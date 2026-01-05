@@ -410,6 +410,9 @@ async function handleSubmit(e) {
     // Clear saved progress
     clearProgress();
 
+    // Mark questionnaire as completed
+    localStorage.setItem('questionnaireCompleted', 'true');
+
     // Redirect to STS assessment page
     window.location.href = '/sts-assessment.html';
 
