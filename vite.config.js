@@ -4,12 +4,11 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
+        main: './index.html',
         home: './home.html',
         questionnaire: './questionnaire.html',
         sts: './sts-assessment.html',
-        analysis: './analysis.html',
-        // Legacy pages (to be removed later)
-        oldIndex: './index.html',
+        results: './results.html',
         physio: './physio.html'
       }
     }
