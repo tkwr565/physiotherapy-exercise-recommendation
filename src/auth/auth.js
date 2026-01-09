@@ -341,8 +341,8 @@ async function checkUserProgress(username) {
 
     // Determine where to redirect
     if (questionnaireData && stsData) {
-      // Both completed - go to analysis
-      window.location.href = '/analysis.html';
+      // Both completed - go to results
+      window.location.href = '/results.html';
     } else if (questionnaireData) {
       // Questionnaire done, STS pending
       window.location.href = '/sts-assessment.html';
