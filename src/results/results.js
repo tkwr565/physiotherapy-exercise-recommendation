@@ -55,13 +55,15 @@ const translations = {
 
     // Exercise Recommendations
     exercisesTitle: "Recommended Exercises",
-    exercisesSubtitle: "Exercises are ranked based on your assessment results",
+    exercisesSubtitle: "Exercises grouped by position and ranked by suitability",
+    topPositionsTitle: "Your Top Exercise Positions",
+    positionCapability: "Capability",
     exerciseRank: "Rank",
     exerciseName: "Exercise",
-    exercisePosition: "Position",
-    exerciseScore: "Match Score",
+    difficultyMatch: "Difficulty Match",
+    finalScore: "Final Match Score",
     exerciseMuscles: "Target Muscles (Major)",
-    exerciseNotes: "Notes",
+    boostReasons: "Score Boost Reasons",
 
     // Position labels
     position_supine: "Supine (Lying on back)",
@@ -132,13 +134,15 @@ const translations = {
 
     // Exercise Recommendations
     exercisesTitle: "推薦運動",
-    exercisesSubtitle: "運動根據您的評估結果排序",
+    exercisesSubtitle: "運動按姿勢分組並按適合度排序",
+    topPositionsTitle: "您的最佳運動姿勢",
+    positionCapability: "能力",
     exerciseRank: "排名",
     exerciseName: "運動名稱",
-    exercisePosition: "姿勢",
-    exerciseScore: "匹配分數",
+    difficultyMatch: "難度匹配",
+    finalScore: "最終匹配分數",
     exerciseMuscles: "目標肌肉（主要）",
-    exerciseNotes: "備註",
+    boostReasons: "分數提升原因",
 
     // Position labels
     position_supine: "仰臥（背部平躺）",
@@ -346,27 +350,31 @@ function getExerciseIndicators(exercise) {
   return indicators.length > 0 ? ' ' + indicators.join(' ') : '';
 }
 
-// Get exercise notes based on modifiers
-function getExerciseNotes(exercise) {
-  const notes = [];
+// Get boost reasons for exercise (only if boosted)
+function getBoostReasons(exercise) {
+  const reasons = [];
 
-  if (!exercise.difficultyScore) return '';
-
-  // Difficulty match
-  const diffPct = (exercise.difficultyScore * 100).toFixed(0);
-  notes.push(currentLang === 'zh-TW' ? `難度匹配: ${diffPct}%` : `Difficulty match: ${diffPct}%`);
+  if (!exercise.alignmentModifier && !exercise.flexibilityModifier) return '-';
 
   // Alignment boost
-  if (exercise.alignmentModifier > 1.3) {
-    notes.push(currentLang === 'zh-TW' ? '矯正姿勢' : 'Alignment correction');
+  if (exercise.alignmentModifier > 1.1) {
+    const boostPct = ((exercise.alignmentModifier - 1.0) * 100).toFixed(0);
+    const reason = currentLang === 'zh-TW'
+      ? `姿勢矯正 (+${boostPct}%)`
+      : `Alignment correction (+${boostPct}%)`;
+    reasons.push(reason);
   }
 
   // Flexibility boost
-  if (exercise.flexibilityModifier > 1.2) {
-    notes.push(currentLang === 'zh-TW' ? '改善柔韌性' : 'Flexibility improvement');
+  if (exercise.flexibilityModifier > 1.1) {
+    const boostPct = ((exercise.flexibilityModifier - 1.0) * 100).toFixed(0);
+    const reason = currentLang === 'zh-TW'
+      ? `柔韌性改善 (+${boostPct}%)`
+      : `Flexibility improvement (+${boostPct}%)`;
+    reasons.push(reason);
   }
 
-  return notes.join(' • ');
+  return reasons.length > 0 ? reasons.join(', ') : '-';
 }
 
 // Get biomechanical notices for display
@@ -408,6 +416,103 @@ function getBiomechanicalNotices() {
   }
 
   return notices.join('\n');
+}
+
+// Render position summary table
+function renderPositionSummary() {
+  if (!algorithmResults || !algorithmResults.recommendations) return '';
+
+  // Only show positions that have exercises
+  const validPositions = algorithmResults.recommendations.filter(rec => rec.exercises.length > 0);
+
+  if (validPositions.length === 0) return '';
+
+  const rows = validPositions.map((rec, index) => `
+    <tr>
+      <td class="position-rank">#${index + 1}</td>
+      <td class="position-name"><strong>${getPositionLabel(rec.position)}</strong></td>
+      <td class="position-capability">${(rec.positionMultiplier * 100).toFixed(0)}%</td>
+      <td class="position-exercises">${rec.exercises.length} ${currentLang === 'zh-TW' ? '個運動' : 'exercises'}</td>
+    </tr>
+  `).join('');
+
+  return `
+    <div class="position-summary">
+      <h3>${t('topPositionsTitle')}</h3>
+      <table class="position-table">
+        <thead>
+          <tr>
+            <th>${t('exerciseRank')}</th>
+            <th>${currentLang === 'zh-TW' ? '姿勢' : 'Position'}</th>
+            <th>${t('positionCapability')}</th>
+            <th>${currentLang === 'zh-TW' ? '推薦運動數' : 'Recommended Exercises'}</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+// Render position-grouped exercise tables
+function renderPositionGroupedExercises() {
+  if (!algorithmResults || !algorithmResults.recommendations) return '';
+
+  // Only show positions that have exercises
+  const validPositions = algorithmResults.recommendations.filter(rec => rec.exercises.length > 0);
+
+  if (validPositions.length === 0) {
+    return `<p class="no-exercises">${currentLang === 'zh-TW' ? '沒有可用的運動' : 'No exercises available'}</p>`;
+  }
+
+  return validPositions.map((positionRec, posIndex) => {
+    const exerciseRows = positionRec.exercises.map((exItem, exIndex) => {
+      const exercise = exItem.exercise;
+      return `
+        <tr>
+          <td class="rank-cell">#${exIndex + 1}</td>
+          <td class="name-cell">
+            ${getExerciseName(exercise)}
+            ${getExerciseIndicators(exercise)}
+          </td>
+          <td class="difficulty-cell">${(exItem.difficultyScore * 100).toFixed(0)}%</td>
+          <td class="final-score-cell"><strong>${(exItem.finalScore * 100).toFixed(0)}%</strong></td>
+          <td class="muscles-cell">${getPrimaryMuscles(exercise, currentLang)}</td>
+          <td class="boost-cell">${getBoostReasons({
+            alignmentModifier: exItem.alignmentModifier,
+            flexibilityModifier: exItem.flexibilityModifier
+          })}</td>
+        </tr>
+      `;
+    }).join('');
+
+    return `
+      <div class="position-group">
+        <h3 class="position-group-title">
+          ${currentLang === 'zh-TW' ? '姿勢' : 'Position'} #${posIndex + 1}:
+          ${getPositionLabel(positionRec.position)}
+          <span class="position-capability-badge">${(positionRec.positionMultiplier * 100).toFixed(0)}% ${t('positionCapability')}</span>
+        </h3>
+        <table class="exercise-table">
+          <thead>
+            <tr>
+              <th>${t('exerciseRank')}</th>
+              <th>${t('exerciseName')}</th>
+              <th>${t('difficultyMatch')}</th>
+              <th>${t('finalScore')}</th>
+              <th>${t('exerciseMuscles')}</th>
+              <th>${t('boostReasons')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${exerciseRows}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }).join('');
 }
 
 // Get STS benchmark (helper function)
@@ -571,35 +676,8 @@ function renderResults() {
       <h2>${t('exercisesTitle')}</h2>
       <p class="section-subtitle">${t('exercisesSubtitle')}</p>
 
-      <div class="exercises-table">
-        <table>
-          <thead>
-            <tr>
-              <th>${t('exerciseRank')}</th>
-              <th>${t('exerciseName')}</th>
-              <th>${t('exercisePosition')}</th>
-              <th>${t('exerciseScore')}</th>
-              <th>${t('exerciseMuscles')}</th>
-              <th>${t('exerciseNotes')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${exerciseRecommendations.map(ex => `
-              <tr>
-                <td class="rank-cell">#${ex.rank}</td>
-                <td class="name-cell">
-                  ${getExerciseName(ex)}
-                  ${getExerciseIndicators(ex)}
-                </td>
-                <td class="position-cell">${getPositionLabel(ex.position)}</td>
-                <td class="score-cell">${(ex.finalScore * 100).toFixed(0)}%</td>
-                <td class="muscles-cell">${getPrimaryMuscles(ex, currentLang)}</td>
-                <td class="notes-cell">${getExerciseNotes(ex)}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
+      ${renderPositionSummary()}
+      ${renderPositionGroupedExercises()}
     </section>
 
     <!-- Action Buttons -->

@@ -214,6 +214,145 @@
   box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
 }
 
+/* Position Summary */
+.position-summary {
+  margin: 30px 0;
+}
+
+.position-summary h3 {
+  color: var(--primary-color);
+  margin-bottom: 15px;
+  font-size: 1.3rem;
+}
+
+.position-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 30px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.position-table th {
+  background: linear-gradient(135deg, var(--primary-color), var(--dark-color));
+  color: white;
+  padding: 15px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.position-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.position-table tr:last-child td {
+  border-bottom: none;
+}
+
+.position-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.position-rank {
+  font-weight: 700;
+  color: var(--primary-color);
+  font-size: 1.1rem;
+}
+
+.position-name {
+  color: #2c3e50;
+}
+
+.position-capability {
+  font-weight: 600;
+  color: #27ae60;
+  font-size: 1.05rem;
+}
+
+.position-exercises {
+  color: #7f8c8d;
+  font-style: italic;
+}
+
+/* Position-Grouped Exercise Tables */
+.position-group {
+  margin: 30px 0;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border-left: 5px solid var(--primary-color);
+}
+
+.position-group-title {
+  color: #2c3e50;
+  margin-bottom: 20px;
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.position-capability-badge {
+  background: linear-gradient(135deg, #27ae60, #229954);
+  color: white;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.exercise-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.exercise-table th {
+  background: linear-gradient(135deg, #34495e, #2c3e50);
+  color: white;
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.exercise-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.exercise-table tr:last-child td {
+  border-bottom: none;
+}
+
+.exercise-table tbody tr:hover {
+  background-color: #f0f8ff;
+}
+
+.difficulty-cell {
+  color: #3498db;
+  font-weight: 600;
+}
+
+.final-score-cell {
+  color: #27ae60;
+  font-size: 1.1rem;
+}
+
+.boost-cell {
+  color: #8e44ad;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
 /* Info Grid */
 .info-grid {
   display: grid;
