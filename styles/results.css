@@ -387,25 +387,54 @@
   font-size: 1rem;
 }
 
-/* Performance level colors */
+/* Status Color Coding for Biomechanical/Flexibility Assessment */
+.info-value.status-good {
+  color: #27ae60 !important;
+  font-weight: 700 !important;
+  background-color: #e8f5e9;
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+
+.info-value.status-warning {
+  color: #e74c3c !important;
+  font-weight: 700 !important;
+  background-color: #ffebee;
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+
+/* Performance level colors (STS Assessment) */
 .info-value.performance-excellent {
   color: #27ae60;
   font-weight: 700;
+  background-color: #e8f5e9;
+  padding: 4px 12px;
+  border-radius: 4px;
 }
 
 .info-value.performance-good {
   color: #2ecc71;
   font-weight: 700;
+  background-color: #e8f5e9;
+  padding: 4px 12px;
+  border-radius: 4px;
 }
 
 .info-value.performance-fair {
   color: #f39c12;
   font-weight: 700;
+  background-color: #fff3e0;
+  padding: 4px 12px;
+  border-radius: 4px;
 }
 
 .info-value.performance-poor {
   color: #e74c3c;
   font-weight: 700;
+  background-color: #ffebee;
+  padding: 4px 12px;
+  border-radius: 4px;
 }
 
 /* Exercises Table */

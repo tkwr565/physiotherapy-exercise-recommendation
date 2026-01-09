@@ -30,10 +30,10 @@ const translations = {
     repetitions: "Repetitions Completed",
     benchmark: "Normative Benchmark",
     performance: "Performance Level",
-    performanceExcellent: "Excellent - Above benchmark",
-    performanceGood: "Good - Meeting benchmark",
-    performanceFair: "Fair - Below benchmark",
-    performancePoor: "Poor - Significantly below benchmark",
+    performanceExcellent: "Excellent - ≥120% of benchmark",
+    performanceGood: "Good - ≥100% of benchmark",
+    performanceFair: "Fair - ≥80% of benchmark",
+    performancePoor: "Poor - <80% of benchmark",
 
     // Biomechanical Assessment
     biomechanicsTitle: "Biomechanical Assessment",
@@ -109,10 +109,10 @@ const translations = {
     repetitions: "完成次數",
     benchmark: "標準基準",
     performance: "表現水平",
-    performanceExcellent: "優秀 - 高於基準",
-    performanceGood: "良好 - 達到基準",
-    performanceFair: "尚可 - 低於基準",
-    performancePoor: "需改善 - 明顯低於基準",
+    performanceExcellent: "優秀 - ≥120% 基準",
+    performanceGood: "良好 - ≥100% 基準",
+    performanceFair: "尚可 - ≥80% 基準",
+    performancePoor: "需改善 - <80% 基準",
 
     // Biomechanical Assessment
     biomechanicsTitle: "生物力學評估",
@@ -515,6 +515,13 @@ function renderPositionGroupedExercises() {
   }).join('');
 }
 
+// Get color-coded value with status class
+function getColorCodedValue(value, normalValue) {
+  const isNormal = value === normalValue;
+  const className = isNormal ? 'status-good' : 'status-warning';
+  return `<span class="${className}">${value}</span>`;
+}
+
 // Get STS benchmark (helper function)
 function getStsBenchmark(age, gender) {
   if (age >= 60 && age < 65) return gender === 'male' ? 14 : 12;
@@ -534,6 +541,11 @@ function calculateStsScore() {
   const benchmark = getStsBenchmark(stsData.age, stsData.gender);
   const score = algorithmResults?.scores?.stsScore || 0;
 
+  // Performance thresholds:
+  // Excellent: ≥120% of benchmark (20% above)
+  // Good: ≥100% of benchmark (at or above)
+  // Fair: ≥80% of benchmark (within 20% below)
+  // Poor: <80% of benchmark (significantly below)
   let performance = 'poor';
   if (score >= 1.2) performance = 'excellent';
   else if (score >= 1.0) performance = 'good';
@@ -647,15 +659,21 @@ function renderResults() {
       <div class="info-grid">
         <div class="info-item">
           <span class="info-label">${t('kneeAlignment')}:</span>
-          <span class="info-value">${t('knee' + stsData.knee_alignment.charAt(0).toUpperCase() + stsData.knee_alignment.slice(1))}</span>
+          <span class="info-value ${stsData.knee_alignment === 'normal' ? 'status-good' : 'status-warning'}">
+            ${t('knee' + stsData.knee_alignment.charAt(0).toUpperCase() + stsData.knee_alignment.slice(1))}
+          </span>
         </div>
         <div class="info-item">
           <span class="info-label">${t('trunkSway')}:</span>
-          <span class="info-value">${t(stsData.trunk_sway)}</span>
+          <span class="info-value ${stsData.trunk_sway === 'absent' ? 'status-good' : 'status-warning'}">
+            ${t(stsData.trunk_sway)}
+          </span>
         </div>
         <div class="info-item">
           <span class="info-label">${t('hipSway')}:</span>
-          <span class="info-value">${t(stsData.hip_sway)}</span>
+          <span class="info-value ${stsData.hip_sway === 'absent' ? 'status-good' : 'status-warning'}">
+            ${t(stsData.hip_sway)}
+          </span>
         </div>
       </div>
     </section>
@@ -666,7 +684,9 @@ function renderResults() {
       <div class="info-grid">
         <div class="info-item full-width">
           <span class="info-label">${t('toeTouch')}:</span>
-          <span class="info-value">${t('toeTouch_' + assessmentData.toe_touch_test)}</span>
+          <span class="info-value ${assessmentData.toe_touch_test === 'can' ? 'status-good' : 'status-warning'}">
+            ${t('toeTouch_' + assessmentData.toe_touch_test)}
+          </span>
         </div>
       </div>
     </section>
