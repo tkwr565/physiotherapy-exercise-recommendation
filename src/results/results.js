@@ -1,5 +1,6 @@
 import { supabase } from '../shared/supabase.js';
 import { getMuscleDescription, getPrimaryMuscles } from '../shared/muscle-translations.js';
+import { calculateRecommendations } from './algorithm.js';
 
 // Results page translations
 const translations = {
@@ -164,6 +165,7 @@ let currentLang = 'zh-TW'; // Default to Traditional Chinese
 let assessmentData = null;
 let stsData = null;
 let exerciseRecommendations = [];
+let algorithmResults = null; // Store complete algorithm output
 
 // Initialize app
 async function init() {
@@ -237,8 +239,7 @@ async function loadAssessmentData() {
     if (stsError) throw stsError;
     stsData = stsAssessment;
 
-    // TODO: Calculate exercise recommendations using new algorithm
-    // For now, fetch first 5 exercises from database as placeholders
+    // Load exercises and calculate recommendations using algorithm
     await loadExercises();
 
   } catch (err) {
@@ -247,70 +248,57 @@ async function loadAssessmentData() {
   }
 }
 
-// Load exercises from database
+// Load exercises from database and run algorithm
 async function loadExercises() {
   try {
+    // Load all exercises from database
     const { data: exercises, error } = await supabase
       .from('exercises')
-      .select('*')
-      .order('difficulty_level', { ascending: true })
-      .limit(10); // Get first 10 exercises as placeholder
+      .select('*');
 
     if (error) throw error;
 
-    // Transform exercises to include rank and placeholder scores
-    exerciseRecommendations = exercises.map((ex, index) => ({
-      rank: index + 1,
-      ...ex,
-      score: 0.95 - (index * 0.05), // Placeholder descending scores
-      notes: currentLang === 'zh-TW' ? '基礎運動' : 'Basic exercise'
-    }));
+    // Run the recommendation algorithm
+    algorithmResults = await calculateRecommendations(
+      assessmentData,
+      stsData,
+      exercises
+    );
 
-    console.log('Loaded exercises:', exerciseRecommendations);
+    // Transform algorithm results to exercise recommendations for display
+    exerciseRecommendations = [];
+    let rank = 1;
+
+    for (const positionRec of algorithmResults.recommendations) {
+      for (const exerciseItem of positionRec.exercises) {
+        exerciseRecommendations.push({
+          rank: rank++,
+          ...exerciseItem.exercise,
+          position: positionRec.position,
+          positionMultiplier: positionRec.positionMultiplier,
+          difficultyScore: exerciseItem.difficultyScore,
+          alignmentModifier: exerciseItem.alignmentModifier,
+          flexibilityModifier: exerciseItem.flexibilityModifier,
+          finalScore: exerciseItem.finalScore
+        });
+      }
+    }
+
+    console.log('Algorithm results:', algorithmResults);
+    console.log('Exercise recommendations:', exerciseRecommendations);
   } catch (error) {
-    console.error('Error loading exercises:', error);
+    console.error('Error loading exercises or running algorithm:', error);
     exerciseRecommendations = [];
   }
 }
 
-// Calculate scores from questionnaire data
+// Calculate scores from algorithm results
 function calculateScores() {
-  if (!assessmentData) return { painScore: 0, symptomScore: 0, combinedScore: 0 };
+  if (!algorithmResults || !algorithmResults.scores) {
+    return { painScore: 0, symptomScore: 0, stsScore: 0, combinedScore: 0 };
+  }
 
-  // PLACEHOLDER: Actual calculation will be implemented in algorithm
-  // For now, show normalized values
-  const painQuestions = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8', 'P9'];
-  const symptomQuestions = ['S1', 'S2', 'S3', 'S4', 'S5'];
-
-  let painSum = 0;
-  let painCount = 0;
-  painQuestions.forEach(q => {
-    const value = parseInt(assessmentData[q]);
-    if (!isNaN(value)) {
-      painSum += value;
-      painCount++;
-    }
-  });
-
-  let symptomSum = 0;
-  let symptomCount = 0;
-  symptomQuestions.forEach(q => {
-    const value = parseInt(assessmentData[q]);
-    if (!isNaN(value)) {
-      symptomSum += value;
-      symptomCount++;
-    }
-  });
-
-  // Normalize to 0-1 scale (invert so higher is better)
-  const painScore = painCount > 0 ? 1 - (painSum / (painCount * 4)) : 0;
-  const symptomScore = symptomCount > 0 ? 1 - (symptomSum / (symptomCount * 4)) : 0;
-
-  return {
-    painScore: painScore,
-    symptomScore: symptomScore,
-    combinedScore: (painScore + symptomScore) / 2 // Placeholder
-  };
+  return algorithmResults.scores;
 }
 
 // Get exercise name based on language
@@ -321,39 +309,125 @@ function getExerciseName(exercise) {
   return exercise.exercise_name;
 }
 
-// Get exercise position key for translation
-function getExercisePosition(exercise) {
-  // Check which position is TRUE
-  if (exercise.position_supine_lying) return 'supine';
-  if (exercise.position_side_lying) return 'side_lying';
-  if (exercise.position_prone) return 'prone';
-  if (exercise.position_quadruped || exercise.position_four_kneeling) return 'quadruped';
-  if (exercise.position_dl_stand) return 'DL_stand';
-  if (exercise.position_split_stand) return 'split_stand';
-  if (exercise.position_sl_stand) return 'SL_stand';
-  return 'supine'; // default
+// Get position label with translation
+function getPositionLabel(position) {
+  const positionMap = {
+    'DL_stand': 'position_DL_stand',
+    'split_stand': 'position_split_stand',
+    'SL_stand': 'position_SL_stand',
+    'quadruped': 'position_four_kneeling',
+    'lying': 'position_supine'
+  };
+
+  return t(positionMap[position] || 'position_supine');
 }
 
-// Calculate STS score and benchmark
+// Get biomechanical indicator badges for exercise
+function getExerciseIndicators(exercise) {
+  const indicators = [];
+
+  if (!algorithmResults || !algorithmResults.biomechanicalFlags) return '';
+
+  // Alignment targeting
+  if (algorithmResults.biomechanicalFlags.alignmentIssue && exercise.alignmentModifier > 1.5) {
+    indicators.push('<span class="indicator alignment" title="Alignment correction">⭐</span>');
+  }
+
+  // Core stability
+  if (algorithmResults.biomechanicalFlags.coreStabilityRequired && exercise.core_ipsi) {
+    indicators.push('<span class="indicator core" title="Core stability">🔄</span>');
+  }
+
+  // Flexibility targeting
+  if (algorithmResults.biomechanicalFlags.flexibilityDeficit && exercise.flexibilityModifier > 1.2) {
+    indicators.push('<span class="indicator flexibility" title="Flexibility improvement">🤸</span>');
+  }
+
+  return indicators.length > 0 ? ' ' + indicators.join(' ') : '';
+}
+
+// Get exercise notes based on modifiers
+function getExerciseNotes(exercise) {
+  const notes = [];
+
+  if (!exercise.difficultyScore) return '';
+
+  // Difficulty match
+  const diffPct = (exercise.difficultyScore * 100).toFixed(0);
+  notes.push(currentLang === 'zh-TW' ? `難度匹配: ${diffPct}%` : `Difficulty match: ${diffPct}%`);
+
+  // Alignment boost
+  if (exercise.alignmentModifier > 1.3) {
+    notes.push(currentLang === 'zh-TW' ? '矯正姿勢' : 'Alignment correction');
+  }
+
+  // Flexibility boost
+  if (exercise.flexibilityModifier > 1.2) {
+    notes.push(currentLang === 'zh-TW' ? '改善柔韌性' : 'Flexibility improvement');
+  }
+
+  return notes.join(' • ');
+}
+
+// Get biomechanical notices for display
+function getBiomechanicalNotices() {
+  if (!algorithmResults || !algorithmResults.biomechanicalFlags) return '';
+
+  const notices = [];
+  const flags = algorithmResults.biomechanicalFlags;
+
+  if (flags.coreStabilityRequired) {
+    notices.push(currentLang === 'zh-TW'
+      ? '<div class="biomech-notice core">⚠️ <strong>需要核心穩定性訓練</strong> - 檢測到運動不穩定</div>'
+      : '<div class="biomech-notice core">⚠️ <strong>Core Stability Required</strong> - Movement instability detected</div>'
+    );
+  }
+
+  if (flags.flexibilityDeficit) {
+    notices.push(currentLang === 'zh-TW'
+      ? '<div class="biomech-notice flex">💪 <strong>柔韌性不足</strong> - 無法觸摸腳趾</div>'
+      : '<div class="biomech-notice flex">💪 <strong>Flexibility Deficit</strong> - Toe touch unable</div>'
+    );
+  }
+
+  if (flags.alignmentIssue) {
+    const alignmentType = stsData.knee_alignment === 'valgus'
+      ? (currentLang === 'zh-TW' ? '外翻（X型腿）' : 'Valgus (Knock-knees)')
+      : (currentLang === 'zh-TW' ? '內翻（O型腿）' : 'Varus (Bow-legged)');
+
+    notices.push(currentLang === 'zh-TW'
+      ? `<div class="biomech-notice align">🎯 <strong>膝蓋排列問題</strong> - ${alignmentType}</div>`
+      : `<div class="biomech-notice align">🎯 <strong>Alignment Issue</strong> - ${alignmentType}</div>`
+    );
+  }
+
+  if (notices.length === 0) {
+    return currentLang === 'zh-TW'
+      ? '<div class="biomech-notice good">✓ <strong>良好的運動質量</strong> - 所有運動類型可用</div>'
+      : '<div class="biomech-notice good">✓ <strong>Good Movement Quality</strong> - All exercise types available</div>';
+  }
+
+  return notices.join('\n');
+}
+
+// Get STS benchmark (helper function)
+function getStsBenchmark(age, gender) {
+  if (age >= 60 && age < 65) return gender === 'male' ? 14 : 12;
+  if (age >= 65 && age < 70) return gender === 'male' ? 12 : 11;
+  if (age >= 70 && age < 75) return gender === 'male' ? 12 : 10;
+  if (age >= 75 && age < 80) return gender === 'male' ? 11 : 10;
+  if (age >= 80 && age < 85) return gender === 'male' ? 10 : 9;
+  if (age >= 85 && age < 90) return gender === 'male' ? 8 : 8;
+  if (age >= 90) return gender === 'male' ? 7 : 4;
+  return 12; // Default
+}
+
+// Calculate STS display info
 function calculateStsScore() {
   if (!stsData) return { score: 0, benchmark: 0, performance: 'poor' };
 
-  // PLACEHOLDER: Use normative data from STS documentation
-  const age = stsData.age;
-  const gender = stsData.gender;
-  const reps = stsData.repetition_count;
-
-  // Simplified benchmark lookup
-  let benchmark = 12; // Default
-  if (age >= 60 && age < 65) benchmark = gender === 'male' ? 14 : 12;
-  else if (age >= 65 && age < 70) benchmark = gender === 'male' ? 12 : 11;
-  else if (age >= 70 && age < 75) benchmark = gender === 'male' ? 12 : 10;
-  else if (age >= 75 && age < 80) benchmark = gender === 'male' ? 11 : 10;
-  else if (age >= 80 && age < 85) benchmark = gender === 'male' ? 10 : 9;
-  else if (age >= 85 && age < 90) benchmark = gender === 'male' ? 8 : 8;
-  else if (age >= 90) benchmark = gender === 'male' ? 7 : 4;
-
-  const score = Math.min(1.0, reps / benchmark);
+  const benchmark = getStsBenchmark(stsData.age, stsData.gender);
+  const score = algorithmResults?.scores?.stsScore || 0;
 
   let performance = 'poor';
   if (score >= 1.2) performance = 'excellent';
@@ -384,10 +458,7 @@ function renderResults() {
       </div>
     </div>
 
-    <!-- Placeholder Notice -->
-    <div class="placeholder-notice">
-      ⚠️ ${t('placeholderNotice')} - ${t('comingSoon')}
-    </div>
+    ${getBiomechanicalNotices()}
 
     <!-- Assessment Summary Section -->
     <section class="results-section summary-section">
@@ -516,11 +587,14 @@ function renderResults() {
             ${exerciseRecommendations.map(ex => `
               <tr>
                 <td class="rank-cell">#${ex.rank}</td>
-                <td class="name-cell">${getExerciseName(ex)}</td>
-                <td class="position-cell">${t('position_' + getExercisePosition(ex))}</td>
-                <td class="score-cell">${(ex.score * 100).toFixed(0)}%</td>
+                <td class="name-cell">
+                  ${getExerciseName(ex)}
+                  ${getExerciseIndicators(ex)}
+                </td>
+                <td class="position-cell">${getPositionLabel(ex.position)}</td>
+                <td class="score-cell">${(ex.finalScore * 100).toFixed(0)}%</td>
                 <td class="muscles-cell">${getPrimaryMuscles(ex, currentLang)}</td>
-                <td class="notes-cell">${ex.notes}</td>
+                <td class="notes-cell">${getExerciseNotes(ex)}</td>
               </tr>
             `).join('')}
           </tbody>
