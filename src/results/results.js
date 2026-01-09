@@ -181,18 +181,13 @@ async function init() {
     return;
   }
 
-  // Check if assessments are completed
-  const questionnaireCompleted = localStorage.getItem('questionnaireCompleted');
-  const stsCompleted = localStorage.getItem('stsAssessmentCompleted');
+  // Try to load assessment data from database
+  const dataLoaded = await loadAssessmentData();
 
-  if (!questionnaireCompleted || !stsCompleted) {
-    alert(currentLang === 'zh-TW' ? '請先完成所有評估。' : 'Please complete all assessments first.');
-    window.location.href = '/questionnaire.html';
+  // If data doesn't exist, loadAssessmentData handles the redirect
+  if (!dataLoaded) {
     return;
   }
-
-  // Load assessment data
-  await loadAssessmentData();
 
   // Render page header
   renderHeader();
@@ -252,9 +247,19 @@ async function loadAssessmentData() {
       .eq('username', currentUser)
       .order('created_at', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
-    if (qError) throw qError;
+    // Check if questionnaire data exists
+    if (qError && qError.code !== 'PGRST116') {
+      throw qError;
+    }
+
+    if (!questionnaireData) {
+      alert(currentLang === 'zh-TW' ? '請先完成問卷調查。' : 'Please complete the questionnaire first.');
+      window.location.href = '/questionnaire.html';
+      return false;
+    }
+
     assessmentData = questionnaireData;
 
     // Load STS assessment
@@ -264,17 +269,30 @@ async function loadAssessmentData() {
       .eq('username', currentUser)
       .order('created_at', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
-    if (stsError) throw stsError;
+    // Check if STS data exists
+    if (stsError && stsError.code !== 'PGRST116') {
+      throw stsError;
+    }
+
+    if (!stsAssessment) {
+      alert(currentLang === 'zh-TW' ? '請先完成坐站測試。' : 'Please complete the sit-to-stand test first.');
+      window.location.href = '/sts-assessment.html';
+      return false;
+    }
+
     stsData = stsAssessment;
 
     // Load exercises and calculate recommendations using algorithm
     await loadExercises();
 
+    return true;
+
   } catch (err) {
     console.error('Error loading assessment data:', err);
     alert(t('error'));
+    return false;
   }
 }
 
