@@ -42,5 +42,16 @@ export const storage = {
 
   clearPhysioAuth() {
     localStorage.removeItem('physio_auth');
+  },
+
+  // User logout - clear all session data
+  logout() {
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('questionnaireCompleted');
+    localStorage.removeItem('stsAssessmentCompleted');
+    localStorage.removeItem('patient_questionnaire');
+    localStorage.removeItem('patient_language');
+    // Redirect to home page
+    window.location.href = '/home.html';
   }
 };

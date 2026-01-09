@@ -129,7 +129,7 @@ The STS assessment data is used in multiple parts of the exercise recommendation
 sts-assessment.html              # HTML page structure
 src/sts/sts-assessment.js        # Assessment logic with bilingual support
 styles/patient.css               # Form styling
-data/sql_scripts/create-sts-assessments-table.sql  # Database schema
+database/migrations/create-sts-assessments-table.sql  # Database schema
 ```
 
 ## Future Enhancements

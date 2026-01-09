@@ -84,6 +84,17 @@ body {
   font-size: 18px;
 }
 
+.btn-logout {
+  background-color: var(--danger-color);
+  color: var(--white);
+  padding: 8px 20px;
+  font-size: 14px;
+}
+
+.btn-logout:hover {
+  background-color: #c0392b;
+}
+
 /* Form Elements */
 input[type="text"],
 input[type="number"],
@@ -168,6 +179,28 @@ label {
   transition: width 0.3s ease;
 }
 
+/* Header with logout button */
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.current-user {
+  font-size: 14px;
+  color: var(--text-light);
+  font-weight: 500;
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .container {
@@ -177,5 +210,15 @@ label {
   .btn {
     padding: 10px 20px;
     font-size: 14px;
+  }
+
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
   }
 }

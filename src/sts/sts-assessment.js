@@ -1,4 +1,5 @@
 import { supabase } from '../shared/supabase.js';
+import { storage } from '../shared/storage.js';
 
 // STS Assessment translations
 const translations = {
@@ -145,10 +146,35 @@ function init() {
 // Render page header
 function renderHeader() {
   const header = document.getElementById('pageHeader');
+  const currentUser = localStorage.getItem('currentUser');
   header.innerHTML = `
-    <h1>${t('title')}</h1>
-    <p>${t('subtitle')}</p>
+    <div class="header-content">
+      <div>
+        <h1>${t('title')}</h1>
+        <p>${t('subtitle')}</p>
+      </div>
+      <div class="header-actions">
+        <span class="current-user">${currentLang === 'zh-TW' ? '用戶' : 'User'}: ${currentUser}</span>
+        <button type="button" class="btn btn-logout" id="logoutBtn">
+          ${currentLang === 'zh-TW' ? '登出' : 'Logout'}
+        </button>
+      </div>
+    </div>
   `;
+
+  // Add logout button listener
+  document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+}
+
+// Handle logout
+function handleLogout() {
+  const confirmMsg = currentLang === 'zh-TW'
+    ? '確定要登出嗎？未保存的進度將會丟失。'
+    : 'Are you sure you want to logout? Unsaved progress will be lost.';
+
+  if (confirm(confirmMsg)) {
+    storage.logout();
+  }
 }
 
 // Get translation

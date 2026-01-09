@@ -1,6 +1,7 @@
 import { supabase } from '../shared/supabase.js';
 import { questionnaireData, requiredQuestions } from '../patient/questionnaire-data.js';
 import { translations, questionTranslations, getTranslation, getQuestionTranslation } from '../patient/translations.js';
+import { storage } from '../shared/storage.js';
 
 // State
 let responses = {};
@@ -43,10 +44,35 @@ function init() {
 function renderHeader() {
   const header = document.getElementById('pageHeader');
   const t = translations[currentLang];
+  const currentUser = localStorage.getItem('currentUser');
   header.innerHTML = `
-    <h1>${t.pageTitle || 'Knee Exercise Assessment'}</h1>
-    <p>${t.pageSubtitle || 'Step 1 of 3: Questionnaire'}</p>
+    <div class="header-content">
+      <div>
+        <h1>${t.pageTitle || 'Knee Exercise Assessment'}</h1>
+        <p>${t.pageSubtitle || 'Step 1 of 3: Questionnaire'}</p>
+      </div>
+      <div class="header-actions">
+        <span class="current-user">${currentLang === 'zh-TW' ? '用戶' : 'User'}: ${currentUser}</span>
+        <button type="button" class="btn btn-logout" id="logoutBtn">
+          ${currentLang === 'zh-TW' ? '登出' : 'Logout'}
+        </button>
+      </div>
+    </div>
   `;
+
+  // Add logout button listener
+  document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+}
+
+// Handle logout
+function handleLogout() {
+  const confirmMsg = currentLang === 'zh-TW'
+    ? '確定要登出嗎？未保存的進度將會丟失。'
+    : 'Are you sure you want to logout? Unsaved progress will be lost.';
+
+  if (confirm(confirmMsg)) {
+    storage.logout();
+  }
 }
 
 // Load saved progress from localStorage
