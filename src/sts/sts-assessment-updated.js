@@ -1,109 +1,7 @@
 import { supabase } from '../shared/supabase.js';
-
-// STS Assessment translations
-const translations = {
-  'en': {
-    title: "30-Second Sit-to-Stand Assessment",
-    subtitle: "Page 2 of 3: Functional Performance Test",
-    instructions: "Please complete the following assessment to help us recommend the most appropriate exercises for you.",
-
-    // Test Instructions Section
-    testInstructionsTitle: "Test Instructions",
-    testInstructionsText: "Perform as many sit-to-stand repetitions as possible in 30 seconds. Start from a seated position and stand up fully, then return to seated. Count each complete cycle.",
-
-    // Form Fields
-    repetitionLabel: "Number of repetitions completed",
-    repetitionPlaceholder: "Enter number (e.g., 12)",
-
-    ageLabel: "Age",
-    agePlaceholder: "Enter your age",
-
-    genderLabel: "Gender",
-    genderMale: "Male",
-    genderFemale: "Female",
-
-    kneeAlignmentLabel: "Knee Alignment",
-    kneeAlignmentNormal: "Normal",
-    kneeAlignmentValgus: "Valgus (Knock-knees)",
-    kneeAlignmentVarus: "Varus (Bow-legged)",
-
-    coreStabilityTitle: "Core Stability Assessment",
-    coreStabilitySubtitle: "Observe during the sit-to-stand test:",
-
-    trunkSwayLabel: "Trunk Sway",
-    trunkSwayPresent: "Present",
-    trunkSwayAbsent: "Absent",
-
-    hipSwayLabel: "Hip Sway",
-    hipSwayPresent: "Present",
-    hipSwayAbsent: "Absent",
-
-    // Buttons
-    submitButton: "Continue to Results",
-    backButton: "Back to Questionnaire",
-
-    // Validation messages
-    validationRequired: "Please fill in all required fields",
-    validationRepetition: "Please enter a valid number of repetitions",
-    validationAge: "Please enter a valid age (18-120)",
-
-    // Success/Error
-    savingData: "Saving assessment data...",
-    errorSaving: "Failed to save assessment data. Please try again."
-  },
-  'zh-TW': {
-    title: "30秒坐站測試",
-    subtitle: "第2頁，共3頁：功能性表現測試",
-    instructions: "請完成以下評估，以幫助我們為您推薦最合適的運動。",
-
-    // Test Instructions Section
-    testInstructionsTitle: "測試說明",
-    testInstructionsText: "在30秒內盡可能多地完成坐站循環。從坐姿開始，完全站起，然後回到坐姿。計算每個完整循環。",
-
-    // Form Fields
-    repetitionLabel: "完成的重複次數",
-    repetitionPlaceholder: "輸入數字（例如：12）",
-
-    ageLabel: "年齡",
-    agePlaceholder: "輸入您的年齡",
-
-    genderLabel: "性別",
-    genderMale: "男性",
-    genderFemale: "女性",
-
-    kneeAlignmentLabel: "膝蓋排列",
-    kneeAlignmentNormal: "正常",
-    kneeAlignmentValgus: "外翻（X型腿）",
-    kneeAlignmentVarus: "內翻（O型腿）",
-
-    coreStabilityTitle: "核心穩定性評估",
-    coreStabilitySubtitle: "在坐站測試期間觀察：",
-
-    trunkSwayLabel: "軀幹搖晃",
-    trunkSwayPresent: "存在",
-    trunkSwayAbsent: "不存在",
-
-    hipSwayLabel: "髖部搖晃",
-    hipSwayPresent: "存在",
-    hipSwayAbsent: "不存在",
-
-    // Buttons
-    submitButton: "繼續查看結果",
-    backButton: "返回問卷",
-
-    // Validation messages
-    validationRequired: "請填寫所有必填欄位",
-    validationRepetition: "請輸入有效的重複次數",
-    validationAge: "請輸入有效的年齡（18-120）",
-
-    // Success/Error
-    savingData: "正在保存評估數據...",
-    errorSaving: "保存評估數據失敗。請重試。"
-  }
-};
+import { i18n, t } from '../shared/i18n.js';
 
 // State
-let currentLang = 'zh-TW'; // Default to Traditional Chinese
 let assessmentData = {
   repetition_count: null,
   age: null,
@@ -115,19 +13,20 @@ let assessmentData = {
 
 // Initialize app
 function init() {
+  // Initialize language from localStorage
+  i18n.initLanguage();
+
   // Check if user is logged in
   const currentUser = localStorage.getItem('currentUser');
   if (!currentUser) {
-    // Not logged in, redirect to home
     window.location.href = '/home.html';
     return;
   }
 
   // Check if questionnaire is completed
-  const questionnaireCompleted = localStorage.getItem('questionnaireCompleted');
+  const questionnaireCompleted = localStorage.getItem('questionnaire Completed');
   if (!questionnaireCompleted) {
-    // Questionnaire not completed, redirect back
-    alert(currentLang === 'zh-TW' ? '請先完成問卷。' : 'Please complete the questionnaire first.');
+    alert(t('stsAssessment.messages.prerequisite'));
     window.location.href = '/questionnaire.html';
     return;
   }
@@ -146,14 +45,9 @@ function init() {
 function renderHeader() {
   const header = document.getElementById('pageHeader');
   header.innerHTML = `
-    <h1>${t('title')}</h1>
-    <p>${t('subtitle')}</p>
+    <h1>${t('stsAssessment.pageTitle')}</h1>
+    <p>${t('stsAssessment.pageSubtitle')}</p>
   `;
-}
-
-// Get translation
-function t(key) {
-  return translations[currentLang][key] || key;
 }
 
 // Load previously saved data if exists
@@ -180,7 +74,6 @@ async function loadSavedData() {
       };
     }
   } catch (err) {
-    // No previous data, that's okay
     console.log('No previous STS assessment data found');
   }
 }
@@ -188,34 +81,33 @@ async function loadSavedData() {
 // Render assessment form
 function renderAssessment() {
   const container = document.getElementById('assessmentContainer');
-  const t_obj = translations[currentLang];
 
   container.innerHTML = `
     <!-- Language Toggle Bar -->
     <div class="language-bar">
       <div class="language-toggle">
-        <button class="lang-btn ${currentLang === 'en' ? 'active' : ''}" data-lang="en">English</button>
-        <button class="lang-btn ${currentLang === 'zh-TW' ? 'active' : ''}" data-lang="zh-TW">繁體中文</button>
+        <button class="lang-btn ${i18n.getLanguage() === 'en' ? 'active' : ''}" data-lang="en">${t('common.language.english')}</button>
+        <button class="lang-btn ${i18n.getLanguage() === 'zh-TW' ? 'active' : ''}" data-lang="zh-TW">${t('common.language.chinese')}</button>
       </div>
     </div>
 
     <div class="assessment-form">
-      <p class="instructions">${t('instructions')}</p>
+      <p class="instructions">${t('stsAssessment.instructions')}</p>
 
       <div class="info-box">
-        <h3>${t('testInstructionsTitle')}</h3>
-        <p>${t('testInstructionsText')}</p>
+        <h3>${t('stsAssessment.testInstructions.title')}</h3>
+        <p>${t('stsAssessment.testInstructions.description')}</p>
       </div>
 
       <form id="stsForm">
         <!-- Repetition Count -->
         <div class="form-group">
-          <label for="repetitionCount">${t('repetitionLabel')} *</label>
+          <label for="repetitionCount">${t('stsAssessment.form.repetitionCount.label')} *</label>
           <input
             type="number"
             id="repetitionCount"
             name="repetitionCount"
-            placeholder="${t('repetitionPlaceholder')}"
+            placeholder="${t('stsAssessment.form.repetitionCount.placeholder')}"
             min="0"
             value="${assessmentData.repetition_count || ''}"
             required
@@ -224,12 +116,12 @@ function renderAssessment() {
 
         <!-- Age -->
         <div class="form-group">
-          <label for="age">${t('ageLabel')} *</label>
+          <label for="age">${t('stsAssessment.form.age.label')} *</label>
           <input
             type="number"
             id="age"
             name="age"
-            placeholder="${t('agePlaceholder')}"
+            placeholder="${t('stsAssessment.form.age.placeholder')}"
             min="18"
             max="120"
             value="${assessmentData.age || ''}"
@@ -239,7 +131,7 @@ function renderAssessment() {
 
         <!-- Gender -->
         <div class="form-group">
-          <label>${t('genderLabel')} *</label>
+          <label>${t('stsAssessment.form.gender.label')} *</label>
           <div class="radio-group">
             <label class="radio-option">
               <input
@@ -249,7 +141,7 @@ function renderAssessment() {
                 ${assessmentData.gender === 'male' ? 'checked' : ''}
                 required
               >
-              ${t('genderMale')}
+              ${t('common.gender.male')}
             </label>
             <label class="radio-option">
               <input
@@ -259,14 +151,14 @@ function renderAssessment() {
                 ${assessmentData.gender === 'female' ? 'checked' : ''}
                 required
               >
-              ${t('genderFemale')}
+              ${t('common.gender.female')}
             </label>
           </div>
         </div>
 
         <!-- Knee Alignment -->
         <div class="form-group">
-          <label>${t('kneeAlignmentLabel')} *</label>
+          <label>${t('stsAssessment.form.kneeAlignment.label')} *</label>
           <div class="radio-group">
             <label class="radio-option">
               <input
@@ -276,7 +168,7 @@ function renderAssessment() {
                 ${assessmentData.knee_alignment === 'normal' ? 'checked' : ''}
                 required
               >
-              ${t('kneeAlignmentNormal')}
+              ${t('stsAssessment.form.kneeAlignment.normal')}
             </label>
             <label class="radio-option">
               <input
@@ -286,7 +178,7 @@ function renderAssessment() {
                 ${assessmentData.knee_alignment === 'valgus' ? 'checked' : ''}
                 required
               >
-              ${t('kneeAlignmentValgus')}
+              ${t('stsAssessment.form.kneeAlignment.valgus')}
             </label>
             <label class="radio-option">
               <input
@@ -296,19 +188,19 @@ function renderAssessment() {
                 ${assessmentData.knee_alignment === 'varus' ? 'checked' : ''}
                 required
               >
-              ${t('kneeAlignmentVarus')}
+              ${t('stsAssessment.form.kneeAlignment.varus')}
             </label>
           </div>
         </div>
 
         <!-- Core Stability Assessment -->
         <div class="form-section">
-          <h3>${t('coreStabilityTitle')}</h3>
-          <p class="form-subtitle">${t('coreStabilitySubtitle')}</p>
+          <h3>${t('stsAssessment.form.coreStability.title')}</h3>
+          <p class="form-subtitle">${t('stsAssessment.form.coreStability.subtitle')}</p>
 
           <!-- Trunk Sway -->
           <div class="form-group">
-            <label>${t('trunkSwayLabel')} *</label>
+            <label>${t('stsAssessment.form.coreStability.trunkSway')} *</label>
             <div class="radio-group">
               <label class="radio-option">
                 <input
@@ -318,7 +210,7 @@ function renderAssessment() {
                   ${assessmentData.trunk_sway === 'present' ? 'checked' : ''}
                   required
                 >
-                ${t('trunkSwayPresent')}
+                ${t('common.status.present')}
               </label>
               <label class="radio-option">
                 <input
@@ -328,14 +220,14 @@ function renderAssessment() {
                   ${assessmentData.trunk_sway === 'absent' ? 'checked' : ''}
                   required
                 >
-                ${t('trunkSwayAbsent')}
+                ${t('common.status.absent')}
               </label>
             </div>
           </div>
 
           <!-- Hip Sway -->
           <div class="form-group">
-            <label>${t('hipSwayLabel')} *</label>
+            <label>${t('stsAssessment.form.coreStability.hipSway')} *</label>
             <div class="radio-group">
               <label class="radio-option">
                 <input
@@ -345,7 +237,7 @@ function renderAssessment() {
                   ${assessmentData.hip_sway === 'present' ? 'checked' : ''}
                   required
                 >
-                ${t('hipSwayPresent')}
+                ${t('common.status.present')}
               </label>
               <label class="radio-option">
                 <input
@@ -355,7 +247,7 @@ function renderAssessment() {
                   ${assessmentData.hip_sway === 'absent' ? 'checked' : ''}
                   required
                 >
-                ${t('hipSwayAbsent')}
+                ${t('common.status.absent')}
               </label>
             </div>
           </div>
@@ -364,10 +256,10 @@ function renderAssessment() {
         <!-- Action Buttons -->
         <div class="button-group">
           <button type="button" class="btn btn-secondary" id="backBtn">
-            ${t('backButton')}
+            ${t('stsAssessment.backButton')}
           </button>
           <button type="submit" class="btn btn-primary">
-            ${t('submitButton')}
+            ${t('stsAssessment.submitButton')}
           </button>
         </div>
       </form>
@@ -390,7 +282,7 @@ function renderAssessment() {
 
 // Switch language
 function switchLanguage(lang) {
-  currentLang = lang;
+  i18n.setLanguage(lang);
   renderHeader();
   renderAssessment();
 }
@@ -411,17 +303,17 @@ async function handleSubmit(e) {
   const hipSway = formData.get('hipSway');
 
   if (!repetitionCount || repetitionCount < 0) {
-    alert(t('validationRepetition'));
+    alert(t('stsAssessment.validation.invalidRepetition'));
     return;
   }
 
   if (!age || age < 18 || age > 120) {
-    alert(t('validationAge'));
+    alert(t('stsAssessment.validation.invalidAge'));
     return;
   }
 
   if (!gender || !kneeAlignment || !trunkSway || !hipSway) {
-    alert(t('validationRequired'));
+    alert(t('stsAssessment.validation.allRequired'));
     return;
   }
 
@@ -445,7 +337,7 @@ async function handleSubmit(e) {
     // Redirect to results page
     window.location.href = '/results.html';
   } else {
-    alert(t('errorSaving'));
+    alert(t('stsAssessment.messages.saveError'));
   }
 }
 
@@ -491,10 +383,6 @@ async function saveAssessment() {
 
     if (error) {
       console.error('Supabase error details:', error);
-      console.error('Error code:', error.code);
-      console.error('Error message:', error.message);
-      console.error('Error hint:', error.hint);
-      console.error('Error details:', error.details);
       return false;
     }
 

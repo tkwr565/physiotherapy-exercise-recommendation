@@ -32,8 +32,21 @@ function init() {
   // Try to restore previous progress
   loadSavedProgress();
 
+  // Render page header
+  renderHeader();
+
   renderQuestionnaire();
   updateProgress();
+}
+
+// Render page header
+function renderHeader() {
+  const header = document.getElementById('pageHeader');
+  const t = translations[currentLang];
+  header.innerHTML = `
+    <h1>${t.pageTitle || 'Knee Exercise Assessment'}</h1>
+    <p>${t.pageSubtitle || 'Step 1 of 3: Questionnaire'}</p>
+  `;
 }
 
 // Load saved progress from localStorage
@@ -73,6 +86,7 @@ function clearProgress() {
 function switchLanguage(newLang) {
   currentLang = newLang;
   localStorage.setItem('patient_language', newLang);
+  renderHeader();
   renderQuestionnaire();
   updateProgress();
 }
@@ -162,11 +176,11 @@ function renderQuestionnaire() {
       <div class="options">
         <label class="option ${toeTouch === 'can' ? 'selected' : ''}" data-code="toe_touch" data-value="can">
           <input type="radio" name="toe_touch" value="can" ${toeTouch === 'can' ? 'checked' : ''}>
-          ${currentLang === 'zh-TW' ? '可以' : 'Can'}
+          ${currentLang === 'zh-TW' ? '能夠' : 'Able'}
         </label>
         <label class="option ${toeTouch === 'cannot' ? 'selected' : ''}" data-code="toe_touch" data-value="cannot">
           <input type="radio" name="toe_touch" value="cannot" ${toeTouch === 'cannot' ? 'checked' : ''}>
-          ${currentLang === 'zh-TW' ? '不可以' : 'Cannot'}
+          ${currentLang === 'zh-TW' ? '無法' : 'Unable'}
         </label>
       </div>
     </div>
