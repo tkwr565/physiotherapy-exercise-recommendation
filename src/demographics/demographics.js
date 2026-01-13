@@ -104,7 +104,7 @@ const translations = {
 };
 
 // State
-let currentLang = localStorage.getItem('patient_language') || 'en';
+let currentLang = localStorage.getItem('patient_language') || 'zh-TW';
 
 // Translation helper
 function t(key) {
@@ -121,10 +121,11 @@ async function init() {
   }
 
   // Set language
-  currentLang = localStorage.getItem('patient_language') || 'en';
+  currentLang = localStorage.getItem('patient_language') || 'zh-TW';
 
   // Render page
   renderHeader();
+  renderLanguageToggle();
   renderContent();
   setupFormHandlers();
 
@@ -157,6 +158,34 @@ function renderHeader() {
   `;
 
   document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+}
+
+// Render language toggle
+function renderLanguageToggle() {
+  const languageBar = document.getElementById('languageBar');
+
+  languageBar.innerHTML = `
+    <div class="language-toggle">
+      <button class="lang-btn ${currentLang === 'en' ? 'active' : ''}" data-lang="en">English</button>
+      <button class="lang-btn ${currentLang === 'zh-TW' ? 'active' : ''}" data-lang="zh-TW">繁體中文</button>
+    </div>
+  `;
+
+  // Add language toggle listeners
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      switchLanguage(btn.dataset.lang);
+    });
+  });
+}
+
+// Switch language
+function switchLanguage(lang) {
+  currentLang = lang;
+  localStorage.setItem('patient_language', lang);
+  renderHeader();
+  renderLanguageToggle();
+  renderContent();
 }
 
 // Render content
