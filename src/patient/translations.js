@@ -8,7 +8,7 @@ export const translations = {
   'en': {
     // Page Header (for dynamic rendering)
     pageTitle: "Knee Exercise Assessment",
-    pageSubtitle: "Page 1 of 3: Questionnaire",
+    pageSubtitle: "Step 2 of 4: Questionnaire",
 
     // Header & Navigation
     headerTitle: "Knee Exercise Assessment",
@@ -64,7 +64,7 @@ export const translations = {
   'zh-TW': {
     // Page Header (for dynamic rendering)
     pageTitle: "膝關節運動評估",
-    pageSubtitle: "第1頁，共3頁：問卷調查",
+    pageSubtitle: "第2步，共4步：問卷調查",
 
     // Header & Navigation
     headerTitle: "膝關節運動評估",

@@ -5,7 +5,7 @@ import { storage } from '../shared/storage.js';
 const translations = {
   'en': {
     title: "30-Second Sit-to-Stand Assessment",
-    subtitle: "Page 2 of 3: Functional Performance Test",
+    subtitle: "Step 3 of 4: Functional Performance Test",
     instructions: "Please complete the following assessment to help us recommend the most appropriate exercises for you.",
 
     // Test Instructions Section
@@ -15,13 +15,6 @@ const translations = {
     // Form Fields
     repetitionLabel: "Number of repetitions completed",
     repetitionPlaceholder: "Enter number (e.g., 12)",
-
-    ageLabel: "Age",
-    agePlaceholder: "Enter your age",
-
-    genderLabel: "Gender",
-    genderMale: "Male",
-    genderFemale: "Female",
 
     kneeAlignmentLabel: "Knee Alignment",
     kneeAlignmentNormal: "Normal",
@@ -46,7 +39,6 @@ const translations = {
     // Validation messages
     validationRequired: "Please fill in all required fields",
     validationRepetition: "Please enter a valid number of repetitions",
-    validationAge: "Please enter a valid age (18-120)",
 
     // Success/Error
     savingData: "Saving assessment data...",
@@ -54,7 +46,7 @@ const translations = {
   },
   'zh-TW': {
     title: "30秒坐站測試",
-    subtitle: "第2頁，共3頁：功能性表現測試",
+    subtitle: "第3步，共4步：功能性表現測試",
     instructions: "請完成以下評估，以幫助我們為您推薦最合適的運動。",
 
     // Test Instructions Section
@@ -64,13 +56,6 @@ const translations = {
     // Form Fields
     repetitionLabel: "完成的重複次數",
     repetitionPlaceholder: "輸入數字（例如：12）",
-
-    ageLabel: "年齡",
-    agePlaceholder: "輸入您的年齡",
-
-    genderLabel: "性別",
-    genderMale: "男性",
-    genderFemale: "女性",
 
     kneeAlignmentLabel: "膝蓋排列",
     kneeAlignmentNormal: "正常",
@@ -95,7 +80,6 @@ const translations = {
     // Validation messages
     validationRequired: "請填寫所有必填欄位",
     validationRepetition: "請輸入有效的重複次數",
-    validationAge: "請輸入有效的年齡（18-120）",
 
     // Success/Error
     savingData: "正在保存評估數據...",
@@ -107,8 +91,6 @@ const translations = {
 let currentLang = 'zh-TW'; // Default to Traditional Chinese
 let assessmentData = {
   repetition_count: null,
-  age: null,
-  gender: null,
   knee_alignment: null,
   trunk_sway: null,
   hip_sway: null
@@ -198,8 +180,6 @@ async function loadSavedData() {
     if (data && !error) {
       assessmentData = {
         repetition_count: data.repetition_count,
-        age: data.age,
-        gender: data.gender,
         knee_alignment: data.knee_alignment,
         trunk_sway: data.trunk_sway,
         hip_sway: data.hip_sway
@@ -246,48 +226,6 @@ function renderAssessment() {
             value="${assessmentData.repetition_count || ''}"
             required
           >
-        </div>
-
-        <!-- Age -->
-        <div class="form-group">
-          <label for="age">${t('ageLabel')} *</label>
-          <input
-            type="number"
-            id="age"
-            name="age"
-            placeholder="${t('agePlaceholder')}"
-            min="18"
-            max="120"
-            value="${assessmentData.age || ''}"
-            required
-          >
-        </div>
-
-        <!-- Gender -->
-        <div class="form-group">
-          <label>${t('genderLabel')} *</label>
-          <div class="radio-group">
-            <label class="radio-option">
-              <input
-                type="radio"
-                name="gender"
-                value="male"
-                ${assessmentData.gender === 'male' ? 'checked' : ''}
-                required
-              >
-              ${t('genderMale')}
-            </label>
-            <label class="radio-option">
-              <input
-                type="radio"
-                name="gender"
-                value="female"
-                ${assessmentData.gender === 'female' ? 'checked' : ''}
-                required
-              >
-              ${t('genderFemale')}
-            </label>
-          </div>
         </div>
 
         <!-- Knee Alignment -->
@@ -430,8 +368,6 @@ async function handleSubmit(e) {
 
   // Validate inputs
   const repetitionCount = parseInt(formData.get('repetitionCount'));
-  const age = parseInt(formData.get('age'));
-  const gender = formData.get('gender');
   const kneeAlignment = formData.get('kneeAlignment');
   const trunkSway = formData.get('trunkSway');
   const hipSway = formData.get('hipSway');
@@ -441,12 +377,7 @@ async function handleSubmit(e) {
     return;
   }
 
-  if (!age || age < 18 || age > 120) {
-    alert(t('validationAge'));
-    return;
-  }
-
-  if (!gender || !kneeAlignment || !trunkSway || !hipSway) {
+  if (!kneeAlignment || !trunkSway || !hipSway) {
     alert(t('validationRequired'));
     return;
   }
@@ -454,8 +385,6 @@ async function handleSubmit(e) {
   // Update assessment data
   assessmentData = {
     repetition_count: repetitionCount,
-    age: age,
-    gender: gender,
     knee_alignment: kneeAlignment,
     trunk_sway: trunkSway,
     hip_sway: hipSway
@@ -497,8 +426,6 @@ async function saveAssessment() {
       user_id: userData.id,
       username: currentUser,
       repetition_count: assessmentData.repetition_count,
-      age: assessmentData.age,
-      gender: assessmentData.gender,
       knee_alignment: assessmentData.knee_alignment,
       trunk_sway: assessmentData.trunk_sway,
       hip_sway: assessmentData.hip_sway

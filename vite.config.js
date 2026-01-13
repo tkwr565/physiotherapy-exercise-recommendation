@@ -6,6 +6,7 @@ export default defineConfig({
       input: {
         main: './index.html',
         home: './home.html',
+        demographics: './demographics.html',
         questionnaire: './questionnaire.html',
         sts: './sts-assessment.html',
         results: './results.html',

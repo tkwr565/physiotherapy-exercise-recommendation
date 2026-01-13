@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Demographics - Physiotherapy Assessment</title>
+  <link rel="stylesheet" href="/styles/shared.css">
+  <link rel="stylesheet" href="/styles/demographics.css">
+</head>
+<body>
+  <div class="container">
+    <header id="pageHeader">
+      <!-- Header will be rendered by JS -->
+    </header>
+
+    <main id="mainContent">
+      <div class="demographics-container">
+        <div class="demographics-intro">
+          <h2 id="introTitle">Personal Information</h2>
+          <p id="introText">Please provide your demographic information. This helps us calculate age-appropriate benchmarks and body mass index (BMI) for personalized exercise recommendations.</p>
+        </div>
+
+        <form id="demographicsForm" class="demographics-form">
+          <div class="form-group">
+            <label for="dateOfBirth" class="form-label">
+              <span id="labelDOB">Date of Birth</span>
+              <span class="required">*</span>
+            </label>
+            <input
+              type="date"
+              id="dateOfBirth"
+              class="form-input"
+              required
+              max=""
+            />
+            <span class="form-hint" id="hintDOB">Used to calculate your age</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <span id="labelGender">Gender</span>
+              <span class="required">*</span>
+            </label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="gender" value="male" required />
+                <span id="optionMale">Male</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="gender" value="female" required />
+                <span id="optionFemale">Female</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="gender" value="other" required />
+                <span id="optionOther">Other</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="height" class="form-label">
+                <span id="labelHeight">Height</span>
+                <span class="required">*</span>
+              </label>
+              <div class="input-with-unit">
+                <input
+                  type="number"
+                  id="height"
+                  class="form-input"
+                  placeholder="170"
+                  min="50"
+                  max="250"
+                  step="0.1"
+                  required
+                />
+                <span class="input-unit">cm</span>
+              </div>
+              <span class="form-hint" id="hintHeight">Enter height in centimeters</span>
+            </div>
+
+            <div class="form-group">
+              <label for="weight" class="form-label">
+                <span id="labelWeight">Weight</span>
+                <span class="required">*</span>
+              </label>
+              <div class="input-with-unit">
+                <input
+                  type="number"
+                  id="weight"
+                  class="form-input"
+                  placeholder="70"
+                  min="20"
+                  max="300"
+                  step="0.1"
+                  required
+                />
+                <span class="input-unit">kg</span>
+              </div>
+              <span class="form-hint" id="hintWeight">Enter weight in kilograms</span>
+            </div>
+          </div>
+
+          <div class="bmi-preview" id="bmiPreview" style="display: none;">
+            <div class="bmi-label" id="labelBMI">Your BMI:</div>
+            <div class="bmi-value" id="bmiValue">--</div>
+            <div class="bmi-category" id="bmiCategory"></div>
+          </div>
+
+          <div id="formError" class="form-error"></div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+              <span id="btnContinue">Continue to Questionnaire</span>
+            </button>
+          </div>
+        </form>
+
+        <div class="info-box">
+          <h3 id="infoTitle">Why We Need This Information</h3>
+          <ul>
+            <li id="infoAge">Age: Used for age-appropriate normative comparisons</li>
+            <li id="infoBMI">BMI: Helps adjust exercise recommendations</li>
+            <li id="infoGender">Gender: Used for sit-to-stand benchmarks</li>
+            <li id="infoPrivacy">Your data is stored securely and used only for assessment purposes</li>
+          </ul>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="/src/demographics/demographics.js"></script>
+</body>
+</html>

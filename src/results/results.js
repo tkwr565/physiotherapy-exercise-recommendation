@@ -7,7 +7,7 @@ import { storage } from '../shared/storage.js';
 const translations = {
   'en': {
     title: "Your Personalized Exercise Recommendations",
-    subtitle: "Page 3 of 3: Assessment Results & Exercise Plan",
+    subtitle: "Step 4 of 4: Assessment Results & Exercise Plan",
     loading: "Loading your assessment results...",
     error: "Failed to load assessment data. Please try again.",
 
@@ -22,9 +22,18 @@ const translations = {
     // Demographics
     demographicsTitle: "Your Profile",
     age: "Age",
+    yearsOld: "years old",
     gender: "Gender",
     male: "Male",
     female: "Female",
+    other: "Other",
+    height: "Height",
+    weight: "Weight",
+    bmi: "BMI",
+    bmiUnderweight: "Underweight",
+    bmiNormal: "Normal weight",
+    bmiOverweight: "Overweight",
+    bmiObese: "Obese",
 
     // STS Assessment
     stsTitle: "Sit-to-Stand Assessment",
@@ -86,7 +95,7 @@ const translations = {
   },
   'zh-TW': {
     title: "您的個人化運動建議",
-    subtitle: "第3頁，共3頁：評估結果與運動計劃",
+    subtitle: "第4步，共4步：評估結果與運動計劃",
     loading: "正在載入您的評估結果...",
     error: "無法載入評估數據。請重試。",
 
@@ -101,9 +110,18 @@ const translations = {
     // Demographics
     demographicsTitle: "您的資料",
     age: "年齡",
+    yearsOld: "歲",
     gender: "性別",
     male: "男性",
     female: "女性",
+    other: "其他",
+    height: "身高",
+    weight: "體重",
+    bmi: "BMI",
+    bmiUnderweight: "體重過輕",
+    bmiNormal: "正常體重",
+    bmiOverweight: "體重過重",
+    bmiObese: "肥胖",
 
     // STS Assessment
     stsTitle: "坐站測試評估",
@@ -168,6 +186,7 @@ const translations = {
 // State
 let currentLang = 'zh-TW'; // Default to Traditional Chinese
 let assessmentData = null;
+let demographicsData = null;
 let stsData = null;
 let exerciseRecommendations = [];
 let algorithmResults = null; // Store complete algorithm output
@@ -240,6 +259,28 @@ async function loadAssessmentData() {
   const currentUser = localStorage.getItem('currentUser');
 
   try {
+    // Load demographics data
+    const { data: demographics, error: dError } = await supabase
+      .from('patient_demographics')
+      .select('*')
+      .eq('username', currentUser)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    // Check if demographics data exists
+    if (dError && dError.code !== 'PGRST116') {
+      throw dError;
+    }
+
+    if (!demographics) {
+      alert(currentLang === 'zh-TW' ? '請先完成個人資料填寫。' : 'Please complete your demographics first.');
+      window.location.href = '/demographics.html';
+      return false;
+    }
+
+    demographicsData = demographics;
+
     // Load questionnaire responses
     const { data: questionnaireData, error: qError } = await supabase
       .from('questionnaire_responses')
@@ -580,9 +621,10 @@ function getStsBenchmark(age, gender) {
 
 // Calculate STS display info
 function calculateStsScore() {
-  if (!stsData) return { score: 0, benchmark: 0, performance: 'poor' };
+  if (!stsData || !demographicsData) return { score: 0, benchmark: 0, performance: 'poor' };
 
-  const benchmark = getStsBenchmark(stsData.age, stsData.gender);
+  const age = calculateAge(demographicsData.date_of_birth);
+  const benchmark = getStsBenchmark(age, demographicsData.gender);
   const score = algorithmResults?.scores?.stsScore || 0;
 
   // Performance thresholds:
@@ -667,11 +709,26 @@ function renderResults() {
       <div class="info-grid">
         <div class="info-item">
           <span class="info-label">${t('age')}:</span>
-          <span class="info-value">${stsData.age}</span>
+          <span class="info-value">${calculateAge(demographicsData.date_of_birth)} ${t('yearsOld')}</span>
         </div>
         <div class="info-item">
           <span class="info-label">${t('gender')}:</span>
-          <span class="info-value">${t(stsData.gender)}</span>
+          <span class="info-value">${t(demographicsData.gender)}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">${t('height')}:</span>
+          <span class="info-value">${demographicsData.height_cm} cm</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">${t('weight')}:</span>
+          <span class="info-value">${demographicsData.weight_kg} kg</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">${t('bmi')}:</span>
+          <span class="info-value ${getBMIClass(calculateBMI(demographicsData.height_cm, demographicsData.weight_kg))}">
+            ${calculateBMI(demographicsData.height_cm, demographicsData.weight_kg).toFixed(1)}
+            <span class="bmi-category">(${getBMICategory(calculateBMI(demographicsData.height_cm, demographicsData.weight_kg))})</span>
+          </span>
         </div>
       </div>
     </section>
@@ -787,6 +844,43 @@ function switchLanguage(lang) {
   currentLang = lang;
   renderHeader();
   renderResults();
+}
+
+// Helper function: Calculate age from date of birth
+function calculateAge(dateOfBirth) {
+  const dob = new Date(dateOfBirth);
+  const today = new Date();
+  let age = today.getFullYear() - dob.getFullYear();
+  const monthDiff = today.getMonth() - dob.getMonth();
+
+  // Adjust if birthday hasn't occurred this year
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+    age--;
+  }
+
+  return age;
+}
+
+// Helper function: Calculate BMI
+function calculateBMI(heightCm, weightKg) {
+  const heightM = heightCm / 100;
+  return weightKg / (heightM * heightM);
+}
+
+// Helper function: Get BMI category
+function getBMICategory(bmi) {
+  if (bmi < 18.5) return t('bmiUnderweight');
+  if (bmi < 25) return t('bmiNormal');
+  if (bmi < 30) return t('bmiOverweight');
+  return t('bmiObese');
+}
+
+// Helper function: Get BMI CSS class
+function getBMIClass(bmi) {
+  if (bmi < 18.5) return 'bmi-underweight';
+  if (bmi < 25) return 'bmi-normal';
+  if (bmi < 30) return 'bmi-overweight';
+  return 'bmi-obese';
 }
 
 // Initialize when DOM is ready

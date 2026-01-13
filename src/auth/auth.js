@@ -302,8 +302,8 @@ async function handleUsernameSubmit(e) {
       localStorage.setItem('currentUser', username);
       localStorage.setItem('userId', newUser.id);
 
-      // New user - start from questionnaire
-      window.location.href = '/questionnaire.html';
+      // New user - start from demographics
+      window.location.href = '/demographics.html';
     }
 
   } catch (error) {
@@ -317,6 +317,17 @@ async function handleUsernameSubmit(e) {
 // Check user progress and redirect appropriately
 async function checkUserProgress(username) {
   try {
+    // Check demographics completion
+    const { data: demographicsData, error: dError } = await supabase
+      .from('patient_demographics')
+      .select('*')
+      .eq('username', username)
+      .maybeSingle();
+
+    if (dError && dError.code !== 'PGRST116') {
+      throw dError;
+    }
+
     // Check questionnaire completion
     const { data: questionnaireData, error: qError } = await supabase
       .from('questionnaire_responses')
@@ -339,22 +350,25 @@ async function checkUserProgress(username) {
       throw stsError;
     }
 
-    // Determine where to redirect
-    if (questionnaireData && stsData) {
-      // Both completed - go to results
+    // Determine where to redirect based on completion status
+    if (!demographicsData) {
+      // No demographics - start from demographics
+      window.location.href = '/demographics.html';
+    } else if (questionnaireData && stsData) {
+      // All completed - go to results
       window.location.href = '/results.html';
     } else if (questionnaireData) {
-      // Questionnaire done, STS pending
+      // Demographics and questionnaire done, STS pending
       window.location.href = '/sts-assessment.html';
     } else {
-      // Nothing done yet - start from questionnaire
+      // Demographics done, questionnaire pending
       window.location.href = '/questionnaire.html';
     }
 
   } catch (error) {
     console.error('Error checking user progress:', error);
-    // On error, default to questionnaire
-    window.location.href = '/questionnaire.html';
+    // On error, default to demographics
+    window.location.href = '/demographics.html';
   }
 }
 
