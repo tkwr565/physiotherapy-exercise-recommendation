@@ -16,7 +16,6 @@ const translations = {
     labelGender: 'Gender',
     optionMale: 'Male',
     optionFemale: 'Female',
-    optionOther: 'Other',
     labelHeight: 'Height',
     hintHeight: 'Enter height in centimeters',
     labelWeight: 'Weight',
@@ -65,7 +64,6 @@ const translations = {
     labelGender: '性別',
     optionMale: '男性',
     optionFemale: '女性',
-    optionOther: '其他',
     labelHeight: '身高',
     hintHeight: '請輸入身高（公分）',
     labelWeight: '體重',
@@ -197,7 +195,6 @@ function renderContent() {
   document.getElementById('labelGender').textContent = t('labelGender');
   document.getElementById('optionMale').textContent = t('optionMale');
   document.getElementById('optionFemale').textContent = t('optionFemale');
-  document.getElementById('optionOther').textContent = t('optionOther');
   document.getElementById('labelHeight').textContent = t('labelHeight');
   document.getElementById('hintHeight').textContent = t('hintHeight');
   document.getElementById('labelWeight').textContent = t('labelWeight');
