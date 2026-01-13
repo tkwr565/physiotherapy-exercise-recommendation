@@ -182,7 +182,7 @@ const translations = {
 };
 
 // State
-let currentLang = 'zh-TW'; // Default to Traditional Chinese
+let currentLang = localStorage.getItem('patient_language') || 'zh-TW';
 let assessmentData = null;
 let demographicsData = null;
 let stsData = null;
@@ -197,6 +197,10 @@ async function init() {
     window.location.href = '/home.html';
     return;
   }
+
+  // Load language preference
+  currentLang = localStorage.getItem('patient_language') || 'zh-TW';
+  console.log('[Results] Language loaded from localStorage:', currentLang);
 
   // Try to load assessment data from database
   const dataLoaded = await loadAssessmentData();
@@ -840,6 +844,7 @@ function renderResults() {
 // Switch language
 function switchLanguage(lang) {
   currentLang = lang;
+  localStorage.setItem('patient_language', lang);
   renderHeader();
   renderResults();
 }

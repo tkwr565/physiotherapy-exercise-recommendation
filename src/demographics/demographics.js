@@ -179,11 +179,39 @@ function renderLanguageToggle() {
 
 // Switch language
 function switchLanguage(lang) {
+  // Save current form values before switching
+  const formData = {
+    dateOfBirth: document.getElementById('dateOfBirth')?.value || '',
+    gender: document.querySelector('input[name="gender"]:checked')?.value || '',
+    height: document.getElementById('height')?.value || '',
+    weight: document.getElementById('weight')?.value || ''
+  };
+
   currentLang = lang;
   localStorage.setItem('patient_language', lang);
   renderHeader();
   renderLanguageToggle();
   renderContent();
+
+  // Restore form values after switching
+  if (formData.dateOfBirth) {
+    document.getElementById('dateOfBirth').value = formData.dateOfBirth;
+  }
+  if (formData.gender) {
+    const genderInput = document.querySelector(`input[name="gender"][value="${formData.gender}"]`);
+    if (genderInput) genderInput.checked = true;
+  }
+  if (formData.height) {
+    document.getElementById('height').value = formData.height;
+  }
+  if (formData.weight) {
+    document.getElementById('weight').value = formData.weight;
+  }
+
+  // Re-calculate BMI if height and weight are present
+  if (formData.height && formData.weight) {
+    updateBMI();
+  }
 }
 
 // Render content

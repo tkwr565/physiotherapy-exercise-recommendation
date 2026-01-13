@@ -6,7 +6,7 @@ import { storage } from '../shared/storage.js';
 // State
 let responses = {};
 let toeTouch = null; // 'can' or 'cannot'
-let currentLang = 'zh-TW'; // Default to Traditional Chinese
+let currentLang = localStorage.getItem('patient_language') || 'zh-TW';
 
 // Initialize app
 function init() {
@@ -110,8 +110,10 @@ function clearProgress() {
 
 // Switch language
 function switchLanguage(newLang) {
+  console.log('[Questionnaire] Switching language to:', newLang);
   currentLang = newLang;
   localStorage.setItem('patient_language', newLang);
+  console.log('[Questionnaire] Language saved to localStorage:', localStorage.getItem('patient_language'));
   renderHeader();
   renderQuestionnaire();
   updateProgress();

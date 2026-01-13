@@ -160,6 +160,16 @@ function renderHeader() {
 
 // Switch language
 function switchLanguage(lang) {
+  // Save current form values before switching
+  let savedPasscode = '';
+  let savedUsername = '';
+
+  if (currentStep === 'passcode') {
+    savedPasscode = document.getElementById('passcode')?.value || '';
+  } else {
+    savedUsername = document.getElementById('username')?.value || '';
+  }
+
   currentLang = lang;
   localStorage.setItem('patient_language', lang);
   renderHeader();
@@ -167,8 +177,19 @@ function switchLanguage(lang) {
   // Re-render the current screen
   if (currentStep === 'passcode') {
     renderPasscodeScreen();
+    // Restore passcode value
+    if (savedPasscode) {
+      document.getElementById('passcode').value = savedPasscode;
+    }
   } else {
     renderUsernameScreen();
+    // Restore username value and trigger availability check
+    if (savedUsername) {
+      const usernameInput = document.getElementById('username');
+      usernameInput.value = savedUsername;
+      // Trigger username availability check
+      checkUsernameAvailability(savedUsername);
+    }
   }
 }
 

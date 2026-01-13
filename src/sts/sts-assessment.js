@@ -88,7 +88,7 @@ const translations = {
 };
 
 // State
-let currentLang = 'zh-TW'; // Default to Traditional Chinese
+let currentLang = localStorage.getItem('patient_language') || 'zh-TW';
 let assessmentData = {
   repetition_count: null,
   knee_alignment: null,
@@ -105,6 +105,10 @@ function init() {
     window.location.href = '/home.html';
     return;
   }
+
+  // Load language preference
+  currentLang = localStorage.getItem('patient_language') || 'zh-TW';
+  console.log('[STS] Language loaded from localStorage:', currentLang);
 
   // Check if questionnaire is completed
   const questionnaireCompleted = localStorage.getItem('questionnaireCompleted');
@@ -354,7 +358,25 @@ function renderAssessment() {
 
 // Switch language
 function switchLanguage(lang) {
+  console.log('[STS] Switching language to:', lang);
+
+  // Save current form values before switching
+  const repetitionCount = document.getElementById('repetitionCount')?.value;
+  const kneeAlignment = document.querySelector('input[name="kneeAlignment"]:checked')?.value;
+  const trunkSway = document.querySelector('input[name="trunkSway"]:checked')?.value;
+  const hipSway = document.querySelector('input[name="hipSway"]:checked')?.value;
+
+  // Update assessmentData with current form values
+  if (repetitionCount !== undefined && repetitionCount !== '') {
+    assessmentData.repetition_count = parseInt(repetitionCount);
+  }
+  if (kneeAlignment) assessmentData.knee_alignment = kneeAlignment;
+  if (trunkSway) assessmentData.trunk_sway = trunkSway;
+  if (hipSway) assessmentData.hip_sway = hipSway;
+
   currentLang = lang;
+  localStorage.setItem('patient_language', lang);
+  console.log('[STS] Language saved to localStorage:', localStorage.getItem('patient_language'));
   renderHeader();
   renderAssessment();
 }
