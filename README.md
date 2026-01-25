@@ -5,6 +5,20 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com)
 
+## 🔄 System Transition Notice
+
+**This system is preparing to transition from rule-based to LLM-powered exercise recommendation.**
+
+- **Current (v2.0)**: Rule-based algorithm with fixed formulas, manual STS input
+- **Future (v3.0)**: LLM agent with flexible clinical reasoning
+- **Future Enhancement**: Pose-detection model for automated STS assessment (replacing manual form)
+
+For detailed transition plans:
+- [Algorithm Transition Guide](docs/ALGORITHM_TO_LLM_TRANSITION.md) - How decision-making will change
+- [Database Transition Plan](docs/EXERCISE_DATABASE_TRANSITION.md) - Database structure updates
+
+---
+
 ## 📋 Table of Contents
 
 - [Overview](#overview)
@@ -37,8 +51,9 @@ This system implements an evidence-based exercise recommendation algorithm for p
 
 ### 🩺 Clinical Assessment
 
-- **30-Question KOOS/WOMAC Questionnaire** - Validated knee function assessment
+- **10-minute KOOS/WOMAC Questionnaire** - Validated knee function assessment
 - **Sit-to-Stand (STS) Test** - Age/gender-normalized functional performance
+  - *Note: Currently using manual form input; future integration with pose-detection model planned*
 - **Biomechanical Screening** - Knee alignment, trunk/hip stability assessment
 - **Flexibility Testing** - Toe touch test for posterior chain flexibility
 
@@ -102,26 +117,25 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 4. **Set up the database**
 
-Run the migration scripts in order:
-```bash
-# Navigate to database/migrations
-cd database/migrations
-
-# Run schema creation
-psql -f database-migration.sql
-
-# Run STS assessments table
-psql -f create-sts-assessments-table.sql
-
-# Add quality of life improvements
-psql -f add-quality-of-life-columns.sql
+In your Supabase SQL Editor, run the master schema creation script:
+```sql
+-- Copy and paste the contents of database/schema/00_RUN_ALL_MIGRATIONS.sql
+-- This creates all 5 tables: users, patient_demographics, questionnaire_responses, sts_assessments, exercises
 ```
+
+Alternatively, run individual schema files in order:
+- `01_create_users_table.sql`
+- `02_create_patient_demographics_table.sql`
+- `03_create_questionnaire_responses_table.sql`
+- `04_create_sts_assessments_table.sql`
+- `05_create_exercises_table.sql`
 
 5. **Seed exercise data**
-```bash
-# Import exercises from CSV
-# Use Supabase dashboard or CLI to import database/seeds/exercises.csv
-```
+
+Import exercises via Supabase dashboard:
+1. Navigate to: **Database** → **Tables** → **exercises**
+2. Click **Insert** → **Import data from CSV**
+3. Upload `database/seeds/exercises.csv` (33 exercises)
 
 6. **Run development server**
 ```bash
@@ -167,7 +181,7 @@ physiotherapy-exercise-recommendation/
 │   ├── results.css              # Results page styles
 │   └── shared.css               # Global styles
 ├── database/
-│   ├── migrations/              # SQL migration scripts
+│   ├── schema/                  # SQL schema creation scripts
 │   └── seeds/                   # Data seed files
 │       └── exercises.csv        # 33 exercises with metadata
 ├── docs/                        # Documentation
@@ -318,9 +332,9 @@ For detailed algorithm documentation, see [docs/ALGORITHM_DOCUMENTATION.md](docs
 ### Supabase Setup
 
 1. Create new project in Supabase dashboard
-2. Run migration scripts in SQL editor
-3. Import exercise data via CSV import
-4. Configure Row Level Security (RLS) policies
+2. Run schema creation scripts in SQL editor (see step 4 above)
+3. Import exercise data via CSV import (see step 5 above)
+4. Configure Row Level Security (RLS) policies if needed
 5. Copy project URL and anon key to `.env`
 
 ## 📚 Documentation

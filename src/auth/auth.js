@@ -44,7 +44,7 @@ const translations = {
     aboutItem4: 'Evidence-based biomechanical targeting',
 
     whatToExpectTitle: 'What to Expect',
-    expectItem1: 'Page 1: Answer 30 questionnaire questions',
+    expectItem1: 'Page 1: Complete 10-minute questionnaire',
     expectItem2: 'Page 2: Complete sit-to-stand test',
     expectItem3: 'Page 3: View your personalized exercises'
   },
@@ -87,7 +87,7 @@ const translations = {
     aboutItem4: '基於證據的生物力學目標定位',
 
     whatToExpectTitle: '評估流程',
-    expectItem1: '第1步：回答30個問卷問題',
+    expectItem1: '第1步：完成10分鐘問卷',
     expectItem2: '第2步：完成坐站測試',
     expectItem3: '第3步：查看您的個人化運動'
   }
