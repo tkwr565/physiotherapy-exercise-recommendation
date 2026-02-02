@@ -1,0 +1,1394 @@
+[
+  {
+    "exercise_name": "Straight leg raise",
+    "exercise_name_ch": "直膝抬腿",
+    "positions": [
+      "supine_lying"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "quad",
+          "value": 4
+        }
+      ],
+      "secondary_movers": [
+        {
+          "muscle": "hip_flexors",
+          "value": 3
+        }
+      ],
+      "stabiliser": []
+    },
+    "difficulty": {
+      "level": 1,
+      "category": "beginner"
+    },
+    "safety_constraints": [],
+    "sport_similarity": [],
+    "progression_from": [],
+    "progression_to": [],
+    "core_ipsi": false,
+    "core_contra": false,
+    "toe_touch": false,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "Double leg glute bridging",
+    "exercise_name_ch": "雙腳臀橋",
+    "positions": [
+      "supine_lying"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "glute_max",
+          "value": 4
+        }
+      ],
+      "secondary_movers": [
+        {
+          "muscle": "hamstring",
+          "value": 3
+        }
+      ],
+      "stabiliser": []
+    },
+    "difficulty": {
+      "level": 2,
+      "category": "beginner"
+    },
+    "safety_constraints": [],
+    "sport_similarity": [],
+    "progression_from": [],
+    "progression_to": [
+      "Single leg glute bridging"
+    ],
+    "core_ipsi": false,
+    "core_contra": false,
+    "toe_touch": true,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "Double leg hamstrings bridging",
+    "exercise_name_ch": "雙腳膕旁肌橋式",
+    "positions": [
+      "supine_lying"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "hamstring",
+          "value": 4
+        }
+      ],
+      "secondary_movers": [
+        {
+          "muscle": "glute_max",
+          "value": 4
+        }
+      ],
+      "stabiliser": []
+    },
+    "difficulty": {
+      "level": 3,
+      "category": "beginner_to_intermediate"
+    },
+    "safety_constraints": [],
+    "sport_similarity": [],
+    "progression_from": [],
+    "progression_to": [
+      "Single leg hamstrings bridging"
+    ],
+    "core_ipsi": false,
+    "core_contra": false,
+    "toe_touch": true,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "Single leg glute bridging",
+    "exercise_name_ch": "單腳臀橋",
+    "positions": [
+      "supine_lying"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "glute_max",
+          "value": 5
+        }
+      ],
+      "secondary_movers": [
+        {
+          "muscle": "hamstring",
+          "value": 3
+        }
+      ],
+      "stabiliser": [
+        {
+          "muscle": "glute_med_min",
+          "value": 4
+        }
+      ]
+    },
+    "difficulty": {
+      "level": 4,
+      "category": "beginner_to_intermediate"
+    },
+    "safety_constraints": [],
+    "sport_similarity": [],
+    "progression_from": [],
+    "progression_to": [],
+    "core_ipsi": true,
+    "core_contra": true,
+    "toe_touch": true,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "Single leg hamstrings bridging",
+    "exercise_name_ch": "單腳膕旁肌橋式",
+    "positions": [
+      "supine_lying"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "hamstring",
+          "value": 5
+        }
+      ],
+      "secondary_movers": [
+        {
+          "muscle": "glute_max",
+          "value": 4
+        }
+      ],
+      "stabiliser": [
+        {
+          "muscle": "glute_med_min",
+          "value": 4
+        }
+      ]
+    },
+    "difficulty": {
+      "level": 5,
+      "category": "intermediate"
+    },
+    "safety_constraints": [],
+    "sport_similarity": [],
+    "progression_from": [],
+    "progression_to": [],
+    "core_ipsi": true,
+    "core_contra": true,
+    "toe_touch": true,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "Scissors",
+    "exercise_name_ch": "仰臥剪刀式",
+    "positions": [
+      "supine_lying"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "hip_flexors",
+          "value": 3
+        }
+      ],
+      "secondary_movers": [],
+      "stabiliser": []
+    },
+    "difficulty": {
+      "level": 1,
+      "category": "beginner"
+    },
+    "safety_constraints": [],
+    "sport_similarity": [],
+    "progression_from": [],
+    "progression_to": [
+      "3-months supine hip lowering"
+    ],
+    "core_ipsi": false,
+    "core_contra": false,
+    "toe_touch": true,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "3-months supine hip lowering",
+    "exercise_name_ch": "仰臥三個月姿勢髖部下放",
+    "positions": [
+      "supine_lying"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "hip_flexors",
+          "value": 5
+        }
+      ],
+      "secondary_movers": [],
+      "stabiliser": []
+    },
+    "difficulty": {
+      "level": 2,
+      "category": "beginner"
+    },
+    "safety_constraints": [],
+    "sport_similarity": [],
+    "progression_from": [
+      "Scissors"
+    ],
+    "progression_to": [
+      "Deadbug"
+    ],
+    "core_ipsi": false,
+    "core_contra": false,
+    "toe_touch": true,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "Deadbug",
+    "exercise_name_ch": "死蟲式",
+    "positions": [
+      "supine_lying"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "hip_flexors",
+          "value": 4
+        }
+      ],
+      "secondary_movers": [],
+      "stabiliser": []
+    },
+    "difficulty": {
+      "level": 3,
+      "category": "beginner_to_intermediate"
+    },
+    "safety_constraints": [],
+    "sport_similarity": [],
+    "progression_from": [
+      "3-months supine hip lowering"
+    ],
+    "progression_to": [],
+    "core_ipsi": false,
+    "core_contra": true,
+    "toe_touch": true,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "Side lying Clamshell",
+    "exercise_name_ch": "側臥蚌殼式",
+    "positions": [
+      "side_lying"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "glute_med_min",
+          "value": 4
+        }
+      ],
+      "secondary_movers": [
+        {
+          "muscle": "glute_max",
+          "value": 2
+        }
+      ],
+      "stabiliser": []
+    },
+    "difficulty": {
+      "level": 1,
+      "category": "beginner"
+    },
+    "safety_constraints": [],
+    "sport_similarity": [],
+    "progression_from": [],
+    "progression_to": [
+      "Side plank on knees hip dip"
+    ],
+    "core_ipsi": false,
+    "core_contra": false,
+    "toe_touch": false,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "Side plank on knees hip dip",
+    "exercise_name_ch": "跪姿側棒式髖部升降",
+    "positions": [
+      "side_lying"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "glute_med_min",
+          "value": 4
+        }
+      ],
+      "secondary_movers": [
+        {
+          "muscle": "glute_max",
+          "value": 4
+        }
+      ],
+      "stabiliser": []
+    },
+    "difficulty": {
+      "level": 2,
+      "category": "beginner"
+    },
+    "safety_constraints": [],
+    "sport_similarity": [],
+    "progression_from": [
+      "Side lying Clamshell"
+    ],
+    "progression_to": [
+      "Side plank on knees hold"
+    ],
+    "core_ipsi": true,
+    "core_contra": false,
+    "toe_touch": false,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "Side plank on knees hold",
+    "exercise_name_ch": "跪姿側棒式停留",
+    "positions": [
+      "side_lying"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "glute_med_min",
+          "value": 5
+        }
+      ],
+      "secondary_movers": [
+        {
+          "muscle": "glute_max",
+          "value": 4
+        }
+      ],
+      "stabiliser": []
+    },
+    "difficulty": {
+      "level": 3,
+      "category": "beginner_to_intermediate"
+    },
+    "safety_constraints": [],
+    "sport_similarity": [],
+    "progression_from": [
+      "Side plank on knees hip dip"
+    ],
+    "progression_to": [
+      "Side plank Clamshell"
+    ],
+    "core_ipsi": true,
+    "core_contra": false,
+    "toe_touch": false,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "Side plank Clamshell",
+    "exercise_name_ch": "側棒式蚌殼式",
+    "positions": [
+      "side_lying"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "glute_med_min",
+          "value": 5
+        }
+      ],
+      "secondary_movers": [
+        {
+          "muscle": "glute_max",
+          "value": 4
+        }
+      ],
+      "stabiliser": []
+    },
+    "difficulty": {
+      "level": 4,
+      "category": "beginner_to_intermediate"
+    },
+    "safety_constraints": [],
+    "sport_similarity": [],
+    "progression_from": [
+      "Side plank Clamshell"
+    ],
+    "progression_to": [],
+    "core_ipsi": true,
+    "core_contra": false,
+    "toe_touch": false,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "Side plank hip abduction",
+    "exercise_name_ch": "側棒式髖外展",
+    "positions": [
+      "side_lying"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "glute_med_min",
+          "value": 5
+        }
+      ],
+      "secondary_movers": [
+        {
+          "muscle": "glute_max",
+          "value": 4
+        }
+      ],
+      "stabiliser": []
+    },
+    "difficulty": {
+      "level": 5,
+      "category": "intermediate"
+    },
+    "safety_constraints": [],
+    "sport_similarity": [],
+    "progression_from": [],
+    "progression_to": [],
+    "core_ipsi": true,
+    "core_contra": false,
+    "toe_touch": false,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "Copenhagen adductor lv1",
+    "exercise_name_ch": "哥本哈根內收肌運動 Lv1",
+    "positions": [
+      "side_lying"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "adductors",
+          "value": 3
+        }
+      ],
+      "secondary_movers": [],
+      "stabiliser": []
+    },
+    "difficulty": {
+      "level": 1,
+      "category": "beginner"
+    },
+    "safety_constraints": [],
+    "sport_similarity": [],
+    "progression_from": [],
+    "progression_to": [
+      "Copenhagen adductor lv2"
+    ],
+    "core_ipsi": false,
+    "core_contra": false,
+    "toe_touch": false,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "Copenhagen adductor lv2",
+    "exercise_name_ch": "哥本哈根內收肌運動 Lv2",
+    "positions": [
+      "side_lying"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "adductors",
+          "value": 5
+        }
+      ],
+      "secondary_movers": [],
+      "stabiliser": []
+    },
+    "difficulty": {
+      "level": 7,
+      "category": "intermediate_to_advance"
+    },
+    "safety_constraints": [],
+    "sport_similarity": [],
+    "progression_from": [
+      "Copenhagen adductor lv1"
+    ],
+    "progression_to": [],
+    "core_ipsi": true,
+    "core_contra": false,
+    "toe_touch": false,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "Quadruped single limb movement",
+    "exercise_name_ch": "四足跪姿單肢活動",
+    "positions": [
+      "quadruped"
+    ],
+    "muscles": {
+      "primary_movers": [],
+      "secondary_movers": [],
+      "stabiliser": [
+        {
+          "muscle": "glute_med_min",
+          "value": 3
+        }
+      ]
+    },
+    "difficulty": {
+      "level": 2,
+      "category": "beginner"
+    },
+    "safety_constraints": [
+      "Kneeling"
+    ],
+    "sport_similarity": [],
+    "progression_from": [],
+    "progression_to": [
+      "Quadruped donkey kick",
+      "Quadruped hip abduction"
+    ],
+    "core_ipsi": false,
+    "core_contra": true,
+    "toe_touch": false,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "Quadruped donkey kick",
+    "exercise_name_ch": "四足跪姿驢踢",
+    "positions": [
+      "quadruped"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "glute_max",
+          "value": 3
+        }
+      ],
+      "secondary_movers": [
+        {
+          "muscle": "hamstring",
+          "value": 3
+        }
+      ],
+      "stabiliser": [
+        {
+          "muscle": "glute_med_min",
+          "value": 4
+        }
+      ]
+    },
+    "difficulty": {
+      "level": 3,
+      "category": "beginner_to_intermediate"
+    },
+    "safety_constraints": [
+      "Kneeling"
+    ],
+    "sport_similarity": [],
+    "progression_from": [
+      "Quadruped single limb movement"
+    ],
+    "progression_to": [
+      "Quadruped leg extension"
+    ],
+    "core_ipsi": false,
+    "core_contra": true,
+    "toe_touch": false,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "Quadruped leg extension",
+    "exercise_name_ch": "四足跪姿後踢",
+    "positions": [
+      "quadruped"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "glute_max",
+          "value": 3
+        }
+      ],
+      "secondary_movers": [
+        {
+          "muscle": "hamstring",
+          "value": 2
+        }
+      ],
+      "stabiliser": [
+        {
+          "muscle": "glute_med_min",
+          "value": 4
+        }
+      ]
+    },
+    "difficulty": {
+      "level": 4,
+      "category": "beginner_to_intermediate"
+    },
+    "safety_constraints": [
+      "Kneeling"
+    ],
+    "sport_similarity": [],
+    "progression_from": [
+      "Quadruped donkey kick"
+    ],
+    "progression_to": [
+      "Birddog"
+    ],
+    "core_ipsi": false,
+    "core_contra": true,
+    "toe_touch": false,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "Quadruped hip abduction",
+    "exercise_name_ch": "四足跪姿髖外展",
+    "positions": [
+      "quadruped"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "glute_max",
+          "value": 3
+        }
+      ],
+      "secondary_movers": [
+        {
+          "muscle": "hamstring",
+          "value": 1
+        }
+      ],
+      "stabiliser": [
+        {
+          "muscle": "glute_med_min",
+          "value": 5
+        }
+      ]
+    },
+    "difficulty": {
+      "level": 4,
+      "category": "beginner_to_intermediate"
+    },
+    "safety_constraints": [
+      "Kneeling"
+    ],
+    "sport_similarity": [],
+    "progression_from": [
+      "Quadruped single limb movement"
+    ],
+    "progression_to": [],
+    "core_ipsi": false,
+    "core_contra": true,
+    "toe_touch": false,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "Birddog",
+    "exercise_name_ch": "鳥狗式",
+    "positions": [
+      "quadruped"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "glute_max",
+          "value": 3
+        }
+      ],
+      "secondary_movers": [
+        {
+          "muscle": "hamstring",
+          "value": 2
+        }
+      ],
+      "stabiliser": [
+        {
+          "muscle": "glute_med_min",
+          "value": 5
+        }
+      ]
+    },
+    "difficulty": {
+      "level": 5,
+      "category": "intermediate"
+    },
+    "safety_constraints": [
+      "Kneeling"
+    ],
+    "sport_similarity": [],
+    "progression_from": [
+      "Quadruped leg extension"
+    ],
+    "progression_to": [],
+    "core_ipsi": false,
+    "core_contra": true,
+    "toe_touch": false,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "DL squat",
+    "exercise_name_ch": "雙腳深蹲",
+    "positions": [
+      "DL_stand"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "quad",
+          "value": 5
+        },
+        {
+          "muscle": "glute_max",
+          "value": 3
+        }
+      ],
+      "secondary_movers": [
+        {
+          "muscle": "hamstring",
+          "value": 3
+        },
+        {
+          "muscle": "adductors",
+          "value": 1
+        }
+      ],
+      "stabiliser": [
+        {
+          "muscle": "glute_med_min",
+          "value": 3
+        }
+      ]
+    },
+    "difficulty": {
+      "level": 3,
+      "category": "beginner_to_intermediate"
+    },
+    "safety_constraints": [
+      "Weight_bear"
+    ],
+    "sport_similarity": [
+      "cycling",
+      "swimming"
+    ],
+    "progression_from": [],
+    "progression_to": [
+      "Split leg squat"
+    ],
+    "core_ipsi": false,
+    "core_contra": false,
+    "toe_touch": false,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "DL squat with band",
+    "exercise_name_ch": "彈力帶雙腳深蹲",
+    "positions": [
+      "DL_stand"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "quad",
+          "value": 5
+        },
+        {
+          "muscle": "glute_max",
+          "value": 4
+        },
+        {
+          "muscle": "glute_med_min",
+          "value": 4
+        }
+      ],
+      "secondary_movers": [
+        {
+          "muscle": "hamstring",
+          "value": 3
+        },
+        {
+          "muscle": "adductors",
+          "value": 1
+        }
+      ],
+      "stabiliser": []
+    },
+    "difficulty": {
+      "level": 4,
+      "category": "beginner_to_intermediate"
+    },
+    "safety_constraints": [
+      "Weight_bear"
+    ],
+    "sport_similarity": [
+      "cycling",
+      "swimming"
+    ],
+    "progression_from": [],
+    "progression_to": [
+      "Split leg squat"
+    ],
+    "core_ipsi": false,
+    "core_contra": false,
+    "toe_touch": false,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "DL squat with adductor squeeze",
+    "exercise_name_ch": "雙腳深蹲(夾內收肌)",
+    "positions": [
+      "DL_stand"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "quad",
+          "value": 5
+        },
+        {
+          "muscle": "glute_max",
+          "value": 3
+        },
+        {
+          "muscle": "adductors",
+          "value": 3
+        }
+      ],
+      "secondary_movers": [
+        {
+          "muscle": "hamstring",
+          "value": 3
+        }
+      ],
+      "stabiliser": [
+        {
+          "muscle": "glute_med_min",
+          "value": 3
+        }
+      ]
+    },
+    "difficulty": {
+      "level": 4,
+      "category": "beginner_to_intermediate"
+    },
+    "safety_constraints": [
+      "Weight_bear"
+    ],
+    "sport_similarity": [
+      "cycling",
+      "swimming"
+    ],
+    "progression_from": [],
+    "progression_to": [
+      "Split leg squat"
+    ],
+    "core_ipsi": false,
+    "core_contra": false,
+    "toe_touch": false,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "Hip hinge",
+    "exercise_name_ch": "髖關節鉸鏈",
+    "positions": [
+      "DL_stand"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "hamstring",
+          "value": 5
+        },
+        {
+          "muscle": "glute_max",
+          "value": 4
+        }
+      ],
+      "secondary_movers": [
+        {
+          "muscle": "adductors",
+          "value": 2
+        }
+      ],
+      "stabiliser": [
+        {
+          "muscle": "quad",
+          "value": 3
+        }
+      ]
+    },
+    "difficulty": {
+      "level": 5,
+      "category": "intermediate"
+    },
+    "safety_constraints": [
+      "Weight_bear"
+    ],
+    "sport_similarity": [
+      "cycling",
+      "swimming"
+    ],
+    "progression_from": [],
+    "progression_to": [
+      "SL RDL"
+    ],
+    "core_ipsi": false,
+    "core_contra": false,
+    "toe_touch": false,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "Split leg squat",
+    "exercise_name_ch": "分腿蹲",
+    "positions": [
+      "split_stand"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "quad",
+          "value": 5
+        },
+        {
+          "muscle": "glute_max",
+          "value": 4
+        }
+      ],
+      "secondary_movers": [
+        {
+          "muscle": "hamstring",
+          "value": 4
+        },
+        {
+          "muscle": "adductors",
+          "value": 3
+        }
+      ],
+      "stabiliser": [
+        {
+          "muscle": "glute_med_min",
+          "value": 4
+        }
+      ]
+    },
+    "difficulty": {
+      "level": 4,
+      "category": "beginner_to_intermediate"
+    },
+    "safety_constraints": [
+      "Core_stability",
+      "Weight_bear"
+    ],
+    "sport_similarity": [
+      "running",
+      "hiking",
+      "dancing",
+      "racket sports"
+    ],
+    "progression_from": [
+      "Quadruped hip abduction"
+    ],
+    "progression_to": [
+      "Backward Lunge"
+    ],
+    "core_ipsi": true,
+    "core_contra": true,
+    "toe_touch": false,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "Backward Lunge",
+    "exercise_name_ch": "後弓箭步",
+    "positions": [
+      "split_stand"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "quad",
+          "value": 5
+        },
+        {
+          "muscle": "glute_max",
+          "value": 5
+        }
+      ],
+      "secondary_movers": [
+        {
+          "muscle": "hamstring",
+          "value": 5
+        },
+        {
+          "muscle": "adductors",
+          "value": 3
+        }
+      ],
+      "stabiliser": [
+        {
+          "muscle": "glute_med_min",
+          "value": 4
+        }
+      ]
+    },
+    "difficulty": {
+      "level": 5,
+      "category": "intermediate"
+    },
+    "safety_constraints": [
+      "Core_stability",
+      "Weight_bear"
+    ],
+    "sport_similarity": [
+      "running",
+      "hiking",
+      "dancing",
+      "racket sports"
+    ],
+    "progression_from": [
+      "Split leg squat"
+    ],
+    "progression_to": [
+      "Step up"
+    ],
+    "core_ipsi": true,
+    "core_contra": true,
+    "toe_touch": false,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "Step up",
+    "exercise_name_ch": "登階運動",
+    "positions": [
+      "split_stand"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "quad",
+          "value": 5
+        },
+        {
+          "muscle": "glute_max",
+          "value": 4
+        }
+      ],
+      "secondary_movers": [
+        {
+          "muscle": "hamstring",
+          "value": 4
+        },
+        {
+          "muscle": "adductors",
+          "value": 3
+        }
+      ],
+      "stabiliser": [
+        {
+          "muscle": "glute_med_min",
+          "value": 5
+        }
+      ]
+    },
+    "difficulty": {
+      "level": 5,
+      "category": "intermediate"
+    },
+    "safety_constraints": [
+      "Core_stability",
+      "Weight_bear"
+    ],
+    "sport_similarity": [
+      "running",
+      "hiking",
+      "dancing",
+      "racket sports"
+    ],
+    "progression_from": [
+      "Hip hikes"
+    ],
+    "progression_to": [
+      "SL half squat"
+    ],
+    "core_ipsi": true,
+    "core_contra": true,
+    "toe_touch": false,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "Side squat",
+    "exercise_name_ch": "側蹲",
+    "positions": [
+      "split_stand"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "quad",
+          "value": 5
+        },
+        {
+          "muscle": "glute_max",
+          "value": 4
+        },
+        {
+          "muscle": "glute_med_min",
+          "value": 5
+        }
+      ],
+      "secondary_movers": [
+        {
+          "muscle": "hamstring",
+          "value": 4
+        },
+        {
+          "muscle": "adductors",
+          "value": 3
+        }
+      ],
+      "stabiliser": []
+    },
+    "difficulty": {
+      "level": 6,
+      "category": "intermediate"
+    },
+    "safety_constraints": [
+      "Core_stability",
+      "Weight_bear"
+    ],
+    "sport_similarity": [
+      "running",
+      "hiking",
+      "dancing",
+      "racket sports"
+    ],
+    "progression_from": [
+      "Side plank hip abduction"
+    ],
+    "progression_to": [],
+    "core_ipsi": true,
+    "core_contra": true,
+    "toe_touch": false,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "Hip hikes",
+    "exercise_name_ch": "骨盆側提",
+    "positions": [
+      "SL_stand"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "glute_med_min",
+          "value": 5
+        }
+      ],
+      "secondary_movers": [],
+      "stabiliser": []
+    },
+    "difficulty": {
+      "level": 5,
+      "category": "intermediate"
+    },
+    "safety_constraints": [
+      "Core_stability",
+      "Weight_bear"
+    ],
+    "sport_similarity": [
+      "running",
+      "hiking",
+      "dancing",
+      "racket sports"
+    ],
+    "progression_from": [
+      "Side plank on knees hip dip"
+    ],
+    "progression_to": [
+      "Step up"
+    ],
+    "core_ipsi": true,
+    "core_contra": false,
+    "toe_touch": false,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "RFESS",
+    "exercise_name_ch": "保加利亞分腿蹲",
+    "positions": [
+      "SL_stand"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "quad",
+          "value": 5
+        },
+        {
+          "muscle": "glute_max",
+          "value": 5
+        }
+      ],
+      "secondary_movers": [
+        {
+          "muscle": "hamstring",
+          "value": 4
+        },
+        {
+          "muscle": "adductors",
+          "value": 3
+        }
+      ],
+      "stabiliser": [
+        {
+          "muscle": "glute_med_min",
+          "value": 4
+        }
+      ]
+    },
+    "difficulty": {
+      "level": 7,
+      "category": "intermediate_to_advance"
+    },
+    "safety_constraints": [
+      "Core_stability",
+      "Weight_bear"
+    ],
+    "sport_similarity": [
+      "running",
+      "hiking",
+      "dancing",
+      "racket sports"
+    ],
+    "progression_from": [
+      "Split leg squat"
+    ],
+    "progression_to": [
+      "SL half squat"
+    ],
+    "core_ipsi": true,
+    "core_contra": true,
+    "toe_touch": false,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "SL half squat",
+    "exercise_name_ch": "單腳半蹲",
+    "positions": [
+      "SL_stand"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "quad",
+          "value": 5
+        },
+        {
+          "muscle": "glute_max",
+          "value": 5
+        }
+      ],
+      "secondary_movers": [
+        {
+          "muscle": "hamstring",
+          "value": 3
+        },
+        {
+          "muscle": "adductors",
+          "value": 3
+        }
+      ],
+      "stabiliser": [
+        {
+          "muscle": "glute_med_min",
+          "value": 5
+        }
+      ]
+    },
+    "difficulty": {
+      "level": 9,
+      "category": "advance"
+    },
+    "safety_constraints": [
+      "Core_stability",
+      "Weight_bear"
+    ],
+    "sport_similarity": [
+      "running",
+      "hiking",
+      "dancing",
+      "racket sports"
+    ],
+    "progression_from": [
+      "RFESS"
+    ],
+    "progression_to": [],
+    "core_ipsi": true,
+    "core_contra": true,
+    "toe_touch": false,
+    "clinical_summary": ""
+  },
+  {
+    "exercise_name": "SL RDL",
+    "exercise_name_ch": "單腳羅馬尼亞硬舉",
+    "positions": [
+      "SL_stand"
+    ],
+    "muscles": {
+      "primary_movers": [
+        {
+          "muscle": "hamstring",
+          "value": 5
+        }
+      ],
+      "secondary_movers": [
+        {
+          "muscle": "glute_max",
+          "value": 5
+        }
+      ],
+      "stabiliser": [
+        {
+          "muscle": "quad",
+          "value": 2
+        },
+        {
+          "muscle": "glute_med_min",
+          "value": 5
+        },
+        {
+          "muscle": "adductors",
+          "value": 4
+        }
+      ]
+    },
+    "difficulty": {
+      "level": 9,
+      "category": "advance"
+    },
+    "safety_constraints": [
+      "Core_stability",
+      "Weight_bear"
+    ],
+    "sport_similarity": [
+      "running",
+      "hiking",
+      "dancing",
+      "racket sports"
+    ],
+    "progression_from": [
+      "Birddog",
+      "Hip hinge"
+    ],
+    "progression_to": [],
+    "core_ipsi": true,
+    "core_contra": true,
+    "toe_touch": false,
+    "clinical_summary": ""
+  }
+]
