@@ -37,12 +37,11 @@ const translations = {
     // STS Assessment
     stsTitle: "Sit-to-Stand Assessment",
     repetitions: "Repetitions Completed",
-    benchmark: "Normative Benchmark",
+    benchmark: "HK Norm (Average Range)",
     performance: "Performance Level",
-    performanceExcellent: "Excellent - ≥120% of benchmark",
-    performanceGood: "Good - ≥100% of benchmark",
-    performanceFair: "Fair - ≥80% of benchmark",
-    performancePoor: "Poor - <80% of benchmark",
+    performanceAboveAverage: "Above Average",
+    performanceAverage: "Average",
+    performanceBelowAverage: "Below Average",
 
     // Biomechanical Assessment
     biomechanicsTitle: "Biomechanical Assessment",
@@ -124,12 +123,11 @@ const translations = {
     // STS Assessment
     stsTitle: "坐站測試評估",
     repetitions: "完成次數",
-    benchmark: "標準基準",
+    benchmark: "香港常模（平均範圍）",
     performance: "表現水平",
-    performanceExcellent: "優秀 - ≥120% 基準",
-    performanceGood: "良好 - ≥100% 基準",
-    performanceFair: "尚可 - ≥80% 基準",
-    performancePoor: "需改善 - <80% 基準",
+    performanceAboveAverage: "高於平均",
+    performanceAverage: "平均",
+    performanceBelowAverage: "低於平均",
 
     // Biomechanical Assessment
     biomechanicsTitle: "生物力學評估",
@@ -609,37 +607,45 @@ function getColorCodedValue(value, normalValue) {
   return `<span class="${className}">${value}</span>`;
 }
 
-// Get STS benchmark (helper function)
-function getStsBenchmark(age, gender) {
-  if (age >= 60 && age < 65) return gender === 'male' ? 14 : 12;
-  if (age >= 65 && age < 70) return gender === 'male' ? 12 : 11;
-  if (age >= 70 && age < 75) return gender === 'male' ? 12 : 10;
-  if (age >= 75 && age < 80) return gender === 'male' ? 11 : 10;
-  if (age >= 80 && age < 85) return gender === 'male' ? 10 : 9;
-  if (age >= 85 && age < 90) return gender === 'male' ? 8 : 8;
-  if (age >= 90) return gender === 'male' ? 7 : 4;
-  return 12; // Default
+// Get STS benchmark range (Hong Kong Norms)
+function getStsBenchmarkRange(age, gender) {
+  const benchmarks = {
+    male: {
+      '60-64': '12-16', '65-69': '11-15', '70-74': '10-13',
+      '75-79': '10-13', '80-84': '10-13', '85-89': '7-10', '90+': '5-7'
+    },
+    female: {
+      '60-64': '11-14', '65-69': '10-13', '70-74': '9-12',
+      '75-79': '8-11', '80-84': '8-11', '85-89': '8-9', '90+': '7-9'
+    }
+  };
+
+  let ageGroup;
+  if (age >= 60 && age < 65) ageGroup = '60-64';
+  else if (age >= 65 && age < 70) ageGroup = '65-69';
+  else if (age >= 70 && age < 75) ageGroup = '70-74';
+  else if (age >= 75 && age < 80) ageGroup = '75-79';
+  else if (age >= 80 && age < 85) ageGroup = '80-84';
+  else if (age >= 85 && age < 90) ageGroup = '85-89';
+  else if (age >= 90) ageGroup = '90+';
+  else ageGroup = '60-64';
+
+  return benchmarks[gender]?.[ageGroup] || '11-14';
 }
 
 // Calculate STS display info
 function calculateStsScore() {
-  if (!stsData || !demographicsData) return { score: 0, benchmark: 0, performance: 'poor' };
+  if (!stsData || !demographicsData) {
+    return { benchmarkRange: '11-14', performance: 'Below Average' };
+  }
 
   const age = calculateAge(demographicsData.date_of_birth);
-  const benchmark = getStsBenchmark(age, demographicsData.gender);
-  const score = algorithmResults?.scores?.stsScore || 0;
+  const benchmarkRange = getStsBenchmarkRange(age, demographicsData.gender);
 
-  // Performance thresholds:
-  // Excellent: ≥120% of benchmark (20% above)
-  // Good: ≥100% of benchmark (at or above)
-  // Fair: ≥80% of benchmark (within 20% below)
-  // Poor: <80% of benchmark (significantly below)
-  let performance = 'poor';
-  if (score >= 1.2) performance = 'excellent';
-  else if (score >= 1.0) performance = 'good';
-  else if (score >= 0.8) performance = 'fair';
+  // Get performance from algorithm results (already calculated with HK norms)
+  const performance = algorithmResults?.scores?.stsPerformance || 'Average';
 
-  return { score, benchmark, performance };
+  return { benchmarkRange, performance };
 }
 
 // Render results dashboard
@@ -689,9 +695,9 @@ function renderResults() {
 
         <div class="score-card">
           <div class="score-label">${t('stsScore')}</div>
-          <div class="score-value">${(stsScore.score * 100).toFixed(0)}%</div>
+          <div class="score-value">${stsScore.performance}</div>
           <div class="score-bar">
-            <div class="score-bar-fill" style="width: ${stsScore.score * 100}%"></div>
+            <div class="score-bar-fill performance-${stsScore.performance.toLowerCase().replace(' ', '-')}" style="width: ${stsScore.performance === 'Above Average' ? 100 : stsScore.performance === 'Average' ? 65 : 30}%"></div>
           </div>
         </div>
 
@@ -745,12 +751,12 @@ function renderResults() {
         </div>
         <div class="info-item">
           <span class="info-label">${t('benchmark')}:</span>
-          <span class="info-value">${stsScore.benchmark}</span>
+          <span class="info-value">${stsScore.benchmarkRange}</span>
         </div>
         <div class="info-item full-width">
           <span class="info-label">${t('performance')}:</span>
-          <span class="info-value performance-${stsScore.performance}">
-            ${t('performance' + stsScore.performance.charAt(0).toUpperCase() + stsScore.performance.slice(1))}
+          <span class="info-value performance-${stsScore.performance.toLowerCase().replace(' ', '-')}">
+            ${t('performance' + stsScore.performance.replace(' ', ''))}
           </span>
         </div>
       </div>

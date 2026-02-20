@@ -43,11 +43,13 @@ Output: 4 Exercises (2 positions × 2 exercises)
 
 | Position | Questions Used | Average Score | Multiplier | Rank |
 |----------|---------------|---------------|------------|------|
-| DL_stand | F3, F4, F5, F6, F8, SP1 | 2.0 | 0.80 | ✅ #1 |
-| split_stand | F1, F2, F3, F7, F13, F15, SP1, SP4 | 2.5 | 0.60 | ✅ #2 |
-| SL_stand | F1, F2, F4, F9, F11, SP1, SP2, SP3, SP4 | 3.2 | 0.35 | ❌ #3 |
+| DL_stand | F4, SP1 | 2.0 | 0.80 | ✅ #1 |
+| split_stand | F2, F4, SP1, SP4 | 2.5 | 0.60 | ✅ #2 |
+| SL_stand | F1, F2, SP4 | 3.2 | 0.35 | ❌ #3 |
 | quadruped | F5, SP5, ST2, P3, P4 | 2.8 | 0.50 | ❌ #4 |
 | lying | (inverse of best active) | - | 0.20 | ❌ #5 |
+
+**Note:** Position mappings updated to focus on most position-relevant questions. Other questions still collected for general functional assessment.
 
 **Formula:** `multiplier = (4 - average_score) / 4`
 - Higher multiplier = Better capability

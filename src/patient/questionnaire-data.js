@@ -229,12 +229,12 @@ export const questionnaireData = {
       description: 'These questions are used for different exercise positions as core ability indicators (60% weight).',
       subsections: [
         {
-          title: '🔗 Shared by 3 positions (DL_stand, split_stand & SL_stand)',
+          title: '🔗 Shared by DL_stand & split_stand',
           questions: [
             {
               code: 'SP1',
               text: 'Squatting',
-              note: '→ DL_stand, split_stand & SL_stand',
+              note: '→ DL_stand & split_stand',
               options: [
                 { value: 0, label: 'None (0)' },
                 { value: 1, label: 'Mild (1)' },
@@ -248,18 +248,6 @@ export const questionnaireData = {
         {
           title: '🔗 Shared by split_stand & SL_stand',
           questions: [
-            {
-              code: 'F1',
-              text: 'Descending stairs',
-              note: '→ split_stand & SL_stand',
-              options: [
-                { value: 0, label: 'None (0)' },
-                { value: 1, label: 'Mild (1)' },
-                { value: 2, label: 'Moderate (2)' },
-                { value: 3, label: 'Severe (3)' },
-                { value: 4, label: 'Extreme (4)' }
-              ]
-            },
             {
               code: 'F2',
               text: 'Ascending stairs',
@@ -290,26 +278,9 @@ export const questionnaireData = {
           title: '🔗 Shared by DL_stand & split_stand',
           questions: [
             {
-              code: 'F3',
-              text: 'Rising from sitting',
-              note: '→ DL_stand & split_stand',
-              options: [
-                { value: 0, label: 'None (0)' },
-                { value: 1, label: 'Mild (1)' },
-                { value: 2, label: 'Moderate (2)' },
-                { value: 3, label: 'Severe (3)' },
-                { value: 4, label: 'Extreme (4)' }
-              ]
-            }
-          ]
-        },
-        {
-          title: '🔗 Shared by DL_stand & SL_stand',
-          questions: [
-            {
               code: 'F4',
               text: 'Standing',
-              note: '→ DL_stand & SL_stand',
+              note: '→ DL_stand & split_stand',
               options: [
                 { value: 0, label: 'None (0)' },
                 { value: 1, label: 'Mild (1)' },
@@ -338,12 +309,53 @@ export const questionnaireData = {
           ]
         },
         {
-          title: '📍 DL_stand Unique Questions',
+          title: '📍 SL_stand Unique Questions',
           questions: [
+            {
+              code: 'F1',
+              text: 'Descending stairs',
+              note: '→ SL_stand only',
+              options: [
+                { value: 0, label: 'None (0)' },
+                { value: 1, label: 'Mild (1)' },
+                { value: 2, label: 'Moderate (2)' },
+                { value: 3, label: 'Severe (3)' },
+                { value: 4, label: 'Extreme (4)' }
+              ]
+            }
+          ]
+        },
+        {
+          title: '📍 Non-position-mapped Questions (still required)',
+          questions: [
+            {
+              code: 'F3',
+              text: 'Rising from sitting',
+              note: '→ General function assessment',
+              options: [
+                { value: 0, label: 'None (0)' },
+                { value: 1, label: 'Mild (1)' },
+                { value: 2, label: 'Moderate (2)' },
+                { value: 3, label: 'Severe (3)' },
+                { value: 4, label: 'Extreme (4)' }
+              ]
+            },
+            {
+              code: 'F5',
+              text: 'Bending to floor/pick up an object',
+              note: '→ General function assessment',
+              options: [
+                { value: 0, label: 'None (0)' },
+                { value: 1, label: 'Mild (1)' },
+                { value: 2, label: 'Moderate (2)' },
+                { value: 3, label: 'Severe (3)' },
+                { value: 4, label: 'Extreme (4)' }
+              ]
+            },
             {
               code: 'F6',
               text: 'Walking on flat surface',
-              note: '→ DL_stand only',
+              note: '→ General function assessment',
               options: [
                 { value: 0, label: 'None (0)' },
                 { value: 1, label: 'Mild (1)' },
@@ -355,7 +367,7 @@ export const questionnaireData = {
             {
               code: 'F8',
               text: 'Going shopping',
-              note: '→ DL_stand only',
+              note: '→ General function assessment',
               options: [
                 { value: 0, label: 'None (0)' },
                 { value: 1, label: 'Mild (1)' },
@@ -367,12 +379,12 @@ export const questionnaireData = {
           ]
         },
         {
-          title: '📍 split_stand Unique Questions',
+          title: '📍 Non-position-mapped Questions (still required) - Part 2',
           questions: [
             {
               code: 'F7',
               text: 'Getting in/out of car',
-              note: '→ split_stand only',
+              note: '→ General function assessment',
               options: [
                 { value: 0, label: 'None (0)' },
                 { value: 1, label: 'Mild (1)' },
@@ -381,39 +393,10 @@ export const questionnaireData = {
                 { value: 4, label: 'Extreme (4)' }
               ]
             },
-            {
-              code: 'F13',
-              text: 'Getting in/out of bath',
-              note: '→ split_stand only',
-              options: [
-                { value: 0, label: 'None (0)' },
-                { value: 1, label: 'Mild (1)' },
-                { value: 2, label: 'Moderate (2)' },
-                { value: 3, label: 'Severe (3)' },
-                { value: 4, label: 'Extreme (4)' }
-              ]
-            },
-            {
-              code: 'F15',
-              text: 'Getting on/off toilet',
-              note: '→ split_stand only',
-              options: [
-                { value: 0, label: 'None (0)' },
-                { value: 1, label: 'Mild (1)' },
-                { value: 2, label: 'Moderate (2)' },
-                { value: 3, label: 'Severe (3)' },
-                { value: 4, label: 'Extreme (4)' }
-              ]
-            }
-          ]
-        },
-        {
-          title: '📍 SL_stand Unique Questions',
-          questions: [
             {
               code: 'F9',
               text: 'Putting on socks/stockings',
-              note: '→ SL_stand only',
+              note: '→ General function assessment',
               options: [
                 { value: 0, label: 'None (0)' },
                 { value: 1, label: 'Mild (1)' },
@@ -425,7 +408,31 @@ export const questionnaireData = {
             {
               code: 'F11',
               text: 'Taking off socks/stockings',
-              note: '→ SL_stand only',
+              note: '→ General function assessment',
+              options: [
+                { value: 0, label: 'None (0)' },
+                { value: 1, label: 'Mild (1)' },
+                { value: 2, label: 'Moderate (2)' },
+                { value: 3, label: 'Severe (3)' },
+                { value: 4, label: 'Extreme (4)' }
+              ]
+            },
+            {
+              code: 'F13',
+              text: 'Getting in/out of bath',
+              note: '→ General function assessment',
+              options: [
+                { value: 0, label: 'None (0)' },
+                { value: 1, label: 'Mild (1)' },
+                { value: 2, label: 'Moderate (2)' },
+                { value: 3, label: 'Severe (3)' },
+                { value: 4, label: 'Extreme (4)' }
+              ]
+            },
+            {
+              code: 'F15',
+              text: 'Getting on/off toilet',
+              note: '→ General function assessment',
               options: [
                 { value: 0, label: 'None (0)' },
                 { value: 1, label: 'Mild (1)' },
@@ -437,7 +444,7 @@ export const questionnaireData = {
             {
               code: 'SP2',
               text: 'Running',
-              note: '→ SL_stand only',
+              note: '→ General function assessment',
               options: [
                 { value: 0, label: 'None (0)' },
                 { value: 1, label: 'Mild (1)' },
@@ -449,7 +456,7 @@ export const questionnaireData = {
             {
               code: 'SP3',
               text: 'Jumping',
-              note: '→ SL_stand only',
+              note: '→ General function assessment',
               options: [
                 { value: 0, label: 'None (0)' },
                 { value: 1, label: 'Mild (1)' },
@@ -584,19 +591,19 @@ export const requiredQuestions = [
 export const positionDefinitions = {
   DL_stand: {
     name: 'Double Leg Stand',
-    core: ['F3', 'F4', 'F5', 'F6', 'F8', 'SP1'],
+    core: ['F4', 'SP1'],
     pain: ['P1', 'P2', 'P5', 'P6', 'P9'],
     symptoms: ['S1', 'S2', 'S3', 'S4', 'S5']
   },
   split_stand: {
     name: 'Split Stand',
-    core: ['F1', 'F2', 'F3', 'F7', 'F13', 'F15', 'SP1', 'SP4'],
+    core: ['F2', 'F4', 'SP1', 'SP4'],
     pain: ['P1', 'P2', 'P5', 'P6', 'P9'],
     symptoms: ['S1', 'S2', 'S3', 'S4', 'S5']
   },
   SL_stand: {
     name: 'Single Leg Stand',
-    core: ['F1', 'F2', 'F4', 'F9', 'F11', 'SP1', 'SP2', 'SP3', 'SP4'],
+    core: ['F1', 'F2', 'SP4'],
     pain: ['P1', 'P2', 'P5', 'P6', 'P9'],
     symptoms: ['S1', 'S2', 'S3', 'S4', 'S5']
   },

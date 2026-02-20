@@ -450,28 +450,38 @@ function testPositionMultipliers() {
 }
 
 function testSTSScore() {
-    logTest('STS score normalization');
+    logTest('STS score with HK norms and performance categories');
 
-    // Test 1: At benchmark = 1.0
-    const score1 = calculateSTSScore(11, 65, 'female');
-    assertApprox(score1, 1.0, 0.01, 'At benchmark should give 1.0');
-    logSuccess('At benchmark (11/11) = 1.0 ✓');
+    // Test 1: Above Average performance (Female 65-69, 14+ reps)
+    const result1 = calculateSTSScore(14, 65, 'female');
+    assert(result1.performance === 'Above Average', 'Should be Above Average');
+    assert(result1.normalizedScore === 0.9, 'Above Average should map to 0.9');
+    assert(result1.benchmarkRange === '10-13', 'Benchmark range should be 10-13');
+    logSuccess('Above Average: 14 reps (female 65-69) → Above Average (0.9) ✓');
 
-    // Test 2: Above benchmark = 1.0 (capped)
-    const score2 = calculateSTSScore(15, 65, 'female');
-    assertApprox(score2, 1.0, 0.01, 'Above benchmark should cap at 1.0');
-    logSuccess('Above benchmark (15/11) = 1.0 (capped) ✓');
+    // Test 2: Average performance (Female 65-69, 10-13 reps)
+    const result2 = calculateSTSScore(11, 65, 'female');
+    assert(result2.performance === 'Average', 'Should be Average');
+    assert(result2.normalizedScore === 0.65, 'Average should map to 0.65');
+    logSuccess('Average: 11 reps (female 65-69) → Average (0.65) ✓');
 
-    // Test 3: Below benchmark = proportional
-    const score3 = calculateSTSScore(8, 65, 'female');
-    const expected3 = 8 / 11;
-    assertApprox(score3, expected3, 0.01, 'Below benchmark should be proportional');
-    logSuccess(`Below benchmark (8/11) = ${score3.toFixed(2)} ✓`);
+    // Test 3: Below Average performance (Female 65-69, ≤9 reps)
+    const result3 = calculateSTSScore(8, 65, 'female');
+    assert(result3.performance === 'Below Average', 'Should be Below Average');
+    assert(result3.normalizedScore === 0.3, 'Below Average should map to 0.3');
+    logSuccess('Below Average: 8 reps (female 65-69) → Below Average (0.3) ✓');
 
-    // Test 4: Different age/gender
-    const score4 = calculateSTSScore(14, 62, 'male');
-    assertApprox(score4, 1.0, 0.01, 'Male 62 with 14 reps should be at benchmark');
-    logSuccess('Different age/gender lookup works ✓');
+    // Test 4: Different age/gender (Male 60-64, 17+ reps = Above Average)
+    const result4 = calculateSTSScore(17, 62, 'male');
+    assert(result4.performance === 'Above Average', 'Should be Above Average');
+    assert(result4.benchmarkRange === '12-16', 'Benchmark range should be 12-16');
+    logSuccess('Different age/gender: 17 reps (male 62) → Above Average ✓');
+
+    // Test 5: Edge case 90+ age group
+    const result5 = calculateSTSScore(10, 92, 'female');
+    assert(result5.performance === 'Above Average', '10 reps for 90+ female should be Above Average');
+    assert(result5.benchmarkRange === '7-9', 'Benchmark range should be 7-9');
+    logSuccess('90+ age group: 10 reps (female 92) → Above Average ✓');
 }
 
 function testEnhancedCombinedScore() {
@@ -772,8 +782,9 @@ function testEdgeCases() {
     }
 
     logTest('Edge case: Very young age (should default)');
-    const youngScore = calculateSTSScore(15, 50, 'male');
-    assert(youngScore > 0, 'Should handle young age with default benchmark');
+    const youngResult = calculateSTSScore(15, 50, 'male');
+    assert(youngResult.normalizedScore > 0, 'Should handle young age with default benchmark');
+    assert(youngResult.performance, 'Should return performance category');
     logSuccess('Handles out-of-range age ✓');
 
     logTest('Edge case: Position with no exercises');

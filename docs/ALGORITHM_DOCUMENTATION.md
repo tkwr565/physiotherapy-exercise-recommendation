@@ -52,10 +52,12 @@ Output: 4 Exercises (top 2 from each of top 2 positions)
 #### **Position-Specific Questions:**
 | Position | Questions | Count |
 |----------|-----------|-------|
-| **DL Stand** (Double-leg standing) | F3, F4, F5, F6, F8, SP1 | 6 |
-| **Split Stand** | F1, F2, F3, F7, F13, F15, SP1, SP4 | 8 |
-| **SL Stand** (Single-leg standing) | F1, F2, F4, F9, F11, SP1, SP2, SP3, SP4 | 9 |
+| **DL Stand** (Double-leg standing) | F4, SP1 | 2 |
+| **Split Stand** | F2, F4, SP1, SP4 | 4 |
+| **SL Stand** (Single-leg standing) | F1, F2, SP4 | 3 |
 | **Quadruped** | F5, SP5, ST2, P3, P4 | 5 |
+
+**Note:** This mapping was updated to focus on the most position-relevant questions. Other questions (F3, F5, F6, F7, F8, F9, F11, F13, F15, SP2, SP3) are still collected in the questionnaire for general functional assessment but are not used for position multiplier calculations.
 
 #### **Formula:**
 ```javascript
@@ -77,37 +79,49 @@ lyingMultiplier = max(0.1, 1.0 - bestActive)  // Inverse of best active
 
 ### 2. STS Score Calculation
 
-**Purpose:** Normalize objective performance using age/gender benchmarks
+**Purpose:** Categorize objective performance using Hong Kong normative data
 **Function:** `calculateSTSScore(repetitionCount, age, gender)`
 
-#### **Normative Benchmarks (30-second STS):**
-| Age Range | Male | Female |
-|-----------|------|--------|
-| 60-64 | 14 | 12 |
-| 65-69 | 12 | 11 |
-| 70-74 | 12 | 10 |
-| 75-79 | 11 | 10 |
-| 80-84 | 10 | 9 |
-| 85-89 | 8 | 8 |
-| 90-94 | 7 | 4 |
+#### **Hong Kong Normative Benchmarks (30-second STS):**
+| Age Group | Gender | Below Average | Average (HK Norm) | Above Average |
+|-----------|--------|---------------|-------------------|---------------|
+| 60-64 | Female | ≤10 | 11-14 | ≥15 |
+| 65-69 | Female | ≤9 | 10-13 | ≥14 |
+| 70-74 | Female | ≤8 | 9-12 | ≥13 |
+| 75-79 | Female | ≤7 | 8-11 | ≥12 |
+| 80-84 | Female | ≤7 | 8-11 | ≥12 |
+| 85-89 | Female | ≤7 | 8-9 | ≥10 |
+| 90+ | Female | ≤6 | 7-9 | ≥10 |
+| 60-64 | Male | ≤11 | 12-16 | ≥17 |
+| 65-69 | Male | ≤10 | 11-15 | ≥16 |
+| 70-74 | Male | ≤9 | 10-13 | ≥14 |
+| 75-79 | Male | ≤9 | 10-13 | ≥14 |
+| 80-84 | Male | ≤9 | 10-13 | ≥14 |
+| 85-89 | Male | ≤6 | 7-10 | ≥11 |
+| 90+ | Male | ≤4 | 5-7 | ≥8 |
 
-#### **Formula:**
+#### **Performance Categories:**
 ```javascript
-benchmark = lookupBenchmark(age, gender)
-stsScore = min(1.0, repetitionCount / benchmark)
+if (repetitionCount <= benchmarkData.below) {
+    performance = 'Below Average'  // normalizedScore = 0.3
+} else if (repetitionCount >= benchmarkData.above) {
+    performance = 'Above Average'  // normalizedScore = 0.9
+} else {
+    performance = 'Average'  // normalizedScore = 0.65
+}
 ```
 
 #### **Examples:**
-- **At benchmark:** 11 reps / 11 benchmark = 1.0 (perfect)
-- **Above benchmark:** 15 reps / 11 benchmark = 1.36 → capped at 1.0
-- **Below benchmark:** 8 reps / 11 benchmark = 0.73 (proportional)
+- **Female 65-69, 14 reps:** Above Average (normalizedScore = 0.9)
+- **Female 65-69, 11 reps:** Average (normalizedScore = 0.65)
+- **Female 65-69, 8 reps:** Below Average (normalizedScore = 0.3)
 
 ---
 
 ### 3. Enhanced Combined Score
 
 **Purpose:** Combine subjective (pain/symptoms) and objective (STS) with safety features
-**Function:** `calculateEnhancedCombinedScore(painAvg, symptomsAvg, stsScore)`
+**Function:** `calculateEnhancedCombinedScore(painAvg, symptomsAvg, stsNormalizedScore)`
 
 #### **Formula:**
 ```javascript
@@ -116,12 +130,13 @@ painScore = (4 - painAvg) / 4        // 0-1 scale (higher = better)
 symptomScore = (4 - symptomsAvg) / 4  // 0-1 scale (higher = better)
 
 // Step 2: Base calculation (50% objective, 50% subjective)
-combinedScore = (stsScore × 0.5) + (painScore × 0.25) + (symptomScore × 0.25)
+// stsNormalizedScore from performance categories: Above=0.9, Average=0.65, Below=0.3
+combinedScore = (stsNormalizedScore × 0.5) + (painScore × 0.25) + (symptomScore × 0.25)
 
 // Step 3: Conflict Resolution
 subjectiveScore = (painScore × 0.5) + (symptomScore × 0.5)
-if (|stsScore - subjectiveScore| > 0.5) {
-    conservativeScore = min(stsScore, subjectiveScore)
+if (|stsNormalizedScore - subjectiveScore| > 0.5) {
+    conservativeScore = min(stsNormalizedScore, subjectiveScore)
     combinedScore = (conservativeScore × 0.6) + (combinedScore × 0.4)
 }
 
@@ -130,13 +145,13 @@ combinedScore = clamp(combinedScore, 0.1, 0.9)
 ```
 
 #### **Clinical Scenarios:**
-| Scenario | STS | Pain | Result | Action |
-|----------|-----|------|--------|--------|
-| Normal | 0.8 | 0.8 | 0.65 | No conflict |
-| High performance, high pain | 1.0 | 0.0 | 0.40 | **Conservative** (use min) |
-| Low performance, low pain | 0.3 | 1.0 | 0.45 | **Conservative** (use min) |
-| Best case | 1.0 | 1.0 | 0.88 | Ceiling at 0.9 |
-| Worst case | 0.0 | 0.0 | 0.10 | Floor at 0.1 |
+| Scenario | STS Performance | STS Norm | Pain | Result | Action |
+|----------|----------------|----------|------|--------|--------|
+| Normal | Average | 0.65 | 0.8 | 0.69 | No conflict |
+| Above avg performance, high pain | Above Average | 0.9 | 0.0 | 0.38 | **Conservative** (use min) |
+| Below avg performance, low pain | Below Average | 0.3 | 1.0 | 0.45 | **Conservative** (use min) |
+| Best case | Above Average | 0.9 | 1.0 | 0.88 | Ceiling at 0.9 |
+| Worst case | Below Average | 0.3 | 0.0 | 0.15 | Floor at 0.1 |
 
 ---
 
@@ -340,10 +355,12 @@ Selected: Backward Lunge, Split Leg Squat
         lying: 0.30
     },
     scores: {
-        painScore: 0.50,      // (4-2)/4 = 0.50
-        symptomScore: 0.50,   // (4-2)/4 = 0.50
-        stsScore: 1.0,        // 12/11 = 1.09 → capped at 1.0
-        combinedScore: 0.65   // Weighted average with conflict check
+        painScore: 0.50,           // (4-2)/4 = 0.50
+        symptomScore: 0.50,        // (4-2)/4 = 0.50
+        stsPerformance: 'Average', // 11 reps for female 65-69
+        stsBenchmarkRange: '10-13',
+        stsNormalizedScore: 0.65,  // Average performance
+        combinedScore: 0.60        // Weighted average with conflict check
     },
     recommendations: [
         {
@@ -388,17 +405,17 @@ Selected: Backward Lunge, Split Leg Squat
 ```
 Input:
   - Age: 65, Female
-  - STS: 12 reps (at benchmark)
+  - STS: 11 reps (Average for HK norm 10-13)
   - Pain: Moderate (2.0/4)
   - Knee: Normal alignment
   - Core: Stable
   - Flexibility: Good
 
 Algorithm Flow:
-  → STS Score: 1.0 (12/11 capped)
-  → Combined Score: 0.65
+  → STS Performance: Average (normalized = 0.65)
+  → Combined Score: 0.60
   → No filters applied
-  → Difficulty preference: ~6.9 (moderate-hard)
+  → Difficulty preference: ~6.4 (moderate)
   → No biomechanical boosts
 
 Output:
@@ -413,24 +430,24 @@ Output:
 ```
 Input:
   - Age: 70, Male
-  - STS: 8 reps (below benchmark)
+  - STS: 8 reps (Below Average for HK norm 10-13)
   - Pain: High (3.5/4)
   - Knee: Valgus (knock-knees)
   - Core: Trunk sway present
   - Flexibility: Poor
 
 Algorithm Flow:
-  → STS Score: 0.67 (8/12)
-  → Combined Score: 0.30 (conservative due to high pain)
+  → STS Performance: Below Average (normalized = 0.3)
+  → Combined Score: 0.25 (conservative due to high pain)
   → CORE FILTER APPLIED → Only core_ipsi exercises
-  → Difficulty preference: ~3.7 (easier)
+  → Difficulty preference: ~3.2 (easier)
   → Alignment boost: Glute med/min exercises (1.0x - 2.0x)
   → Flexibility boost: Hamstring/glute max (1.0x - 1.4x)
 
 Output:
   → 4 exercises from top 2 positions
   → ALL are core stability exercises (core_ipsi=true)
-  → Easier difficulty (3-5 range)
+  → Easier difficulty (2-4 range)
   → Prioritize glute med/min exercises (e.g., Clamshell, Side Plank)
   → Boost hamstring exercises if available
 ```
@@ -441,7 +458,7 @@ Output:
 ```
 Input:
   - Age: 62, Male
-  - STS: 18 reps (well above benchmark → 1.0 score)
+  - STS: 18 reps (Above Average for HK norm 12-16)
   - Pain: Very high (4.0/4 → 0.0 score)
   - Symptoms: High (3.5/4 → 0.125 score)
   - Knee: Normal
@@ -449,12 +466,12 @@ Input:
   - Flexibility: Good
 
 Algorithm Flow:
-  → STS Score: 1.0 (18/14 capped)
+  → STS Performance: Above Average (normalized = 0.9)
   → Subjective: 0.0625 (pain + symptoms avg)
-  → CONFLICT DETECTED (|1.0 - 0.0625| = 0.94 > 0.5)
-  → Conservative approach: min(1.0, 0.0625) = 0.0625
-  → Combined Score: (0.0625 × 0.6) + (original × 0.4) ≈ 0.40
-  → Difficulty preference: ~4.6 (moderate-easy)
+  → CONFLICT DETECTED (|0.9 - 0.0625| = 0.84 > 0.5)
+  → Conservative approach: min(0.9, 0.0625) = 0.0625
+  → Combined Score: (0.0625 × 0.6) + (original × 0.4) ≈ 0.35
+  → Difficulty preference: ~4.2 (moderate-easy)
 
 Output:
   → 4 exercises from top 2 positions

@@ -92,44 +92,44 @@ Final Exercise Prescription (4 exercises with modifications)
 }
 ```
 
-**Position Capability Scores (RAW, not multipliers):**
+**Position-Relevant Questions (NO pre-calculated scores):**
+
+Provide raw question-response pairs for position-specific assessment. Let LLM interpret difficulty based on actual responses.
 
 ```javascript
 {
-  "position_scores": {
-    "sl_stand": {
-      "questions": ["f2", "f9", "f10", "f12"],
-      "scores": [2, 2, 1, 2],
-      "avg": 1.75,
-      "normalized_0_100": 75.0
-    },
-    "split_stand": {
-      "questions": ["f1", "f3", "f5", "f6", "f7", "f8", "f9", "f14", "f16"],
-      "scores": [2, 3, 2, 2, 2, 1, 2, 1, 2],
-      "avg": 1.89,
-      "normalized_0_100": 70.4
-    },
-    "dl_stand": {
-      "questions": ["f1", "f3", "f4", "f5", "f6", "f7", "f11"],
-      "scores": [2, 3, 1, 2, 2, 2, 1],
-      "avg": 1.86,
-      "normalized_0_100": 71.4
+  "position_relevant_questions": {
+    "weight_bearing_spectrum": {
+      "description": "DL_stand (F4, SP1) → split_stand (F2, F4, SP1, SP4) → SL_stand (F1, F2, SP4) - increasing difficulty",
+      "questions": [
+        {"code": "f1", "question": "Descending stairs", "score": 2, "positions": ["SL_stand"]},
+        {"code": "f2", "question": "Ascending stairs", "score": 2, "positions": ["split_stand", "SL_stand"]},
+        {"code": "f4", "question": "Standing", "score": 1, "positions": ["DL_stand", "split_stand"]},
+        {"code": "sp1", "question": "Squatting", "score": 4, "positions": ["DL_stand", "split_stand"]},
+        {"code": "sp4", "question": "Twisting/pivoting on your injured knee", "score": 2, "positions": ["split_stand", "SL_stand"]}
+      ],
+      "interpretation": "Lower scores (0-2) = better capability for standing exercises. Higher scores (3-4) = difficulty with weight-bearing tasks."
     },
     "quadruped": {
-      "questions": ["f5", "sp5", "st2", "p3", "p4"],
-      "scores": [2, 2, 3, 2, 2],
-      "avg": 2.2,
-      "normalized_0_100": 60.0
+      "description": "Kneeling tolerance",
+      "questions": {
+        "sp5": 2  // Kneeling
+      },
+      "interpretation": "Score 1-2 = can tolerate kneeling. Score 3-4 = avoid quadruped exercises."
     },
     "lying": {
-      "questions": ["f13", "f17"],
-      "scores": [2, 2],
-      "avg": 2.0,
-      "normalized_0_100": 66.7
+      "description": "Supine/side lying positions (easiest, assumed safe for all patients)",
+      "questions": {},
+      "interpretation": "No specific questions. Lying positions safe by default."
     }
   }
 }
 ```
+
+**Questionnaire Question Reference:**
+- **F (Function ADL)**: 1=No difficulty, 2=Mild, 3=Moderate, 4=Severe, 5=Extreme
+- **SP (Sports Function)**: 1=None, 2=Mild, 3=Moderate, 4=Severe, 5=Extreme
+- Lower score = better function
 
 **Additional relevant data:**
 
@@ -149,8 +149,8 @@ Final Exercise Prescription (4 exercises with modifications)
 {
   "sts_assessment": {
     "repetition_count": 9,
-    "age_gender_benchmark": 11,  // NEW: Add this based on patient age/gender
-    "benchmark_percent": 81.8,   // (reps / benchmark) * 100
+    "age_gender_benchmark_range": "10-13",  // Hong Kong norm average range
+    "benchmark_performance": "Below Average",   // Below Average / Average / Above Average
 
     // Objective biomechanical observations
     "trunk_sway": "absent",      // present/absent
@@ -249,12 +249,20 @@ Provide ALL 33 exercises with their attributes:
 Analyze patient data and select 4 exercises based on clinical reasoning.
 
 ### Focus Areas
-1. **Patient capability assessment** - Which positions can patient tolerate? (Use position scores + lying score)
+1. **Patient capability assessment** - Which positions can patient tolerate?
+   - Review `position_relevant_questions` - interpret raw scores directly
+   - Weight-bearing spectrum:
+     * **DL_stand**: F4 (Standing), SP1 (Squatting)
+     * **Split_stand**: F2 (Ascending stairs), F4 (Standing), SP1 (Squatting), SP4 (Twisting/pivoting)
+     * **SL_stand**: F1 (Descending stairs), F2 (Ascending stairs), SP4 (Twisting/pivoting)
+     * Scores 0-2 = tolerate standing, 3-4 = difficulty
+   - Quadruped (SP5): Score 0-2 = tolerate kneeling, 3-4 = avoid
+   - Lying: Safe by default (no questions)
 2. **Biomechanical targeting** - What issues need addressing?
    - **Valgus knee?** → Use `core_contra: true` + high `muscle_glute_med_min` exercises
    - **Varus knee?** → Use `core_contra: true` + high `muscle_adductors` exercises
    - **Cannot touch toes?** → Use `toe_touch: true` + high `muscle_hamstring` + `muscle_glute_max` exercises
-3. **Difficulty matching** - Match exercise difficulty to patient capability (use normalized scores)
+3. **Difficulty matching** - Match exercise difficulty to patient capability
 4. **Position diversity** - Select from 2 different positions (2 exercises per position)
 5. **Progression logic** - Exercises that challenge but don't overwhelm
 
@@ -267,7 +275,7 @@ Analyze patient data and select 4 exercises based on clinical reasoning.
 ```javascript
 {
   "patient_assessment": {
-    "capability_summary": "Patient shows moderate capability across positions. Lying (66.7%) and DL stand (71.4%) best; SL stand (75%) adequate; quadruped (60%) moderate difficulty.",
+    "capability_summary": "Patient shows good capability for lying positions (safe by default). Weight-bearing questions show: DL_stand (F4=1, SP1=4), split_stand (F2=2, F4=1, SP1=4, SP4=2), SL_stand (F1=2, F2=2, SP4=2). Can tolerate DL/split stance but high squatting difficulty (SP1=4). Quadruped tolerance adequate (SP5=2).",
     "biomechanical_targets": [
       {
         "issue": "valgus_knee",
@@ -306,36 +314,34 @@ Review LLM #1's recommendations and verify safety against constraints. **Focus o
 
 #### 1. **Weight-Bearing Safety**
 **Objective indicators to check:**
-- `sts_reps` vs `age_gender_benchmark`
-- `sts_benchmark_percent` (< 50% = high risk, 50-80% = moderate, >80% = good)
+- `benchmark_performance` (Above Average / Average / Below Average based on HK norms)
 - `trunk_sway` + `hip_sway` (both present = severe instability)
 
 **Overall picture reasoning:**
-- If `benchmark_percent > 80%` AND sway absent → Weight-bearing exercises safe
-- If `benchmark_percent 50-80%` → Moderate risk, use modifications (wall support, reduced depth)
-- If `benchmark_percent < 50%` OR both sways present → High risk, avoid/minimize weight-bearing
+- If `Above Average` AND sway absent → Weight-bearing exercises safe
+- If `Average` → Moderate risk, use modifications (wall support, reduced depth)
+- If `Below Average` OR both sways present → High risk, avoid/minimize weight-bearing
 
 **Assessment approach:**
-> "Patient has STS 82% of benchmark, trunk sway absent, hip sway present. Functional strength adequate but some postural instability. Weight-bearing exercises appropriate with modifications for balance support."
+> "Patient has STS performance 'Below Average' (9 reps vs HK norm 10-13), trunk sway absent, hip sway present. Functional strength below average but some postural instability. Weight-bearing exercises require modifications for balance support."
 
 ---
 
 #### 2. **Kneeling Safety**
 **Objective indicators to check:**
-- `position_quadruped` score (avg of f5, sp5, st2, p3, p4)
-- `position_quadruped normalized_0_100` score
+- `position_relevant_questions.quadruped.questions.sp5` (Kneeling difficulty)
 
 **Overall picture reasoning:**
-- If `quadruped_score avg < 2.0` AND `normalized > 66%` → Kneeling safe
-- If `quadruped_score avg 2.0-3.0` → Moderate risk, use padding, monitor pain
-- If `quadruped_score avg > 3.0` OR `normalized < 33%` → High risk, avoid kneeling
+- If `sp5` score 1-2 → Kneeling tolerable, safe with padding
+- If `sp5` score 3 → Moderate risk, use thick padding, monitor pain
+- If `sp5` score 4-5 → High risk, avoid kneeling exercises
 
 **Also consider:**
 - `pain.avg` (if overall pain severe, be conservative)
 - `symptoms.avg` (swelling may worsen with kneeling)
 
 **Assessment approach:**
-> "Patient quadruped position score avg 2.2 (normalized 60%). Moderate difficulty with deep knee flexion. Kneeling exercises acceptable with modifications: thick padding, shorter holds, monitor for increased pain."
+> "Patient SP5 (kneeling) score = 2 (mild difficulty). Kneeling exercises acceptable with modifications: thick padding, shorter holds, monitor for increased pain."
 
 ---
 
@@ -343,18 +349,19 @@ Review LLM #1's recommendations and verify safety against constraints. **Focus o
 **Objective indicators to check (CRITICAL):**
 - `trunk_sway` (present/absent)
 - `hip_sway` (present/absent)
+- `position_relevant_questions.weight_bearing_spectrum` - especially F2 (standing), SP4 (twisting/pivoting)
 - Combination patterns:
   - Both present = severe instability
   - Either present = moderate instability
   - Neither present = good stability
 
 **Overall picture reasoning:**
-- If both sways absent AND `sl_stand_score normalized > 70%` → Core stability good, unilateral exercises safe
+- If both sways absent AND weight-bearing questions low (F2≤2, SP4≤2) → Core stability good, unilateral exercises safe
 - If one sway present BUT overall sections good (function_ADL > 70%, pain < 2.0) → Moderate instability, allow soft start with guidance
-- If both sways present OR `sl_stand_score normalized < 50%` → Severe instability, exclude unilateral exercises
+- If both sways present OR weight-bearing questions high (F2≥3, SP4≥3) → Severe instability, exclude unilateral exercises
 
 **Flexible "soft start" logic:**
-> "Patient has hip sway present (lateral instability) but no trunk sway. SL stand score 75%, function ADL 74.7%, pain avg 1.89. Overall profile strong despite selective hip weakness. Approve core stability exercises with MODIFICATIONS: Start with bilateral lying (single leg bridge), progress to supported split stance (lunges with wall), defer full single-limb standing until hip control improves. Monitor for hip drop, provide corrective cues."
+> "Patient has hip sway present (lateral instability) but no trunk sway. Weight-bearing questions: F2=2 (standing), SP4=2 (twisting) indicate adequate single-limb control. Function ADL 74.7%, pain avg 1.89. Overall profile strong despite selective hip weakness. Approve core stability exercises with MODIFICATIONS: Start with bilateral lying (single leg bridge), progress to supported split stance (lunges with wall), defer full single-limb standing until hip control improves. Monitor for hip drop, provide corrective cues."
 
 ---
 
@@ -369,34 +376,35 @@ Review LLM #1's recommendations and verify safety against constraints. **Focus o
   "safety_review": {
     "weight_bearing_check": {
       "objective_data": {
-        "sts_benchmark_percent": 81.8,
+        "sts_benchmark_performance": "Below Average",
         "trunk_sway": "absent",
         "hip_sway": "present"
       },
       "risk_level": "moderate",  // low/moderate/high
-      "reasoning": "STS 82% adequate strength, but hip sway indicates lateral instability",
+      "reasoning": "STS Below Average (9 reps vs HK norm 10-13), but hip sway indicates lateral instability",
       "verdict": "APPROVED with modifications"
     },
     "kneeling_check": {
       "objective_data": {
-        "quadruped_avg": 2.2,
-        "quadruped_normalized": 60.0
+        "sp5_kneeling": 2,
+        "pain_avg": 1.89
       },
-      "risk_level": "moderate",
-      "reasoning": "Moderate difficulty with knee flexion tasks",
-      "verdict": "APPROVED with modifications"
+      "risk_level": "low",
+      "reasoning": "SP5=2 indicates mild difficulty with kneeling, pain avg low",
+      "verdict": "safe"
     },
     "core_stability_check": {
       "objective_data": {
         "trunk_sway": "absent",
         "hip_sway": "present",
-        "sl_stand_normalized": 75.0,
+        "f2_standing": 2,
+        "sp4_twisting": 2,
         "function_ADL_normalized": 74.7,
         "pain_avg": 1.89
       },
       "risk_level": "moderate",
-      "reasoning": "Selective hip instability, but overall strong profile supports soft start",
-      "verdict": "APPROVED with modifications and progression guidance"
+      "reasoning": "Hip sway present but F2=2, SP4=2 show adequate standing/pivoting control. Overall strong profile supports soft start",
+      "verdict": "moderate_risk"
     }
   },
 
@@ -459,7 +467,7 @@ Review LLM #1's recommendations and verify safety against constraints. **Focus o
 ## Example: Two-LLM Interaction
 
 ### Patient Summary:
-- Age 68F, STS 82% (9/11), hip sway present, trunk sway absent
+- Age 68F, STS Below Average (9 reps vs HK norm 10-13), hip sway present, trunk sway absent
 - Pain avg 1.89, Function ADL 74.7%, SL stand 75%
 - Valgus alignment, cannot touch toes
 

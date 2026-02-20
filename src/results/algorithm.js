@@ -48,34 +48,61 @@ export function calculatePositionMultipliers(questionnaireData) {
 }
 
 /**
- * Calculate STS (Sit-to-Stand) normalized score
- * Reference: OA Knee doc lines 695-724
+ * Calculate STS (Sit-to-Stand) performance category based on Hong Kong norms
+ * Reference: Updated Hong Kong normative data 2026
  *
  * @param {number} repetitionCount - Number of repetitions completed in 30 seconds
  * @param {number} age - Patient age
  * @param {string} gender - 'male' or 'female'
- * @returns {number} STS score (0-1 scale, 1.0 = at or above benchmark)
+ * @returns {Object} { performance: 'Below Average'|'Average'|'Above Average', benchmarkRange: '11-14', normalizedScore: 0-1 }
  */
 export function calculateSTSScore(repetitionCount, age, gender) {
-    // Age-specific normative benchmarks
+    // Hong Kong normative benchmarks with performance ranges
     const benchmarks = {
         male: {
-            '60-64': 14, '65-69': 12, '70-74': 12, '75-79': 11,
-            '80-84': 10, '85-89': 8, '90-94': 7
+            '60-64': { below: 11, avgMin: 12, avgMax: 16, above: 17 },
+            '65-69': { below: 10, avgMin: 11, avgMax: 15, above: 16 },
+            '70-74': { below: 9, avgMin: 10, avgMax: 13, above: 14 },
+            '75-79': { below: 9, avgMin: 10, avgMax: 13, above: 14 },
+            '80-84': { below: 9, avgMin: 10, avgMax: 13, above: 14 },
+            '85-89': { below: 6, avgMin: 7, avgMax: 10, above: 11 },
+            '90+': { below: 4, avgMin: 5, avgMax: 7, above: 8 }
         },
         female: {
-            '60-64': 12, '65-69': 11, '70-74': 10, '75-79': 10,
-            '80-84': 9, '85-89': 8, '90-94': 4
+            '60-64': { below: 10, avgMin: 11, avgMax: 14, above: 15 },
+            '65-69': { below: 9, avgMin: 10, avgMax: 13, above: 14 },
+            '70-74': { below: 8, avgMin: 9, avgMax: 12, above: 13 },
+            '75-79': { below: 7, avgMin: 8, avgMax: 11, above: 12 },
+            '80-84': { below: 7, avgMin: 8, avgMax: 11, above: 12 },
+            '85-89': { below: 7, avgMin: 8, avgMax: 9, above: 10 },
+            '90+': { below: 6, avgMin: 7, avgMax: 9, above: 10 }
         }
     };
 
     const ageGroup = getAgeGroup(age);
-    const benchmark = benchmarks[gender]?.[ageGroup] || 12; // Default to 12 if out of range
-    const performanceRatio = repetitionCount / benchmark;
+    const benchmarkData = benchmarks[gender]?.[ageGroup] || { below: 10, avgMin: 11, avgMax: 14, above: 15 };
 
-    // Average or above = perfect score (1.0)
-    // Below average = proportional score (e.g., 10/12 = 0.83)
-    return Math.min(1.0, performanceRatio);
+    // Determine performance category
+    let performance;
+    if (repetitionCount <= benchmarkData.below) {
+        performance = 'Below Average';
+    } else if (repetitionCount >= benchmarkData.above) {
+        performance = 'Above Average';
+    } else {
+        performance = 'Average';
+    }
+
+    // Calculate normalized score for algorithm use (0-1 scale)
+    // Map performance to numeric values: Below=0.3, Average=0.65, Above=0.9
+    const normalizedScore = performance === 'Above Average' ? 0.9
+                          : performance === 'Average' ? 0.65
+                          : 0.3;
+
+    return {
+        performance: performance,
+        benchmarkRange: `${benchmarkData.avgMin}-${benchmarkData.avgMax}`,
+        normalizedScore: normalizedScore
+    };
 }
 
 /**
@@ -333,14 +360,14 @@ export async function calculateRecommendations(questionnaireData, stsData, exerc
     const symptomsAvg = calculateAverage(symptomValues);
 
     // STEP 3: Calculate STS score
-    const stsScore = calculateSTSScore(
+    const stsResult = calculateSTSScore(
         stsData.repetition_count,
         stsData.age,
         stsData.gender
     );
 
     // STEP 4: Calculate enhanced combined score with conflict resolution
-    const enhancedCombinedScore = calculateEnhancedCombinedScore(painAvg, symptomsAvg, stsScore);
+    const enhancedCombinedScore = calculateEnhancedCombinedScore(painAvg, symptomsAvg, stsResult.normalizedScore);
 
     // STEP 5: Layer 1 - Select top 2 positions
     const selectedPositions = selectBestPositions(positionMultipliers);
@@ -371,7 +398,9 @@ export async function calculateRecommendations(questionnaireData, stsData, exerc
         scores: {
             painScore: (4 - painAvg) / 4,
             symptomScore: (4 - symptomsAvg) / 4,
-            stsScore,
+            stsPerformance: stsResult.performance,
+            stsBenchmarkRange: stsResult.benchmarkRange,
+            stsNormalizedScore: stsResult.normalizedScore,
             combinedScore: enhancedCombinedScore
         },
         recommendations,
@@ -402,6 +431,6 @@ function getAgeGroup(age) {
     if (age >= 75 && age < 80) return '75-79';
     if (age >= 80 && age < 85) return '80-84';
     if (age >= 85 && age < 90) return '85-89';
-    if (age >= 90 && age < 95) return '90-94';
-    return '60-64'; // Default fallback
+    if (age >= 90) return '90+';
+    return '60-64'; // Default fallback for ages < 60
 }

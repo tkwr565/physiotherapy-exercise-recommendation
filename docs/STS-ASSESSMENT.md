@@ -89,20 +89,30 @@ CREATE TABLE sts_assessments (
 
 ## Clinical Significance
 
-### STS Test Normative Data
-Used in algorithm to calculate `stsScore` (0-1 scale):
+### STS Test Normative Data (Hong Kong Norms)
+Used in algorithm to categorize performance and calculate normalized score:
 
-| Age Range | Men Benchmark | Women Benchmark |
-|-----------|---------------|-----------------|
-| 60-64     | < 14          | < 12            |
-| 65-69     | < 12          | < 11            |
-| 70-74     | < 12          | < 10            |
-| 75-79     | < 11          | < 10            |
-| 80-84     | < 10          | < 9             |
-| 85-89     | < 8           | < 8             |
-| 90-94     | < 7           | < 4             |
+| Age Group | Gender | Below Average | Average (HK Norm) | Above Average |
+|-----------|--------|---------------|-------------------|---------------|
+| 60-64 | Female | ≤10 | 11-14 | ≥15 |
+| 65-69 | Female | ≤9 | 10-13 | ≥14 |
+| 70-74 | Female | ≤8 | 9-12 | ≥13 |
+| 75-79 | Female | ≤7 | 8-11 | ≥12 |
+| 80-84 | Female | ≤7 | 8-11 | ≥12 |
+| 85-89 | Female | ≤7 | 8-9 | ≥10 |
+| 90+ | Female | ≤6 | 7-9 | ≥10 |
+| 60-64 | Male | ≤11 | 12-16 | ≥17 |
+| 65-69 | Male | ≤10 | 11-15 | ≥16 |
+| 70-74 | Male | ≤9 | 10-13 | ≥14 |
+| 75-79 | Male | ≤9 | 10-13 | ≥14 |
+| 80-84 | Male | ≤9 | 10-13 | ≥14 |
+| 85-89 | Male | ≤6 | 7-10 | ≥11 |
+| 90+ | Male | ≤4 | 5-7 | ≥8 |
 
-**Formula:** `stsScore = Math.min(1.0, repetitionCount / benchmark)`
+**Performance Categories:**
+- **Above Average:** normalizedScore = 0.9
+- **Average:** normalizedScore = 0.65
+- **Below Average:** normalizedScore = 0.3
 
 ### Knee Alignment Impact
 - **Valgus:** Boosts exercises targeting gluteus medius/minimus (hip abductors)
@@ -118,7 +128,7 @@ Used in algorithm to calculate `stsScore` (0-1 scale):
 
 The STS assessment data is used in multiple parts of the exercise recommendation algorithm:
 
-1. **Enhanced Combined Score** - `stsScore` weighted at 50% (vs 25% each for pain/symptoms)
+1. **Enhanced Combined Score** - `stsNormalizedScore` weighted at 50% (vs 25% each for pain/symptoms)
 2. **Alignment Modifier** - Targets muscle weaknesses based on knee alignment
 3. **Core Stability Filter** - Removes unstable exercises if instability detected
 4. **Conflict Resolution** - Conservative approach when objective/subjective measures disagree
