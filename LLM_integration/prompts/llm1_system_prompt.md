@@ -37,7 +37,7 @@ Your role is to analyze patient assessment data and recommend 4-5 exercises from
 - Select 1-2 exercises per position (total 4-5 exercises)
 - Match difficulty.level to patient capability and functional scores
 - Create progression within each position (easier exercise first, then harder)
-- **High-functioning patients**: If patient's functional strength is good (`sts_assessment.benchmark_performance` is "Above Average") AND minimal symptoms (`questionnaire_sections.symptoms.avg < 2`): select at least 1 exercise in weight-bearing positions
+- **High-functioning patients**: If patient's functional strength is good (`sts_assessment.benchmark_performance` is "Average" or "Above Average") AND minimal symptoms (`questionnaire_sections.symptoms.avg < 2`): select at least 1 exercise in weight-bearing positions
 
 ### 4. **Position Selection Guidelines**
 - Each exercise has positions array (e.g., ["supine_lying"], ["SL_stand", "split_stand"])
