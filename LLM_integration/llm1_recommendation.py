@@ -8,23 +8,16 @@ import json
 from typing import Dict, Any, List
 from pathlib import Path
 from pydantic import BaseModel, Field
+from biomechanical_analyzer import (
+    identify_biomechanical_targets,
+    format_targets_for_prompt,
+)
 
 
 # Pydantic schemas for structured output
-class BiomechanicalTarget(BaseModel):
-    issue: str = Field(
-        description="Biomechanical issue (e.g., valgus_knee, cannot_touch_toes)"
-    )
-    strategy: str = Field(description="Treatment strategy for this issue")
-    examples: List[str] = Field(description="Example exercise types")
-
-
 class PatientAssessment(BaseModel):
     capability_summary: str = Field(
         description="2-3 sentence summary of patient capability"
-    )
-    biomechanical_targets: List[BiomechanicalTarget] = Field(
-        description="List of biomechanical issues to address"
     )
     recommended_positions: List[str] = Field(
         description="2 recommended exercise positions"
@@ -84,25 +77,40 @@ def generate_exercise_recommendations(
 
     Returns:
         {
+            "biomechanical_targets": [...],  # Added from rule-based analysis
             "patient_assessment": {...},
             "selected_exercises": [...]
         }
     """
-    # Create structured LLM with Pydantic schema
+    # Step 1: Rule-based biomechanical target identification
+    biomechanical_targets = identify_biomechanical_targets(patient_profile)
+    targets_text = format_targets_for_prompt(biomechanical_targets)
+
+    # Step 2: Inject biomechanical targets into system prompt
+    # Replace the placeholder section with actual identified targets
+    customized_system_prompt = SYSTEM_PROMPT.replace(
+        "### 2. **Address Biomechanical Targets**\n"
+        "The biomechanical targets specific to this patient have been identified and are provided in the patient data section below. "
+        "Your task is to select exercises that address these identified targets using the strategies provided.",
+        f"### 2. **Address Biomechanical Targets**\n\n{targets_text}\n\n"
+        "Your task is to select exercises that address these identified targets using the strategies provided.",
+    )
+
+    # Step 3: Create structured LLM with Pydantic schema
     structured_llm = llm.with_structured_output(ExerciseRecommendation)
 
-    # Create user message with patient data
+    # Step 4: Create user message with patient data only
     user_message = f"""PATIENT DATA:
 
 {json.dumps(patient_profile, indent=2)}
 
-Analyze this patient and recommend 4 exercises based on their capability and biomechanical needs."""
+Analyze this patient and recommend 4 exercises based on their capability and the biomechanical targets identified above."""
 
-    # Invoke structured LLM
+    # Step 5: Invoke structured LLM with customized system prompt
     try:
         result = structured_llm.invoke(
             [
-                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "system", "content": customized_system_prompt},
                 {"role": "user", "content": user_message},
             ]
         )
@@ -121,6 +129,11 @@ Analyze this patient and recommend 4 exercises based on their capability and bio
             raise ValueError(
                 f"LLM returned {len(result_dict['selected_exercises'])} exercises, expected 4"
             )
+
+        # Add biomechanical targets to output
+        result_dict["biomechanical_targets"] = [
+            target.to_dict() for target in biomechanical_targets
+        ]
 
         return result_dict
 
@@ -142,17 +155,22 @@ def print_llm1_output(output: Dict[str, Any]) -> None:
     print("LLM #1: EXERCISE RECOMMENDATION AGENT")
     print("=" * 80)
 
+    # Biomechanical targets (from rule-based analysis)
+    if "biomechanical_targets" in output:
+        print("\n[BIOMECHANICAL TARGETS - RULE-BASED ANALYSIS]")
+        if output["biomechanical_targets"]:
+            for i, target in enumerate(output["biomechanical_targets"], 1):
+                print(f"\n  {i}. Issue: {target['issue']}")
+                print(f"     Strategy: {target['strategy']}")
+                print(f"     Examples: {', '.join(target['examples'])}")
+        else:
+            print("  No specific biomechanical targets identified.")
+
     # Patient assessment
     assessment = output["patient_assessment"]
-    print("\n[PATIENT ASSESSMENT]")
+    print("\n[PATIENT ASSESSMENT - LLM ANALYSIS]")
     print(f"\nCapability Summary:")
     print(f"  {assessment['capability_summary']}")
-
-    print(f"\nBiomechanical Targets:")
-    for i, target in enumerate(assessment["biomechanical_targets"], 1):
-        print(f"  {i}. Issue: {target['issue']}")
-        print(f"     Strategy: {target['strategy']}")
-        print(f"     Examples: {', '.join(target['examples'])}")
 
     print(f"\nRecommended Positions: {', '.join(assessment['recommended_positions'])}")
     print(f"Difficulty Range: {assessment['difficulty_range']}")
