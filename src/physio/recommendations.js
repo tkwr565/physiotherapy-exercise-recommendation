@@ -1,4 +1,5 @@
 import { supabase } from '../shared/supabase.js';
+import { fetchExercisesForAlgorithm } from '../shared/exercise-queries.js';
 
 const muscleMapping = {
   quad: 'muscle_quad',
@@ -14,14 +15,14 @@ const muscleMapping = {
  * Calculate exercise recommendations
  */
 export async function calculateRecommendations(patientData, laterality, muscleFocus, maxDifficulty) {
-  // Fetch all exercises from database
-  const { data: exercises, error } = await supabase
-    .from('exercises')
-    .select('*');
+  // Fetch all exercises from database (denormalized format)
+  // This function queries the normalized v3.0 schema and transforms it
+  // into the flat structure with muscle_* and position_* fields
+  const exercises = await fetchExercisesForAlgorithm();
 
-  if (error) {
-    console.error('Error fetching exercises:', error);
-    throw new Error('Failed to fetch exercises from database');
+  if (!exercises || exercises.length === 0) {
+    console.error('[Recommendations] No exercises available');
+    throw new Error('No exercises found in database');
   }
 
   // Determine which side(s) to use

@@ -2,6 +2,7 @@ import { supabase } from '../shared/supabase.js';
 import { getMuscleDescription, getPrimaryMuscles } from '../shared/muscle-translations.js';
 import { calculateRecommendations } from './algorithm.js';
 import { storage } from '../shared/storage.js';
+import { fetchExercisesForAlgorithm } from '../shared/exercise-queries.js';
 
 // Results page translations
 const translations = {
@@ -340,12 +341,16 @@ async function loadAssessmentData() {
 // Load exercises from database and run algorithm
 async function loadExercises() {
   try {
-    // Load all exercises from database
-    const { data: exercises, error } = await supabase
-      .from('exercises')
-      .select('*');
+    // Load all exercises from database (denormalized format for algorithm)
+    // This function queries the normalized v3.0 schema and transforms it
+    // into the flat structure expected by the algorithm
+    const exercises = await fetchExercisesForAlgorithm();
 
-    if (error) throw error;
+    if (!exercises || exercises.length === 0) {
+      console.warn('[Results] No exercises available');
+      exerciseRecommendations = [];
+      return;
+    }
 
     // Run the recommendation algorithm
     algorithmResults = await calculateRecommendations(
