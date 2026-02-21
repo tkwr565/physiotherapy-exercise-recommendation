@@ -77,7 +77,7 @@ const translations = {
     // Position labels
     position_supine: "Supine (Lying on back)",
     position_prone: "Prone (Lying face down)",
-    position_four_kneeling: "Four-point Kneeling",
+    position_four_kneeling: "Quadruped",
     position_DL_stand: "Double-leg Standing",
     position_split_stand: "Split Stance",
     position_SL_stand: "Single-leg Standing",
@@ -359,11 +359,19 @@ async function loadExercises() {
       exercises
     );
 
+    console.log('=== ALGORITHM DEBUG ===');
+    console.log('Position Multipliers:', algorithmResults.positionMultipliers);
+    console.log('Scores:', algorithmResults.scores);
+    console.log('Recommendations count:', algorithmResults.recommendations.length);
+    console.log('Recommendations detail:', algorithmResults.recommendations);
+    console.log('Biomechanical flags:', algorithmResults.biomechanicalFlags);
+
     // Transform algorithm results to exercise recommendations for display
     exerciseRecommendations = [];
     let rank = 1;
 
     for (const positionRec of algorithmResults.recommendations) {
+      console.log(`Position ${positionRec.position}: ${positionRec.exercises.length} exercises`);
       for (const exerciseItem of positionRec.exercises) {
         exerciseRecommendations.push({
           rank: rank++,
@@ -510,32 +518,37 @@ function getBiomechanicalNotices() {
 
 // Render position summary table
 function renderPositionSummary() {
-  if (!algorithmResults || !algorithmResults.recommendations) return '';
+  if (!algorithmResults || !algorithmResults.allPositionRankings) return '';
 
-  // Only show positions that have exercises
-  const validPositions = algorithmResults.recommendations.filter(rec => rec.exercises.length > 0);
+  // Show ALL positions ranked by capability (even if they have 0 exercises)
+  const allPositions = algorithmResults.allPositionRankings;
 
-  if (validPositions.length === 0) return '';
+  if (allPositions.length === 0) return '';
 
-  const rows = validPositions.map((rec, index) => `
-    <tr>
+  const rows = allPositions.map((rec, index) => {
+    const isSelected = algorithmResults.recommendations.some(r => r.position === rec.position);
+    const rowClass = isSelected ? 'position-selected' : (rec.exercises.length === 0 ? 'position-filtered' : '');
+
+    return `
+    <tr class="${rowClass}">
       <td class="position-rank">#${index + 1}</td>
       <td class="position-name"><strong>${getPositionLabel(rec.position)}</strong></td>
       <td class="position-capability">${(rec.positionMultiplier * 100).toFixed(0)}%</td>
-      <td class="position-exercises">${rec.exercises.length} ${currentLang === 'zh-TW' ? '個運動' : 'exercises'}</td>
+      <td class="position-exercises">${rec.exercises.length} ${currentLang === 'zh-TW' ? '個運動' : 'exercises'}${rec.exercises.length === 0 ? ' ⚠️' : ''}</td>
     </tr>
-  `).join('');
+  `}).join('');
 
   return `
     <div class="position-summary">
       <h3>${t('topPositionsTitle')}</h3>
+      <p class="position-summary-note">${currentLang === 'zh-TW' ? '所有姿勢按能力排序。顯示前2個有效運動的姿勢。' : 'All positions ranked by capability. Top 2 with valid exercises are shown below.'}</p>
       <table class="position-table">
         <thead>
           <tr>
             <th>${t('exerciseRank')}</th>
             <th>${currentLang === 'zh-TW' ? '姿勢' : 'Position'}</th>
             <th>${t('positionCapability')}</th>
-            <th>${currentLang === 'zh-TW' ? '推薦運動數' : 'Recommended Exercises'}</th>
+            <th>${currentLang === 'zh-TW' ? '可用運動數' : 'Available Exercises'}</th>
           </tr>
         </thead>
         <tbody>

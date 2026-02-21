@@ -234,11 +234,11 @@ export function calculateFlexibilityModifier(toeTouch, exercise) {
 }
 
 /**
- * Select top 2 positions based on functional capability
+ * Rank ALL positions based on functional capability
  * Reference: OA Knee doc lines 796-814 (Layer 1 ranking)
  *
  * @param {Object} positionMultipliers - Position multipliers from calculatePositionMultipliers()
- * @returns {Array} Top 2 positions sorted by multiplier (highest first)
+ * @returns {Array} ALL positions sorted by multiplier (highest first)
  */
 export function selectBestPositions(positionMultipliers) {
     // Create array of positions with their multipliers
@@ -250,8 +250,8 @@ export function selectBestPositions(positionMultipliers) {
     // Sort by multiplier (highest = best capability)
     const sortedPositions = positionArray.sort((a, b) => b.multiplier - a.multiplier);
 
-    // Return top 2 positions
-    return sortedPositions.slice(0, 2);
+    // Return ALL positions (renamed function but keeping for backward compatibility)
+    return sortedPositions;
 }
 
 /**
@@ -263,12 +263,16 @@ export function selectBestPositions(positionMultipliers) {
  * @returns {Array} Exercises matching the position
  */
 export function getExercisesForPosition(position, exercises) {
+    console.log(`[getExercisesForPosition] Position: ${position}, Total exercises: ${exercises.length}`);
+
     if (position === 'lying') {
         // Combine both supine and side lying exercises
-        return exercises.filter(ex =>
+        const result = exercises.filter(ex =>
             ex.position_supine_lying === true ||
             ex.position_side_lying === true
         );
+        console.log(`[getExercisesForPosition] Lying position: ${result.length} exercises`);
+        return result;
     }
 
     // Standard position mapping
@@ -280,9 +284,18 @@ export function getExercisesForPosition(position, exercises) {
     };
 
     const columnName = positionMap[position];
-    if (!columnName) return [];
+    console.log(`[getExercisesForPosition] Column name: ${columnName}`);
 
-    return exercises.filter(ex => ex[columnName] === true);
+    if (!columnName) {
+        console.log(`[getExercisesForPosition] No column name found for position ${position}`);
+        return [];
+    }
+
+    const result = exercises.filter(ex => ex[columnName] === true);
+    console.log(`[getExercisesForPosition] Filtered ${result.length} exercises for ${position}`);
+    console.log(`[getExercisesForPosition] Sample exercise:`, result[0]);
+
+    return result;
 }
 
 /**
@@ -309,9 +322,11 @@ export function rankExercisesWithinPosition(
 ) {
     // Get exercises for this position
     let positionExercises = getExercisesForPosition(position, exercises);
+    console.log(`[rankExercises] Position ${position}: ${positionExercises.length} exercises found (before core filter)`);
 
     // STEP 1: Apply core stability filter (if needed)
     positionExercises = applyCoreStabilityFilter(positionExercises, trunkSway, hipSway);
+    console.log(`[rankExercises] Position ${position}: ${positionExercises.length} exercises after core filter`);
 
     // STEP 2: Calculate comprehensive score for each exercise
     const scoredExercises = positionExercises.map(exercise => {
@@ -369,12 +384,13 @@ export async function calculateRecommendations(questionnaireData, stsData, exerc
     // STEP 4: Calculate enhanced combined score with conflict resolution
     const enhancedCombinedScore = calculateEnhancedCombinedScore(painAvg, symptomsAvg, stsResult.normalizedScore);
 
-    // STEP 5: Layer 1 - Select top 2 positions
-    const selectedPositions = selectBestPositions(positionMultipliers);
+    // STEP 5: Rank ALL positions by capability
+    const allPositions = selectBestPositions(positionMultipliers);
+    console.log('[Algorithm] All positions ranked:', allPositions);
 
-    // STEP 6: Layer 2 - Rank exercises within each selected position
-    const recommendations = [];
-    for (const { position, multiplier } of selectedPositions) {
+    // STEP 6: Rank exercises within EACH position (to see which have valid exercises)
+    const allRecommendations = [];
+    for (const { position, multiplier } of allPositions) {
         const rankedExercises = rankExercisesWithinPosition(
             position,
             exercises,
@@ -385,16 +401,24 @@ export async function calculateRecommendations(questionnaireData, stsData, exerc
             stsData.hip_sway
         );
 
-        recommendations.push({
+        allRecommendations.push({
             position,
             positionMultiplier: multiplier,
             exercises: rankedExercises
         });
     }
 
+    // STEP 7: Select top 2 positions that have VALID exercises (not empty)
+    const validRecommendations = allRecommendations.filter(rec => rec.exercises.length > 0);
+    const recommendations = validRecommendations.slice(0, 2);
+
+    console.log('[Algorithm] Valid positions with exercises:', validRecommendations.length);
+    console.log('[Algorithm] Selected top 2:', recommendations.map(r => `${r.position} (${r.exercises.length} exercises)`));
+
     // Prepare final output
     return {
         positionMultipliers,
+        allPositionRankings: allRecommendations, // All positions with their exercise counts
         scores: {
             painScore: (4 - painAvg) / 4,
             symptomScore: (4 - symptomsAvg) / 4,
@@ -403,7 +427,7 @@ export async function calculateRecommendations(questionnaireData, stsData, exerc
             stsNormalizedScore: stsResult.normalizedScore,
             combinedScore: enhancedCombinedScore
         },
-        recommendations,
+        recommendations, // Top 2 positions with valid exercises
         biomechanicalFlags: {
             coreStabilityRequired: stsData.trunk_sway === 'present' || stsData.hip_sway === 'present',
             flexibilityDeficit: questionnaireData.toe_touch_test === 'cannot',
