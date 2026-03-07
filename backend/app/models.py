@@ -17,8 +17,8 @@ class User(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     demographics = relationship("PatientDemographics", back_populates="user", uselist=False)
-    questionnaire = relationship("QuestionnaireResponse", back_populates="user", uselist=False)
-    sts_assessment = relationship("STSAssessment", back_populates="user", uselist=False)
+    questionnaire = relationship("QuestionnaireResponse", back_populates="user", uselist=False, foreign_keys="QuestionnaireResponse.username")
+    sts_assessment = relationship("STSAssessment", back_populates="user", uselist=False, foreign_keys="STSAssessment.username")
 
 
 class PatientDemographics(Base):
@@ -109,7 +109,7 @@ class QuestionnaireResponse(Base):
     completed_at = Column(DateTime(timezone=True), server_default=func.now())
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    user = relationship("User", back_populates="questionnaire")
+    user = relationship("User", back_populates="questionnaire", foreign_keys=[username])
 
 
 class STSAssessment(Base):
@@ -127,7 +127,7 @@ class STSAssessment(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-    user = relationship("User", back_populates="sts_assessment")
+    user = relationship("User", back_populates="sts_assessment", foreign_keys=[username])
 
     __table_args__ = (
         CheckConstraint("repetition_count >= 0", name="check_repetition_count"),

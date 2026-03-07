@@ -21,7 +21,7 @@ export default function DemographicsPage() {
 
   useEffect(() => {
     if (!currentUser) return;
-    getDemographics(currentUser.username)
+    getDemographics(currentUser)
       .then((res) => {
         if (res.data) {
           setForm({
@@ -64,7 +64,7 @@ export default function DemographicsPage() {
     setError('');
     try {
       await upsertDemographics({
-        username: currentUser.username,
+        username: currentUser,
         date_of_birth: form.date_of_birth,
         gender: form.gender,
         height_cm: parseFloat(form.height_cm),
@@ -107,8 +107,8 @@ export default function DemographicsPage() {
               required
             >
               <option value="">--</option>
-              <option value="male">{t('demographics.optionMale')}</option>
-              <option value="female">{t('demographics.optionFemale')}</option>
+              <option value="Male">{t('demographics.optionMale')}</option>
+              <option value="Female">{t('demographics.optionFemale')}</option>
             </select>
           </div>
 

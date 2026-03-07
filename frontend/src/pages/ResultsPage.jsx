@@ -18,7 +18,7 @@ export default function ResultsPage() {
   useEffect(() => {
     if (!currentUser) return;
     setLoading(true);
-    getAlgorithmRecommendations(currentUser.username)
+    getAlgorithmRecommendations(currentUser)
       .then((res) => {
         setResults(res.data);
       })
@@ -31,7 +31,7 @@ export default function ResultsPage() {
   const handleLLM = async () => {
     setLlmLoading(true);
     try {
-      const res = await getLLMRecommendations(currentUser.username);
+      const res = await getLLMRecommendations(currentUser);
       setLlmResults(res.data);
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to get AI recommendations');
@@ -82,28 +82,32 @@ export default function ResultsPage() {
                 <div className="score-card">
                   <span className="score-label">{t('results.painScore')}</span>
                   <span className="score-value">
-                    {results.pain_score !== undefined ? results.pain_score : '—'}
+                    {results.scores?.pain_score !== undefined
+                      ? Number(results.scores.pain_score).toFixed(2)
+                      : '—'}
                   </span>
                 </div>
                 <div className="score-card">
                   <span className="score-label">{t('results.symptomScore')}</span>
                   <span className="score-value">
-                    {results.symptom_score !== undefined ? results.symptom_score : '—'}
+                    {results.scores?.symptom_score !== undefined
+                      ? Number(results.scores.symptom_score).toFixed(2)
+                      : '—'}
                   </span>
                 </div>
                 <div className="score-card">
                   <span className="score-label">{t('results.stsScore')}</span>
                   <span className="score-value">
-                    {results.sts_score !== undefined
-                      ? Number(results.sts_score).toFixed(2)
+                    {results.scores?.sts_score !== undefined
+                      ? Number(results.scores.sts_score).toFixed(2)
                       : '—'}
                   </span>
                 </div>
                 <div className="score-card highlight">
                   <span className="score-label">{t('results.combinedScore')}</span>
                   <span className="score-value">
-                    {results.combined_score !== undefined
-                      ? Number(results.combined_score).toFixed(2)
+                    {results.scores?.combined_score !== undefined
+                      ? Number(results.scores.combined_score).toFixed(2)
                       : '—'}
                   </span>
                 </div>
@@ -115,32 +119,37 @@ export default function ResultsPage() {
               <h2>{t('results.exercisesTitle')}</h2>
               {results.recommendations && results.recommendations.length > 0 ? (
                 <div className="exercise-list">
-                  {results.recommendations.map((rec, idx) => (
-                    <div key={idx} className="exercise-card">
-                      <div className="exercise-header">
-                        <h3 className="exercise-name">
-                          {idx + 1}. {rec.exercise_name}
-                        </h3>
-                        <span className="exercise-score">
-                          {t('results.finalScore')}: {Number(rec.final_score).toFixed(3)}
-                        </span>
-                      </div>
-                      <div className="exercise-details">
-                        <span className="exercise-tag">
-                          {t('results.position')}: {rec.position}
-                        </span>
-                        <span className="exercise-tag">
-                          {t('results.difficulty')}: {Number(rec.difficulty_match).toFixed(3)}
-                        </span>
-                      </div>
-                      {rec.target_muscles && (
-                        <div className="exercise-muscles">
-                          <span className="muscles-label">{t('results.muscles')}:</span>{' '}
-                          {Array.isArray(rec.target_muscles)
-                            ? rec.target_muscles.join(', ')
-                            : rec.target_muscles}
+                  {results.recommendations.map((positionGroup, posIdx) => (
+                    <div key={posIdx} className="position-group">
+                      <h3 className="position-title">
+                        {positionGroup.position} (Multiplier: {Number(positionGroup.position_multiplier).toFixed(2)})
+                      </h3>
+                      {positionGroup.exercises && positionGroup.exercises.map((scoredEx, exIdx) => (
+                        <div key={exIdx} className="exercise-card">
+                          <div className="exercise-header">
+                            <h4 className="exercise-name">
+                              {scoredEx.exercise?.exercise_name || scoredEx.exercise?.exercise_name_ch || 'Unknown'}
+                            </h4>
+                            <span className="exercise-score">
+                              {t('results.finalScore')}: {Number(scoredEx.final_score).toFixed(3)}
+                            </span>
+                          </div>
+                          <div className="exercise-details">
+                            <span className="exercise-tag">
+                              {t('results.difficulty')}: Level {scoredEx.exercise?.difficulty_level || '—'}
+                            </span>
+                            <span className="exercise-tag">
+                              Difficulty Match: {Number(scoredEx.difficulty_score).toFixed(3)}
+                            </span>
+                            <span className="exercise-tag">
+                              Alignment Modifier: {Number(scoredEx.alignment_modifier).toFixed(2)}
+                            </span>
+                            <span className="exercise-tag">
+                              Flexibility Modifier: {Number(scoredEx.flexibility_modifier).toFixed(2)}
+                            </span>
+                          </div>
                         </div>
-                      )}
+                      ))}
                     </div>
                   ))}
                 </div>

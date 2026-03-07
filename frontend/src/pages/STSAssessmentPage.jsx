@@ -20,14 +20,14 @@ export default function STSAssessmentPage() {
 
   useEffect(() => {
     if (!currentUser) return;
-    getSTSAssessment(currentUser.username)
+    getSTSAssessment(currentUser)
       .then((res) => {
         if (res.data) {
           setForm({
-            repetitions: res.data.repetitions ?? '',
+            repetitions: res.data.repetition_count ?? '',
             knee_alignment: res.data.knee_alignment || 'normal',
-            trunk_sway: !!res.data.trunk_sway,
-            hip_sway: !!res.data.hip_sway,
+            trunk_sway: res.data.trunk_sway === 'present',
+            hip_sway: res.data.hip_sway === 'present',
           });
         }
       })
@@ -48,11 +48,11 @@ export default function STSAssessmentPage() {
     setError('');
     try {
       await upsertSTSAssessment({
-        username: currentUser.username,
-        repetitions: parseInt(form.repetitions, 10),
+        username: currentUser,
+        repetition_count: parseInt(form.repetitions, 10),
         knee_alignment: form.knee_alignment,
-        trunk_sway: form.trunk_sway,
-        hip_sway: form.hip_sway,
+        trunk_sway: form.trunk_sway ? 'present' : 'absent',
+        hip_sway: form.hip_sway ? 'present' : 'absent',
       });
       navigate('/results');
     } catch (err) {

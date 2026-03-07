@@ -3,12 +3,13 @@ import React, { createContext, useContext, useState, useCallback } from 'react';
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  // TODO: restore auth check — muted for development
   const [currentUser, setCurrentUser] = useState(
-    () => localStorage.getItem('currentUser') || 'dev_user'
+    () => localStorage.getItem('currentUser') || null
   );
 
-  const login = useCallback((username) => {
+  const login = useCallback((userData) => {
+    // Support both string username and user object
+    const username = typeof userData === 'string' ? userData : userData.username;
     localStorage.setItem('currentUser', username);
     setCurrentUser(username);
   }, []);

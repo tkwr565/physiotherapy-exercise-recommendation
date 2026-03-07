@@ -24,7 +24,7 @@ export default function QuestionnairePage() {
   // Load existing data
   useEffect(() => {
     if (!currentUser) return;
-    getQuestionnaire(currentUser.username)
+    getQuestionnaire(currentUser)
       .then((res) => {
         if (res.data) {
           const loaded = {};
@@ -59,11 +59,11 @@ export default function QuestionnairePage() {
     setError('');
 
     // Build the payload with lowercase keys
-    const payload = { username: currentUser.username };
+    const payload = { username: currentUser };
     for (const code of allQuestionCodes) {
       payload[code.toLowerCase()] = answers[code] !== undefined ? answers[code] : null;
     }
-    payload.toe_touch_test = toeTouch === 'able';
+    payload.toe_touch_test = toeTouch === 'able' ? 'can' : 'cannot';
 
     try {
       await upsertQuestionnaire(payload);
