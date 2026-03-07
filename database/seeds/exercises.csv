@@ -1,0 +1,33 @@
+exercise_name,exercise_name_ch,difficulty_level,position_sl_stand,position_split_stand,position_dl_stand,position_quadruped,position_supine_lying,position_side_lying,muscle_quad,muscle_hamstring,muscle_glute_max,muscle_hip_flexors,muscle_glute_med_min,muscle_adductors,core_ipsi,core_contra,toe_touch
+Straight leg raise,直膝抬腿,1,False,False,False,False,True,False,4,0,0,3,0,0,False,False,False
+Double leg glute bridging,雙腳臀橋,2,False,False,False,False,True,False,0,3,4,0,0,0,False,False,True
+Double leg hamstrings bridging,雙腳膕旁肌橋式,3,False,False,False,False,True,False,0,4,4,0,0,0,False,False,True
+Single leg glute bridging,單腳臀橋,4,False,False,False,False,True,False,0,3,5,0,4,0,True,True,True
+Single leg hamstrings bridging,單腳膕旁肌橋式,5,False,False,False,False,True,False,0,5,4,0,4,0,True,True,True
+Scissors,仰臥剪刀式,1,False,False,False,False,True,False,0,0,0,3,0,0,False,False,True
+3-months supine hip lowering,仰臥三個月姿勢髖部下放,2,False,False,False,False,True,False,0,0,0,5,0,0,False,False,True
+Deadbug,死蟲式,3,False,False,False,False,True,False,0,0,0,4,0,0,False,True,True
+Side lying Clamshell,側臥蚌殼式,1,False,False,False,False,False,True,0,0,2,0,4,0,False,False,False
+Side plank on knees hip dip,跪姿側棒式髖部升降,2,False,False,False,False,False,True,0,0,4,0,4,0,True,False,False
+Side plank on knees hold,跪姿側棒式停留,3,False,False,False,False,False,True,0,0,4,0,5,0,True,False,False
+Side plank Clamshell,側棒式蚌殼式,4,False,False,False,False,False,True,0,0,4,0,5,0,True,False,False
+Side plank hip abduction,側棒式髖外展,5,False,False,False,False,False,True,0,0,4,0,5,0,True,False,False
+Copenhagen adductor lv1,哥本哈根內收肌運動 Lv1,1,False,False,False,False,False,True,0,0,0,0,0,3,False,False,False
+Copenhagen adductor lv2,哥本哈根內收肌運動 Lv2,7,False,False,False,False,False,True,0,0,0,0,0,5,True,False,False
+Quadruped single limb movement,四足跪姿單肢活動,2,False,False,False,True,False,False,0,0,0,0,3,0,False,True,False
+Quadruped donkey kick,四足跪姿驢踢,3,False,False,False,True,False,False,0,3,3,0,4,0,False,True,False
+Quadruped leg extension,四足跪姿後踢,4,False,False,False,True,False,False,0,2,3,0,4,0,False,True,False
+Quadruped hip abduction,四足跪姿髖外展,4,False,False,False,True,False,False,0,1,3,0,5,0,False,True,False
+Birddog,鳥狗式,5,False,False,False,True,False,False,0,2,3,0,5,0,False,True,False
+DL squat,雙腳深蹲,3,False,False,False,False,False,False,5,3,3,0,3,1,False,False,False
+DL squat with band,彈力帶雙腳深蹲,4,False,False,False,False,False,False,5,3,4,0,4,1,False,False,False
+DL squat with adductor squeeze,雙腳深蹲(夾內收肌),4,False,False,False,False,False,False,5,3,3,0,3,3,False,False,False
+Hip hinge,髖關節鉸鏈,5,False,False,False,False,False,False,3,5,4,0,0,2,False,False,False
+Split leg squat,分腿蹲,4,False,True,False,False,False,False,5,4,4,0,4,3,True,True,False
+Backward Lunge,後弓箭步,5,False,True,False,False,False,False,5,5,5,0,4,3,True,True,False
+Step up,登階運動,5,False,True,False,False,False,False,5,4,4,0,5,3,True,True,False
+Side squat,側蹲,6,False,True,False,False,False,False,5,4,4,0,5,3,True,True,False
+Hip hikes,骨盆側提,5,False,False,False,False,False,False,0,0,0,0,5,0,True,False,False
+RFESS,保加利亞分腿蹲,7,False,False,False,False,False,False,5,4,5,0,4,3,True,True,False
+SL half squat,單腳半蹲,9,False,False,False,False,False,False,5,3,5,0,5,3,True,True,False
+SL RDL,單腳羅馬尼亞硬舉,9,False,False,False,False,False,False,2,5,5,0,5,4,True,True,False

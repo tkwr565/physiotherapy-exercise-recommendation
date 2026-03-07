@@ -10,12 +10,11 @@ import STSAssessmentPage from './pages/STSAssessmentPage';
 import ResultsPage from './pages/ResultsPage';
 import './styles/shared.css';
 
-// TODO: restore ProtectedRoute when auth is re-enabled
-// function ProtectedRoute({ children }) {
-//   const { currentUser } = useAuth();
-//   if (!currentUser) return <Navigate to="/" replace />;
-//   return children;
-// }
+function ProtectedRoute({ children }) {
+  const { currentUser } = useAuth();
+  if (!currentUser) return <Navigate to="/" replace />;
+  return children;
+}
 
 export default function App() {
   return (
@@ -24,12 +23,11 @@ export default function App() {
         <LanguageProvider>
           <Header />
           <Routes>
-            {/* Auth muted — redirect home straight to demographics */}
-            <Route path="/" element={<Navigate to="/demographics" replace />} />
-            <Route path="/demographics" element={<DemographicsPage />} />
-            <Route path="/questionnaire" element={<QuestionnairePage />} />
-            <Route path="/sts-assessment" element={<STSAssessmentPage />} />
-            <Route path="/results" element={<ResultsPage />} />
+            <Route path="/" element={<HomePage />} />
+            <Route path="/demographics" element={<ProtectedRoute><DemographicsPage /></ProtectedRoute>} />
+            <Route path="/questionnaire" element={<ProtectedRoute><QuestionnairePage /></ProtectedRoute>} />
+            <Route path="/sts-assessment" element={<ProtectedRoute><STSAssessmentPage /></ProtectedRoute>} />
+            <Route path="/results" element={<ProtectedRoute><ResultsPage /></ProtectedRoute>} />
           </Routes>
         </LanguageProvider>
       </AuthProvider>

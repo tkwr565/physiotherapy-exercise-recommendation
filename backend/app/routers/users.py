@@ -13,7 +13,7 @@ router = APIRouter()
 def verify_passcode(body: PasscodeVerify):
     if body.passcode != settings.physio_passcode:
         raise HTTPException(status_code=401, detail="Incorrect passcode")
-    return {"status": "ok"}
+    return {"valid": True, "status": "ok"}
 
 
 @router.post("/", response_model=UserResponse)

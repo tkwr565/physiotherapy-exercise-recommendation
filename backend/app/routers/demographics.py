@@ -12,7 +12,11 @@ router = APIRouter()
 def upsert_demographics(body: DemographicsCreate, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == body.username).first()
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        # Auto-create user if it doesn't exist
+        user = User(username=body.username)
+        db.add(user)
+        db.commit()
+        db.refresh(user)
 
     existing = db.query(PatientDemographics).filter(
         PatientDemographics.username == body.username
