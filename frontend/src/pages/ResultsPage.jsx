@@ -238,7 +238,7 @@ export default function ResultsPage() {
               onClick={handleDeepSeek}
               disabled={deepseekLoading}
             >
-              {deepseekLoading ? 'Loading DeepSeek AI...' : 'Get DeepSeek AI Recommendations'}
+              {deepseekLoading ? 'Loading DeepSeek AI (may take 1-2 minutes)...' : 'Get DeepSeek AI Recommendations'}
             </button>
           )}
           {deepseekResults && (
@@ -255,66 +255,79 @@ export default function ResultsPage() {
                 </div>
               )}
 
-              {/* Patient Assessment */}
-              {deepseekResults.patient_assessment && (
-                <div className="patient-assessment" style={{marginBottom: '1.5rem', padding: '1rem', background: '#fff9e6', borderRadius: '8px'}}>
-                  <h4>📊 Patient Capability Assessment</h4>
-                  <p>{deepseekResults.patient_assessment.capability_summary}</p>
-                  <div style={{marginTop: '0.5rem'}}>
-                    <strong>Recommended Positions:</strong> {deepseekResults.patient_assessment.recommended_positions?.join(', ')}
-                  </div>
-                  <div>
-                    <strong>Difficulty Range:</strong> {deepseekResults.patient_assessment.difficulty_range}
-                  </div>
-                </div>
-              )}
-
-              {/* Safety Review Summary */}
-              {deepseekResults.safety_review && (
-                <div className="safety-review" style={{marginBottom: '1.5rem', padding: '1rem', background: '#f0fff0', borderRadius: '8px'}}>
-                  <h4>🛡️ Safety Verification Summary</h4>
-                  <div style={{fontSize: '0.9em'}}>
-                    <div><strong>Weight-Bearing:</strong> {deepseekResults.safety_review.weight_bearing_check?.verdict}</div>
-                    <div><strong>Kneeling:</strong> {deepseekResults.safety_review.kneeling_check?.verdict}</div>
-                    <div><strong>Core Stability:</strong> {deepseekResults.safety_review.core_stability_check?.verdict}</div>
-                  </div>
-                </div>
-              )}
+              {/* Warning Banner */}
+              <div style={{marginBottom: '1.5rem', padding: '1rem', background: '#fff3cd', borderRadius: '8px', border: '1px solid #ffc107'}}>
+                <strong>⚠️ Important:</strong> This prescription should be reviewed by a supervising physiotherapist before implementation.
+              </div>
 
               {/* Final Prescription */}
               {deepseekResults.final_prescription && deepseekResults.final_prescription.length > 0 && (
                 <div className="final-prescription">
-                  <h4 style={{marginBottom: '1rem'}}>✅ Final Exercise Prescription (4 Exercises)</h4>
+                  <h4 style={{marginBottom: '1rem', color: '#2e7d32'}}>✅ Final Exercise Prescription (4 Exercises)</h4>
                   <div className="exercise-list">
                     {deepseekResults.final_prescription.map((ex, idx) => (
-                      <div key={idx} className="exercise-card llm-card" style={{borderLeft: '4px solid #4CAF50'}}>
-                        <div className="exercise-header">
-                          <h3 className="exercise-name">
+                      <div key={idx} className="exercise-card llm-card" style={{
+                        borderLeft: '4px solid #4CAF50',
+                        marginBottom: '1rem',
+                        padding: '1rem',
+                        background: '#fff',
+                        borderRadius: '8px',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                      }}>
+                        <div className="exercise-header" style={{marginBottom: '0.75rem'}}>
+                          <h3 className="exercise-name" style={{margin: 0, color: '#1976d2', fontSize: '1.1em'}}>
                             {idx + 1}. {ex.exercise_name} ({ex.exercise_name_ch})
                           </h3>
                         </div>
-                        <div className="exercise-details">
-                          <span className="exercise-tag">
-                            Positions: {ex.positions?.join(', ')}
+                        <div className="exercise-details" style={{display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.75rem'}}>
+                          <span className="exercise-tag" style={{
+                            padding: '0.25rem 0.75rem',
+                            background: '#e3f2fd',
+                            borderRadius: '12px',
+                            fontSize: '0.85em',
+                            color: '#1565c0'
+                          }}>
+                            📍 {ex.positions?.join(', ')}
                           </span>
-                          <span className="exercise-tag">
-                            Difficulty: Level {ex.difficulty}/10
+                          <span className="exercise-tag" style={{
+                            padding: '0.25rem 0.75rem',
+                            background: ex.difficulty <= 3 ? '#c8e6c9' : ex.difficulty <= 6 ? '#fff9c4' : '#ffccbc',
+                            borderRadius: '12px',
+                            fontSize: '0.85em',
+                            color: '#333',
+                            fontWeight: 'bold'
+                          }}>
+                            🎯 Level {ex.difficulty}/10
                           </span>
                         </div>
                         {ex.modifications && ex.modifications.length > 0 && (
-                          <div style={{marginTop: '0.5rem', padding: '0.5rem', background: '#fff3cd', borderRadius: '4px'}}>
-                            <strong>⚠️ Modifications:</strong>
-                            <ul style={{marginTop: '0.25rem', paddingLeft: '1.5rem'}}>
+                          <div style={{
+                            marginTop: '0.75rem',
+                            padding: '0.75rem',
+                            background: '#fff3cd',
+                            borderRadius: '6px',
+                            borderLeft: '3px solid #ffc107'
+                          }}>
+                            <strong style={{color: '#856404'}}>⚠️ Safety Modifications:</strong>
+                            <ul style={{marginTop: '0.5rem', marginBottom: 0, paddingLeft: '1.5rem'}}>
                               {ex.modifications.map((mod, modIdx) => (
-                                <li key={modIdx}>{mod}</li>
+                                <li key={modIdx} style={{marginBottom: '0.25rem'}}>{mod}</li>
                               ))}
                             </ul>
                           </div>
                         )}
                         {ex.clinical_rationale && (
-                          <p className="exercise-rationale" style={{marginTop: '0.5rem'}}>
-                            <strong>Clinical Rationale:</strong> {ex.clinical_rationale}
-                          </p>
+                          <div style={{
+                            marginTop: '0.75rem',
+                            padding: '0.75rem',
+                            background: '#f5f5f5',
+                            borderRadius: '6px',
+                            fontSize: '0.9em',
+                            lineHeight: '1.5'
+                          }}>
+                            <strong style={{color: '#555'}}>💡 Clinical Rationale:</strong>
+                            <p style={{margin: '0.5rem 0 0 0', color: '#666'}}>{ex.clinical_rationale}</p>
+                          </div>
                         )}
                       </div>
                     ))}
