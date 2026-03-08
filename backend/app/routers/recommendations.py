@@ -161,9 +161,15 @@ def get_llm_recommendation_endpoint(body: LLMRecommendationRequest, db: Session 
 @router.post("/deepseek", response_model=DeepSeekRecommendationResponse)
 def get_deepseek_recommendation_endpoint(body: DeepSeekRecommendationRequest, db: Session = Depends(get_db)):
     """Get DeepSeek LLM-enhanced recommendations using two-LLM architecture."""
+    print("\n" + "="*80)
+    print(f"📥 RECEIVED DeepSeek request for username: {body.username}, language: {body.language}")
+    print("="*80)
+
     user = db.query(User).filter(User.username == body.username).first()
     if not user:
+        print(f"❌ User not found: {body.username}")
         raise HTTPException(status_code=404, detail="User not found")
+    print(f"✓ User found: {body.username}")
 
     demo = db.query(PatientDemographics).filter(PatientDemographics.username == body.username).first()
     if not demo:
@@ -202,6 +208,7 @@ def get_deepseek_recommendation_endpoint(body: DeepSeekRecommendationRequest, db
     }
 
     # Call DeepSeek two-LLM service
+    print("✓ All data fetched from database, calling DeepSeek service...")
     try:
         deepseek_results = get_deepseek_recommendations(
             questionnaire_dict=questionnaire_dict,
@@ -210,8 +217,11 @@ def get_deepseek_recommendation_endpoint(body: DeepSeekRecommendationRequest, db
             demographics=demographics_dict,
             language=body.language,
         )
+        print("✓ DeepSeek service completed successfully")
         return deepseek_results
     except ValueError as e:
+        print(f"❌ ValueError in DeepSeek service: {str(e)}")
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        print(f"❌ Exception in DeepSeek service: {str(e)}")
         raise HTTPException(status_code=500, detail=f"DeepSeek LLM error: {str(e)}")
