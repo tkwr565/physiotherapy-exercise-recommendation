@@ -64,6 +64,12 @@ This will:
 | Backend API | [http://localhost:8000](http://localhost:8000) |
 | API Docs (Swagger) | [http://localhost:8000/docs](http://localhost:8000/docs) |
 
+**First-time usage:**
+1. Navigate to [http://localhost:3000](http://localhost:3000)
+2. Enter the passcode (default: `physio2024` from `.env`)
+3. Enter a username to create/login
+4. Complete the assessment flow: Demographics → Questionnaire → STS Assessment → Results
+
 ### 4. Stop
 
 ```bash
@@ -168,7 +174,12 @@ The Vite dev server runs on `http://localhost:5173` and proxies `/api/*` request
 └── database/
     ├── schema/                 # SQL migrations (reference)
     └── seeds/
-        └── exercises.csv       # Exercise seed data
+        ├── exercises.csv       # Exercise seed data (denormalized format)
+        ├── merge_supabase_csvs.py  # Script to merge normalized CSVs
+        └── supabase/           # Normalized exercise data from Supabase
+            ├── exercises.csv
+            ├── exercise_positions.csv
+            └── exercise_muscles.csv
 ```
 
 ## API Endpoints
@@ -207,6 +218,31 @@ When an OpenAI API key is provided, the system enhances recommendations using GP
 - Provides exercise-specific rationale
 - Can adjust ordering based on holistic patient profile
 - Falls back gracefully to algorithm-only results if API key is missing
+
+## Exercise Data Setup
+
+The backend seeds exercise data from `database/seeds/exercises.csv` on startup. This file is in a denormalized format required by the algorithm.
+
+### Using Supabase CSV Data
+
+If you have normalized exercise data from Supabase (in `database/seeds/supabase/`), use the merge script to convert it:
+
+```bash
+cd database/seeds
+python merge_supabase_csvs.py
+```
+
+This will generate `exercises.csv` from:
+- `supabase/exercises.csv` (base exercise data)
+- `supabase/exercise_positions.csv` (position relationships)
+- `supabase/exercise_muscles.csv` (muscle recruitment values)
+
+Then restart Docker to load the new data:
+
+```bash
+docker compose down
+docker compose up --build
+```
 
 ## Bilingual Support
 
