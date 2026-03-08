@@ -197,8 +197,8 @@ def get_deepseek_recommendation_endpoint(body: DeepSeekRecommendationRequest, db
     }
 
     demographics_dict = {
-        "height_cm": demo.height_cm,
-        "weight_kg": demo.weight_kg,
+        "height_cm": float(demo.height_cm),
+        "weight_kg": float(demo.weight_kg),
     }
 
     # Call DeepSeek two-LLM service
