@@ -83,10 +83,13 @@ def generate_exercise_recommendations(
         }
     """
     # Step 1: Rule-based biomechanical target identification
+    print("  → Identifying biomechanical targets...")
     biomechanical_targets = identify_biomechanical_targets(patient_profile)
     targets_text = format_targets_for_prompt(biomechanical_targets)
+    print(f"  → Identified {len(biomechanical_targets)} biomechanical targets")
 
     # Step 2: Inject biomechanical targets into system prompt
+    print("  → Customizing system prompt with targets...")
     customized_system_prompt = SYSTEM_PROMPT.replace(
         "### 2. **Address Biomechanical Targets**\n"
         "The biomechanical targets specific to this patient have been identified and are provided in the patient data section below. "
@@ -96,9 +99,11 @@ def generate_exercise_recommendations(
     )
 
     # Step 3: Create structured LLM with Pydantic schema
+    print("  → Creating structured LLM...")
     structured_llm = llm.with_structured_output(ExerciseRecommendation)
 
     # Step 4: Create user message with patient data only
+    print("  → Preparing user message...")
     user_message = f"""PATIENT DATA:
 
 {json.dumps(patient_profile, indent=2)}
@@ -106,6 +111,7 @@ def generate_exercise_recommendations(
 Analyze this patient and recommend 4 exercises based on their capability and the biomechanical targets identified above."""
 
     # Step 5: Invoke structured LLM with customized system prompt
+    print("  → Calling DeepSeek API for LLM #1...")
     try:
         result = structured_llm.invoke(
             [
@@ -113,6 +119,7 @@ Analyze this patient and recommend 4 exercises based on their capability and the
                 {"role": "user", "content": user_message},
             ]
         )
+        print("  → DeepSeek API response received")
 
         # Debug: Check if result is None
         if result is None:
