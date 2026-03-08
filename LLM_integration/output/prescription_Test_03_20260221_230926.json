@@ -1,0 +1,284 @@
+{
+  "patient_username": "Test_03",
+  "patient_profile_summary": {
+    "age": 67,
+    "gender": "male",
+    "sts_benchmark_performance": "Average",
+    "knee_alignment": "valgus",
+    "flexibility": "cannot"
+  },
+  "llm1_recommendations": {
+    "patient_assessment": {
+      "capability_summary": "This 67-year-old male demonstrates good functional capacity with minimal symptoms (pain avg 0.44, symptoms avg 1.2) and average functional strength (STS benchmark 'Average'). He can tolerate weight-bearing positions (all scores ≤1) but has trunk sway and valgus knee alignment indicating dynamic instability. Quadruped position is safe (kneeling score 1).",
+      "recommended_positions": [
+        "supine_lying",
+        "side_lying"
+      ],
+      "difficulty_range": "2-5"
+    },
+    "selected_exercises": [
+      {
+        "exercise_id": 2,
+        "exercise_name": "Double leg glute bridging",
+        "exercise_name_ch": "雙腳臀橋",
+        "positions": [
+          "supine_lying"
+        ],
+        "difficulty": 2,
+        "muscle_targets": {
+          "primary": [
+            "glute_max:4"
+          ],
+          "secondary": [
+            "hamstring:3"
+          ],
+          "stabiliser": []
+        },
+        "reasoning": "Addresses posterior chain flexibility (cannot touch toes) with glute_max and hamstring activation. Safe supine position with beginner difficulty appropriate for patient's functional level. Provides foundation for hip extension pattern."
+      },
+      {
+        "exercise_id": 4,
+        "exercise_name": "Single leg glute bridging",
+        "exercise_name_ch": "單腳臀橋",
+        "positions": [
+          "supine_lying"
+        ],
+        "difficulty": 4,
+        "muscle_targets": {
+          "primary": [
+            "glute_max:5"
+          ],
+          "secondary": [
+            "hamstring:3"
+          ],
+          "stabiliser": [
+            "glute_med_min:4"
+          ]
+        },
+        "reasoning": "Progresses from double-leg bridging to address dynamic knee instability (valgus) through glute_med_min stabilization (value 4). Core_contra=true helps with anti-rotation control. Addresses posterior chain flexibility with glute_max:5 and hamstring activation."
+      },
+      {
+        "exercise_id": 9,
+        "exercise_name": "Side lying Clamshell",
+        "exercise_name_ch": "側臥蚌殼式",
+        "positions": [
+          "side_lying"
+        ],
+        "difficulty": 1,
+        "muscle_targets": {
+          "primary": [
+            "glute_med_min:4"
+          ],
+          "secondary": [
+            "glute_max:2"
+          ],
+          "stabiliser": []
+        },
+        "reasoning": "Directly targets glute_med_min (primary mover value 4) to address valgus knee alignment and dynamic instability. Core_contra=true provides anti-rotation training. Side-lying position is safe and isolates hip abductors effectively."
+      },
+      {
+        "exercise_id": 11,
+        "exercise_name": "Side plank on knees hold",
+        "exercise_name_ch": "跪姿側棒式停留",
+        "positions": [
+          "side_lying"
+        ],
+        "difficulty": 3,
+        "muscle_targets": {
+          "primary": [
+            "glute_med_min:5"
+          ],
+          "secondary": [
+            "glute_max:4"
+          ],
+          "stabiliser": []
+        },
+        "reasoning": "Progresses from clamshell with higher glute_med_min activation (value 5) and core_ipsi=true to address trunk sway and core instability. Side-lying position remains safe while challenging hip stability and core control in functional alignment."
+      }
+    ],
+    "biomechanical_targets": [
+      {
+        "issue": "Dynamic knee instability (Valgus alignment - knock-knees)",
+        "strategy": "Dynamic knee instability usually associates with weak core anti-rotation control, to prioritize exercises with `core_contra=true`. Prioritize exercises with high glute_med_min in muscles.primary_movers or muscles.secondary_movers (value 4-5). Match muscle role to functional capacity: for lower function patient, try to find those muscle target in muscles.primary_movers or muscles.secondary_movers; for higher function patient, prioritize finding those muscle target in muscles.stabiliser",
+        "examples": [
+          "Side lying clamshell",
+          "hip abduction",
+          "side plank variations"
+        ]
+      },
+      {
+        "issue": "Limited posterior chain flexibility (cannot touch toes)",
+        "strategy": "Prioritize exercises with high hamstring + glute_max in muscles (value 4-5 each)",
+        "examples": [
+          "Glute bridges",
+          "hamstring bridges",
+          "hip hinge exercises"
+        ]
+      },
+      {
+        "issue": "Core instability (trunk sway present)",
+        "strategy": "Prioritize exercises where `core_ipsi=true`",
+        "examples": [
+          "Exercises requiring ipsilateral core stability"
+        ]
+      }
+    ]
+  },
+  "llm2_safety_review": {
+    "safety_review": {
+      "weight_bearing_check": {
+        "objective_data": {
+          "sts_benchmark_performance": "Average",
+          "trunk_sway": "present",
+          "hip_sway": "absent"
+        },
+        "risk_level": "moderate",
+        "reasoning": "STS benchmark performance is 'Average' (14 reps within 11-14 range). According to decision logic: 'Average' = MODERATE RISK → APPROVE WITH MODIFICATIONS. Patient has trunk sway present but hip sway absent. Overall weight-bearing capability is acceptable with modifications.",
+        "verdict": "moderate_risk"
+      },
+      "kneeling_check": {
+        "objective_data": {
+          "sp5_kneeling": 1,
+          "pain_avg": 0.44
+        },
+        "risk_level": "low",
+        "reasoning": "Kneeling score is 1 (Mild difficulty) and pain average is 0.44 (very low). According to decision logic: Kneeling score ≤ 2 = LOW RISK → APPROVE. Patient has minimal difficulty with kneeling and low pain levels.",
+        "verdict": "safe"
+      },
+      "core_stability_check": {
+        "objective_data": {
+          "trunk_sway": "present",
+          "hip_sway": "absent",
+          "f2_standing": 0,
+          "sp4_twisting": 1,
+          "function_ADL_normalized": 125.5
+        },
+        "risk_level": "moderate",
+        "reasoning": "Using flexible 'soft start' approach: Trunk sway present but hip sway absent. F2 standing score = 0 (no difficulty), SP4 twisting = 1 (mild difficulty). Function ADL normalized score = 125.5 (>70). According to decision logic: ONE sway present BUT function_ADL.normalized_0_100 > 70 = MODERATE RISK → APPROVE WITH MODIFICATIONS. Patient has good overall function despite trunk sway.",
+        "verdict": "moderate_risk"
+      }
+    },
+    "exercise_decisions": [
+      {
+        "exercise_id": 2,
+        "exercise_name": "Double leg glute bridging",
+        "safety_constraints_triggered": [],
+        "decision": "APPROVED",
+        "modifications": [],
+        "reasoning": "Supine lying position only, no weight-bearing, kneeling, or core stability constraints triggered. Safe for all patients regardless of functional level. Addresses posterior chain flexibility (cannot touch toes) with glute_max and hamstring activation.",
+        "replacement_suggestion": ""
+      },
+      {
+        "exercise_id": 4,
+        "exercise_name": "Single leg glute bridging",
+        "safety_constraints_triggered": [
+          "core_stability"
+        ],
+        "decision": "APPROVED WITH MODIFICATIONS",
+        "modifications": [
+          "Start with double-leg bridging as warm-up",
+          "Monitor for trunk rotation or hip hiking",
+          "Progress slowly from 5 to 10 reps per side",
+          "Ensure neutral spine position throughout"
+        ],
+        "reasoning": "Core stability constraint triggered (core_contra=true). Patient has trunk sway present but good overall function (ADL normalized 125.5). Using soft start approach: MODERATE RISK → APPROVE WITH MODIFICATIONS. Exercise addresses valgus knee alignment through glute_med_min stabilization.",
+        "replacement_suggestion": ""
+      },
+      {
+        "exercise_id": 9,
+        "exercise_name": "Side lying Clamshell",
+        "safety_constraints_triggered": [
+          "core_stability"
+        ],
+        "decision": "APPROVED WITH MODIFICATIONS",
+        "modifications": [
+          "Ensure proper side-lying alignment with hips stacked",
+          "Start with small range of motion",
+          "Focus on controlled movement without trunk rotation",
+          "Progress to adding resistance band when form is stable"
+        ],
+        "reasoning": "Core stability constraint triggered (core_contra=true). Patient has trunk sway present but good overall function. Using soft start approach: MODERATE RISK → APPROVE WITH MODIFICATIONS. Directly targets glute_med_min to address valgus knee alignment. Side-lying position is inherently stable.",
+        "replacement_suggestion": ""
+      },
+      {
+        "exercise_id": 11,
+        "exercise_name": "Side plank on knees hold",
+        "safety_constraints_triggered": [
+          "core_stability"
+        ],
+        "decision": "APPROVED WITH MODIFICATIONS",
+        "modifications": [
+          "Start with short holds (10-15 seconds)",
+          "Use thick padding under knees for comfort",
+          "Focus on maintaining straight line from head to knees",
+          "Progress duration gradually as tolerance improves",
+          "Monitor for trunk sagging or hip dropping"
+        ],
+        "reasoning": "Core stability constraint triggered (core_ipsi=true). Patient has trunk sway present but good overall function. Using soft start approach: MODERATE RISK → APPROVE WITH MODIFICATIONS. This exercise progresses from clamshell with higher glute_med_min activation and addresses core control. Kneeling position is safe (kneeling score=1).",
+        "replacement_suggestion": ""
+      }
+    ],
+    "final_prescription": [
+      {
+        "exercise_id": 2,
+        "exercise_name": "Double leg glute bridging",
+        "exercise_name_ch": "雙腳臀橋",
+        "positions": [
+          "supine_lying"
+        ],
+        "difficulty": 2,
+        "modifications": [],
+        "clinical_rationale": "Foundational posterior chain exercise addressing hamstring tightness (cannot touch toes). Activates glute_max (4) and hamstrings (3) in safe supine position. Provides hip extension pattern foundation for more advanced exercises. Beginner difficulty appropriate for patient's functional level."
+      },
+      {
+        "exercise_id": 4,
+        "exercise_name": "Single leg glute bridging",
+        "exercise_name_ch": "單腳臀橋",
+        "positions": [
+          "supine_lying"
+        ],
+        "difficulty": 4,
+        "modifications": [
+          "Start with double-leg bridging as warm-up",
+          "Monitor for trunk rotation or hip hiking",
+          "Progress slowly from 5 to 10 reps per side",
+          "Ensure neutral spine position throughout"
+        ],
+        "clinical_rationale": "Progresses from double-leg bridging to address dynamic knee instability (valgus) through glute_med_min stabilization (value 4). Core_contra=true provides anti-rotation control to address trunk sway. Higher glute_max activation (5) strengthens posterior chain. Modifications ensure safe progression given trunk sway present."
+      },
+      {
+        "exercise_id": 9,
+        "exercise_name": "Side lying Clamshell",
+        "exercise_name_ch": "側臥蚌殼式",
+        "positions": [
+          "side_lying"
+        ],
+        "difficulty": 1,
+        "modifications": [
+          "Ensure proper side-lying alignment with hips stacked",
+          "Start with small range of motion",
+          "Focus on controlled movement without trunk rotation",
+          "Progress to adding resistance band when form is stable"
+        ],
+        "clinical_rationale": "Directly targets glute_med_min (primary mover value 4) to address valgus knee alignment and dynamic instability. Core_contra=true provides anti-rotation training. Side-lying position isolates hip abductors effectively while minimizing risk. Beginner difficulty allows focus on proper form."
+      },
+      {
+        "exercise_id": 11,
+        "exercise_name": "Side plank on knees hold",
+        "exercise_name_ch": "跪姿側棒式停留",
+        "positions": [
+          "side_lying"
+        ],
+        "difficulty": 3,
+        "modifications": [
+          "Start with short holds (10-15 seconds)",
+          "Use thick padding under knees for comfort",
+          "Focus on maintaining straight line from head to knees",
+          "Progress duration gradually as tolerance improves",
+          "Monitor for trunk sagging or hip dropping"
+        ],
+        "clinical_rationale": "Progresses from clamshell with higher glute_med_min activation (value 5) and core_ipsi=true to address trunk sway and core instability. Challenges hip stability and core control in functional alignment. Kneeling position is safe (kneeling score=1). Modifications ensure gradual adaptation to core demands."
+      }
+    ]
+  }
+}

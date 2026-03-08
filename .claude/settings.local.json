@@ -14,7 +14,9 @@
       "Bash(test:*)",
       "Bash(cat:*)",
       "Bash(pip install:*)",
-      "Bash(node -e:*)"
+      "Bash(node -e:*)",
+      "Bash(git checkout:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []

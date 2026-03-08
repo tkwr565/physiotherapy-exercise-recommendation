@@ -269,3 +269,19 @@ class LLMRecommendationResponse(BaseModel):
     recommendations: List[Dict[str, Any]]
     reasoning: str
     clinical_justification: str
+
+
+# ── DeepSeek LLM Recommendation Schemas ──────────────────────────────────────
+
+class DeepSeekRecommendationRequest(BaseModel):
+    username: str
+    language: str = "en"
+
+
+class DeepSeekRecommendationResponse(BaseModel):
+    biomechanical_targets: List[Dict[str, Any]]
+    patient_assessment: Dict[str, Any]
+    llm1_recommendations: List[Dict[str, Any]]
+    safety_review: Dict[str, Any]
+    exercise_decisions: List[Dict[str, Any]]
+    final_prescription: List[Dict[str, Any]]

@@ -1,0 +1,285 @@
+{
+  "patient_username": "Test_01",
+  "patient_profile_summary": {
+    "age": 61,
+    "gender": "female",
+    "sts_benchmark_performance": "Average",
+    "knee_alignment": "varus",
+    "flexibility": "can"
+  },
+  "llm1_recommendations": {
+    "patient_assessment": {
+      "capability_summary": "This 61-year-old female with knee OA demonstrates good functional capability with minimal symptoms (pain avg 0.78, symptoms avg 1.0). She has 'Average' functional strength on STS test (13 reps), can tolerate weight-bearing positions (all relevant scores ≤2), and has good posterior chain flexibility (can touch toes). Key biomechanical issues include dynamic knee instability with varus alignment and core instability with hip sway present.",
+      "recommended_positions": [
+        "supine_lying",
+        "DL_stand"
+      ],
+      "difficulty_range": "3-5"
+    },
+    "selected_exercises": [
+      {
+        "exercise_id": 4,
+        "exercise_name": "Single leg glute bridging",
+        "exercise_name_ch": "單腳臀橋",
+        "positions": [
+          "supine_lying"
+        ],
+        "difficulty": 4,
+        "muscle_targets": {
+          "primary": [
+            "glute_max:5"
+          ],
+          "secondary": [
+            "hamstring:3"
+          ],
+          "stabiliser": [
+            "glute_med_min:4"
+          ]
+        },
+        "reasoning": "Addresses core instability (core_ipsi=true) and glute strengthening. Provides progression from double-leg bridging with added challenge for hip sway control. Good starting point for supine progression."
+      },
+      {
+        "exercise_id": 6,
+        "exercise_name": "Scissors",
+        "exercise_name_ch": "仰臥剪刀式",
+        "positions": [
+          "supine_lying"
+        ],
+        "difficulty": 1,
+        "muscle_targets": {
+          "primary": [
+            "hip_flexors:3"
+          ],
+          "secondary": [],
+          "stabiliser": []
+        },
+        "reasoning": "Targets dynamic knee instability with core_contra=true activation. Provides contralateral core control training to address varus alignment. Lower difficulty allows focus on proper form before progressing."
+      },
+      {
+        "exercise_id": 23,
+        "exercise_name": "DL squat with adductor squeeze",
+        "exercise_name_ch": "雙腳深蹲(夾內收肌)",
+        "positions": [
+          "DL_stand"
+        ],
+        "difficulty": 4,
+        "muscle_targets": {
+          "primary": [
+            "quad:5",
+            "glute_max:3",
+            "adductors:3"
+          ],
+          "secondary": [
+            "hamstring:3"
+          ],
+          "stabiliser": [
+            "glute_med_min:3"
+          ]
+        },
+        "reasoning": "Directly addresses varus alignment by targeting adductors (value 3) in primary movers. Weight-bearing position appropriate given good standing tolerance (F4=0, SP1=1). Combines quad strengthening with adductor activation for knee stability."
+      },
+      {
+        "exercise_id": 21,
+        "exercise_name": "DL squat",
+        "exercise_name_ch": "雙腳深蹲",
+        "positions": [
+          "DL_stand"
+        ],
+        "difficulty": 3,
+        "muscle_targets": {
+          "primary": [
+            "quad:5",
+            "glute_max:3"
+          ],
+          "secondary": [
+            "hamstring:3",
+            "adductors:1"
+          ],
+          "stabiliser": [
+            "glute_med_min:3"
+          ]
+        },
+        "reasoning": "Foundational weight-bearing exercise for functional strength. Appropriate difficulty level (3) matches patient's 'Average' STS performance. Provides progression to more challenging squats and addresses general lower limb strength needs."
+      }
+    ],
+    "biomechanical_targets": [
+      {
+        "issue": "Dynamic knee instability (Varus alignment - bow-legged)",
+        "strategy": "Dynamic knee instability usually associates with weak core anti-rotation control, to prioritize exercises with `core_contra=true`. Prioritize exercises with high adductors in muscles (value 4-5). Match muscle role to functional capacity: for lower function patient, try to find those muscle target in muscles.primary_movers or muscles.secondary_movers; for higher function patient, prioritize finding those muscle target in muscles.stabiliser",
+        "examples": [
+          "Copenhagen adductor exercises",
+          "adductor squeezes"
+        ]
+      },
+      {
+        "issue": "Core instability (hip sway present)",
+        "strategy": "Prioritize exercises where `core_ipsi=true`",
+        "examples": [
+          "Exercises requiring ipsilateral core stability"
+        ]
+      },
+      {
+        "issue": "Good posterior chain flexibility (can touch toes)",
+        "strategy": "Patient has adequate hamstring/glute flexibility. May consider Quadruped Position over Supine if kneeling tolerance allows.",
+        "examples": [
+          "Quadruped exercises may be appropriate"
+        ]
+      }
+    ]
+  },
+  "llm2_safety_review": {
+    "safety_review": {
+      "weight_bearing_check": {
+        "objective_data": {
+          "sts_benchmark_performance": "Average",
+          "trunk_sway": "absent",
+          "hip_sway": "present"
+        },
+        "risk_level": "moderate",
+        "reasoning": "STS benchmark performance is 'Average' (13 reps within 11-14 range). Trunk sway absent but hip sway present. According to decision logic: 'Average' = MODERATE RISK → APPROVE WITH MODIFICATIONS (wall support, reduced range, etc.). Patient has good standing tolerance (F4=0, SP1=1) but hip sway indicates need for stability support.",
+        "verdict": "moderate_risk"
+      },
+      "kneeling_check": {
+        "objective_data": {
+          "sp5_kneeling": 0,
+          "pain_avg": 0.78
+        },
+        "risk_level": "low",
+        "reasoning": "Kneeling score is 0 (no difficulty with kneeling) and average pain score is 0.78 (<3.0). According to decision logic: Kneeling score ≤ 2 = LOW RISK → APPROVE. Patient has excellent kneeling tolerance with no reported difficulty.",
+        "verdict": "safe"
+      },
+      "core_stability_check": {
+        "objective_data": {
+          "trunk_sway": "absent",
+          "hip_sway": "present",
+          "f2_standing": 2,
+          "sp4_twisting": 0,
+          "function_ADL_normalized": 107.8
+        },
+        "risk_level": "moderate",
+        "reasoning": "Using flexible 'soft start' approach: Trunk sway absent but hip sway present AND knee_alignment is varus. However, function_ADL.normalized_0_100 = 107.8 (>70). According to decision logic: ONE sway present OR valgus/varus present BUT function_ADL.normalized_0_100 > 70 = MODERATE RISK → APPROVE WITH MODIFICATIONS. F2=2 (moderate difficulty ascending stairs) and SP4=0 (no twisting difficulty). Overall good functional capacity supports modified core stability exercises.",
+        "verdict": "moderate_risk"
+      }
+    },
+    "exercise_decisions": [
+      {
+        "exercise_id": 4,
+        "exercise_name": "Single leg glute bridging",
+        "safety_constraints_triggered": [
+          "core_stability"
+        ],
+        "decision": "APPROVED WITH MODIFICATIONS",
+        "modifications": [
+          "Start with double-leg bridging first to establish proper form",
+          "Focus on maintaining neutral pelvis and avoiding hip hike on working side",
+          "Use tactile cueing for glute activation if needed"
+        ],
+        "reasoning": "Exercise has core_ipsi=true which addresses core stability needs. Patient has hip sway present and varus alignment, but excellent function_ADL score (107.8) supports modified approach. Starting with double-leg progression ensures safety while addressing glute strengthening needs.",
+        "replacement_suggestion": ""
+      },
+      {
+        "exercise_id": 6,
+        "exercise_name": "Scissors",
+        "safety_constraints_triggered": [
+          "core_stability"
+        ],
+        "decision": "APPROVED",
+        "modifications": [],
+        "reasoning": "Exercise has core_contra=true which addresses contralateral core control for varus alignment. Being supine lying position eliminates weight-bearing risks. Low difficulty (level 1) makes it safe for initial core training. No kneeling or weight-bearing constraints triggered.",
+        "replacement_suggestion": ""
+      },
+      {
+        "exercise_id": 23,
+        "exercise_name": "DL squat with adductor squeeze",
+        "safety_constraints_triggered": [
+          "weight_bearing"
+        ],
+        "decision": "APPROVED WITH MODIFICATIONS",
+        "modifications": [
+          "Use wall support or chair back for balance",
+          "Limit depth to 45-60 degrees knee flexion initially",
+          "Focus on controlled descent and ascent with proper knee alignment",
+          "Monitor for hip sway during movement"
+        ],
+        "reasoning": "Weight-bearing exercise with STS 'Average' performance and hip sway present = MODERATE RISK. Patient has good standing tolerance (F4=0) but needs stability support. Adductor squeeze component directly addresses varus alignment. Modifications ensure safety while providing therapeutic benefit.",
+        "replacement_suggestion": ""
+      },
+      {
+        "exercise_id": 21,
+        "exercise_name": "DL squat",
+        "safety_constraints_triggered": [
+          "weight_bearing"
+        ],
+        "decision": "APPROVED WITH MODIFICATIONS",
+        "modifications": [
+          "Use wall support or chair back for balance",
+          "Limit depth to 45-60 degrees knee flexion initially",
+          "Focus on controlled movement with neutral knee alignment",
+          "Monitor hip sway and provide external support as needed"
+        ],
+        "reasoning": "Weight-bearing exercise with STS 'Average' performance and hip sway present = MODERATE RISK. Foundational exercise appropriate for patient's functional level but requires modifications for safety. Good standing tolerance (F4=0) supports modified weight-bearing training.",
+        "replacement_suggestion": ""
+      }
+    ],
+    "final_prescription": [
+      {
+        "exercise_id": 4,
+        "exercise_name": "Single leg glute bridging",
+        "exercise_name_ch": "單腳臀橋",
+        "positions": [
+          "supine_lying"
+        ],
+        "difficulty": 4,
+        "modifications": [
+          "Start with double-leg bridging first to establish proper form",
+          "Focus on maintaining neutral pelvis and avoiding hip hike on working side",
+          "Use tactile cueing for glute activation if needed"
+        ],
+        "clinical_rationale": "Addresses glute strengthening with core_ipsi=true activation to improve hip stability. Targets hip sway present in STS assessment. Provides progression from double-leg bridging with added challenge for hip control. Supine position eliminates weight-bearing risks while addressing core stability needs."
+      },
+      {
+        "exercise_id": 6,
+        "exercise_name": "Scissors",
+        "exercise_name_ch": "仰臥剪刀式",
+        "positions": [
+          "supine_lying"
+        ],
+        "difficulty": 1,
+        "modifications": [],
+        "clinical_rationale": "Targets contralateral core control (core_contra=true) to address varus knee alignment. Low difficulty allows focus on proper movement patterns. Supine position is safest for initial core training. Provides foundation for progression to more challenging core exercises."
+      },
+      {
+        "exercise_id": 23,
+        "exercise_name": "DL squat with adductor squeeze",
+        "exercise_name_ch": "雙腳深蹲(夾內收肌)",
+        "positions": [
+          "DL_stand"
+        ],
+        "difficulty": 4,
+        "modifications": [
+          "Use wall support or chair back for balance",
+          "Limit depth to 45-60 degrees knee flexion initially",
+          "Focus on controlled descent and ascent with proper knee alignment",
+          "Monitor for hip sway during movement"
+        ],
+        "clinical_rationale": "Directly addresses varus alignment by targeting adductors (value 3) as primary movers. Weight-bearing exercise appropriate given good standing tolerance (F4=0). Combines quad strengthening with adductor activation for knee stability. Modifications ensure safety given hip sway present in STS assessment."
+      },
+      {
+        "exercise_id": 21,
+        "exercise_name": "DL squat",
+        "exercise_name_ch": "雙腳深蹲",
+        "positions": [
+          "DL_stand"
+        ],
+        "difficulty": 3,
+        "modifications": [
+          "Use wall support or chair back for balance",
+          "Limit depth to 45-60 degrees knee flexion initially",
+          "Focus on controlled movement with neutral knee alignment",
+          "Monitor hip sway and provide external support as needed"
+        ],
+        "clinical_rationale": "Foundational weight-bearing exercise for functional strength. Appropriate difficulty level (3) matches patient's 'Average' STS performance. Provides progression framework for lower limb strengthening. Addresses general quad and glute strength needs with modifications for hip sway control."
+      }
+    ]
+  }
+}

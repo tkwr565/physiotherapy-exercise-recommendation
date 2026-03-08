@@ -7,9 +7,14 @@ from app.models import (
     User, PatientDemographics, QuestionnaireResponse as QRModel,
     STSAssessment, Exercise,
 )
-from app.schemas import RecommendationRequest, RecommendationResponse, LLMRecommendationRequest, LLMRecommendationResponse
+from app.schemas import (
+    RecommendationRequest, RecommendationResponse,
+    LLMRecommendationRequest, LLMRecommendationResponse,
+    DeepSeekRecommendationRequest, DeepSeekRecommendationResponse
+)
 from app.services.algorithm import calculate_recommendations
 from app.services.llm_recommendation import get_llm_recommendations
+from app.services.llm_deepseek import get_deepseek_recommendations
 
 router = APIRouter()
 
@@ -151,3 +156,62 @@ def get_llm_recommendation_endpoint(body: LLMRecommendationRequest, db: Session 
     )
 
     return llm_results
+
+
+@router.post("/deepseek", response_model=DeepSeekRecommendationResponse)
+def get_deepseek_recommendation_endpoint(body: DeepSeekRecommendationRequest, db: Session = Depends(get_db)):
+    """Get DeepSeek LLM-enhanced recommendations using two-LLM architecture."""
+    user = db.query(User).filter(User.username == body.username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    demo = db.query(PatientDemographics).filter(PatientDemographics.username == body.username).first()
+    if not demo:
+        raise HTTPException(status_code=400, detail="Demographics not found.")
+
+    qr = db.query(QRModel).filter(QRModel.username == body.username).first()
+    if not qr:
+        raise HTTPException(status_code=400, detail="Questionnaire not found.")
+
+    sts = db.query(STSAssessment).filter(STSAssessment.username == body.username).first()
+    if not sts:
+        raise HTTPException(status_code=400, detail="STS assessment not found.")
+
+    exercises = db.query(Exercise).all()
+    if not exercises:
+        raise HTTPException(status_code=500, detail="No exercises found in database.")
+
+    questionnaire_dict = _questionnaire_to_dict(qr)
+    exercise_dicts = [_exercise_to_dict(ex) for ex in exercises]
+
+    age = _calculate_age(demo.date_of_birth)
+    gender = demo.gender.lower() if demo.gender else "male"
+
+    sts_dict = {
+        "repetition_count": sts.repetition_count,
+        "age": age,
+        "gender": gender,
+        "knee_alignment": sts.knee_alignment,
+        "trunk_sway": sts.trunk_sway,
+        "hip_sway": sts.hip_sway,
+    }
+
+    demographics_dict = {
+        "height_cm": demo.height_cm,
+        "weight_kg": demo.weight_kg,
+    }
+
+    # Call DeepSeek two-LLM service
+    try:
+        deepseek_results = get_deepseek_recommendations(
+            questionnaire_dict=questionnaire_dict,
+            sts_dict=sts_dict,
+            exercise_dicts=exercise_dicts,
+            demographics=demographics_dict,
+            language=body.language,
+        )
+        return deepseek_results
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"DeepSeek LLM error: {str(e)}")

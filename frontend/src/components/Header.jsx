@@ -28,7 +28,7 @@ export default function Header() {
           {currentUser && (
             <>
               <span className="header-user">
-                {t('common.user')}: {currentUser.username}
+                {t('common.user')}: {currentUser}
               </span>
               <button className="btn btn-outline" onClick={handleLogout}>
                 {t('common.logout')}

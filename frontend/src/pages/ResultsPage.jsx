@@ -2,17 +2,19 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { getAlgorithmRecommendations, getLLMRecommendations } from '../services/api';
+import { getAlgorithmRecommendations, getLLMRecommendations, getDeepSeekRecommendations } from '../services/api';
 
 export default function ResultsPage() {
   const { currentUser } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
 
   const [results, setResults] = useState(null);
   const [llmResults, setLlmResults] = useState(null);
+  const [deepseekResults, setDeepseekResults] = useState(null);
   const [loading, setLoading] = useState(true);
   const [llmLoading, setLlmLoading] = useState(false);
+  const [deepseekLoading, setDeepseekLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -37,6 +39,19 @@ export default function ResultsPage() {
       setError(err.response?.data?.detail || 'Failed to get AI recommendations');
     } finally {
       setLlmLoading(false);
+    }
+  };
+
+  const handleDeepSeek = async () => {
+    setDeepseekLoading(true);
+    setError('');
+    try {
+      const res = await getDeepSeekRecommendations(currentUser, language);
+      setDeepseekResults(res.data);
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to get DeepSeek AI recommendations');
+    } finally {
+      setDeepseekLoading(false);
     }
   };
 
@@ -160,7 +175,7 @@ export default function ResultsPage() {
           </>
         )}
 
-        {/* LLM Recommendations */}
+        {/* LLM Recommendations (OpenAI) */}
         <section className="llm-section">
           <h2>{t('results.llmTitle')}</h2>
           {!llmResults && (
@@ -205,6 +220,105 @@ export default function ResultsPage() {
                       )}
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+          )}
+        </section>
+
+        {/* DeepSeek LLM Recommendations (Two-LLM Architecture) */}
+        <section className="llm-section deepseek-section">
+          <h2>🤖 DeepSeek AI Recommendations (Two-LLM Safety System)</h2>
+          <p style={{fontSize: '0.9em', color: '#666', marginBottom: '1rem'}}>
+            Uses a two-stage AI system: Exercise Recommendation Agent + Safety Verification Agent
+          </p>
+          {!deepseekResults && (
+            <button
+              className="btn btn-accent"
+              onClick={handleDeepSeek}
+              disabled={deepseekLoading}
+            >
+              {deepseekLoading ? 'Loading DeepSeek AI...' : 'Get DeepSeek AI Recommendations'}
+            </button>
+          )}
+          {deepseekResults && (
+            <div className="llm-results">
+              {/* Biomechanical Targets */}
+              {deepseekResults.biomechanical_targets && deepseekResults.biomechanical_targets.length > 0 && (
+                <div className="biomech-targets" style={{marginBottom: '1.5rem', padding: '1rem', background: '#f0f8ff', borderRadius: '8px'}}>
+                  <h4 style={{marginBottom: '0.5rem'}}>🎯 Identified Biomechanical Targets</h4>
+                  {deepseekResults.biomechanical_targets.map((target, idx) => (
+                    <div key={idx} style={{marginBottom: '0.5rem'}}>
+                      <strong>{target.issue}</strong>: {target.strategy}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Patient Assessment */}
+              {deepseekResults.patient_assessment && (
+                <div className="patient-assessment" style={{marginBottom: '1.5rem', padding: '1rem', background: '#fff9e6', borderRadius: '8px'}}>
+                  <h4>📊 Patient Capability Assessment</h4>
+                  <p>{deepseekResults.patient_assessment.capability_summary}</p>
+                  <div style={{marginTop: '0.5rem'}}>
+                    <strong>Recommended Positions:</strong> {deepseekResults.patient_assessment.recommended_positions?.join(', ')}
+                  </div>
+                  <div>
+                    <strong>Difficulty Range:</strong> {deepseekResults.patient_assessment.difficulty_range}
+                  </div>
+                </div>
+              )}
+
+              {/* Safety Review Summary */}
+              {deepseekResults.safety_review && (
+                <div className="safety-review" style={{marginBottom: '1.5rem', padding: '1rem', background: '#f0fff0', borderRadius: '8px'}}>
+                  <h4>🛡️ Safety Verification Summary</h4>
+                  <div style={{fontSize: '0.9em'}}>
+                    <div><strong>Weight-Bearing:</strong> {deepseekResults.safety_review.weight_bearing_check?.verdict}</div>
+                    <div><strong>Kneeling:</strong> {deepseekResults.safety_review.kneeling_check?.verdict}</div>
+                    <div><strong>Core Stability:</strong> {deepseekResults.safety_review.core_stability_check?.verdict}</div>
+                  </div>
+                </div>
+              )}
+
+              {/* Final Prescription */}
+              {deepseekResults.final_prescription && deepseekResults.final_prescription.length > 0 && (
+                <div className="final-prescription">
+                  <h4 style={{marginBottom: '1rem'}}>✅ Final Exercise Prescription (4 Exercises)</h4>
+                  <div className="exercise-list">
+                    {deepseekResults.final_prescription.map((ex, idx) => (
+                      <div key={idx} className="exercise-card llm-card" style={{borderLeft: '4px solid #4CAF50'}}>
+                        <div className="exercise-header">
+                          <h3 className="exercise-name">
+                            {idx + 1}. {ex.exercise_name} ({ex.exercise_name_ch})
+                          </h3>
+                        </div>
+                        <div className="exercise-details">
+                          <span className="exercise-tag">
+                            Positions: {ex.positions?.join(', ')}
+                          </span>
+                          <span className="exercise-tag">
+                            Difficulty: Level {ex.difficulty}/10
+                          </span>
+                        </div>
+                        {ex.modifications && ex.modifications.length > 0 && (
+                          <div style={{marginTop: '0.5rem', padding: '0.5rem', background: '#fff3cd', borderRadius: '4px'}}>
+                            <strong>⚠️ Modifications:</strong>
+                            <ul style={{marginTop: '0.25rem', paddingLeft: '1.5rem'}}>
+                              {ex.modifications.map((mod, modIdx) => (
+                                <li key={modIdx}>{mod}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {ex.clinical_rationale && (
+                          <p className="exercise-rationale" style={{marginTop: '0.5rem'}}>
+                            <strong>Clinical Rationale:</strong> {ex.clinical_rationale}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

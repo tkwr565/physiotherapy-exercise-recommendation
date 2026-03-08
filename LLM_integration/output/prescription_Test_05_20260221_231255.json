@@ -1,0 +1,256 @@
+{
+  "patient_username": "Test_05",
+  "patient_profile_summary": {
+    "age": 82,
+    "gender": "female",
+    "sts_benchmark_performance": "Below Average",
+    "knee_alignment": "valgus",
+    "flexibility": "cannot"
+  },
+  "llm1_recommendations": {
+    "patient_assessment": {
+      "capability_summary": "82-year-old female with significant functional limitations: Below Average STS performance (7 reps), severe difficulty with stairs (scores 4/4), moderate standing tolerance (score 2), and severe squatting difficulty (score 3). Avoid weight-bearing positions due to high scores (3-4) on stair-related tasks and trunk/hip sway present. Lying positions are safest. Pain levels are low (avg 1.33) but symptoms and stiffness are moderate to severe.",
+      "recommended_positions": [
+        "supine_lying",
+        "side_lying"
+      ],
+      "difficulty_range": "1-4"
+    },
+    "selected_exercises": [
+      {
+        "exercise_id": 9,
+        "exercise_name": "Side lying Clamshell",
+        "exercise_name_ch": "側臥蚌殼式",
+        "positions": [
+          "side_lying"
+        ],
+        "difficulty": 1,
+        "muscle_targets": {
+          "primary": [
+            "glute_med_min:4"
+          ],
+          "secondary": [
+            "glute_max:2"
+          ],
+          "stabiliser": []
+        },
+        "reasoning": "Addresses dynamic knee instability (valgus alignment) by targeting gluteus medius/minimus with core_contra=true. This is the foundational exercise for hip abductor strengthening in a safe side-lying position, appropriate for her Below Average functional strength."
+      },
+      {
+        "exercise_id": 10,
+        "exercise_name": "Side plank on knees hip dip",
+        "exercise_name_ch": "跪姿側棒式臀部升降",
+        "positions": [
+          "side_lying"
+        ],
+        "difficulty": 2,
+        "muscle_targets": {
+          "primary": [
+            "glute_med_min:4"
+          ],
+          "secondary": [
+            "glute_max:4"
+          ],
+          "stabiliser": []
+        },
+        "reasoning": "Progresses from clamshell to address both knee instability (glute_med_min:4) and core instability (core_ipsi=true). The kneeling side plank variation is safe while providing ipsilateral core stability training to address trunk sway."
+      },
+      {
+        "exercise_id": 2,
+        "exercise_name": "Double leg glute bridging",
+        "exercise_name_ch": "雙腳臀橋",
+        "positions": [
+          "supine_lying"
+        ],
+        "difficulty": 2,
+        "muscle_targets": {
+          "primary": [
+            "glute_max:4"
+          ],
+          "secondary": [
+            "hamstring:3"
+          ],
+          "stabiliser": []
+        },
+        "reasoning": "Addresses limited posterior chain flexibility (cannot touch toes) by targeting glute_max:4 and hamstring:3. The toe_touch=true indicates this exercise promotes posterior chain mobility. Double-leg version is appropriate for her functional level."
+      },
+      {
+        "exercise_id": 3,
+        "exercise_name": "Double leg hamstrings bridging",
+        "exercise_name_ch": "雙腳膕旁肌橋式",
+        "positions": [
+          "supine_lying"
+        ],
+        "difficulty": 3,
+        "muscle_targets": {
+          "primary": [
+            "hamstring:4"
+          ],
+          "secondary": [
+            "glute_max:4"
+          ],
+          "stabiliser": []
+        },
+        "reasoning": "Further addresses posterior chain flexibility with stronger hamstring focus (hamstring:4, glute_max:4). Provides progression from glute bridges while maintaining safety in supine position. The toe_touch=true promotes flexibility gains needed for her limited toe touch ability."
+      }
+    ],
+    "biomechanical_targets": [
+      {
+        "issue": "Dynamic knee instability (Valgus alignment - knock-knees)",
+        "strategy": "Dynamic knee instability usually associates with weak core anti-rotation control, to prioritize exercises with `core_contra=true`. Prioritize exercises with high glute_med_min in muscles.primary_movers or muscles.secondary_movers (value 4-5). Match muscle role to functional capacity: for lower function patient, try to find those muscle target in muscles.primary_movers or muscles.secondary_movers; for higher function patient, prioritize finding those muscle target in muscles.stabiliser",
+        "examples": [
+          "Side lying clamshell",
+          "hip abduction",
+          "side plank variations"
+        ]
+      },
+      {
+        "issue": "Limited posterior chain flexibility (cannot touch toes)",
+        "strategy": "Prioritize exercises with high hamstring + glute_max in muscles (value 4-5 each)",
+        "examples": [
+          "Glute bridges",
+          "hamstring bridges",
+          "hip hinge exercises"
+        ]
+      },
+      {
+        "issue": "Core instability (trunk sway and hip sway present)",
+        "strategy": "Prioritize exercises where `core_ipsi=true`",
+        "examples": [
+          "Exercises requiring ipsilateral core stability"
+        ]
+      }
+    ]
+  },
+  "llm2_safety_review": {
+    "safety_review": {
+      "weight_bearing_check": {
+        "objective_data": {
+          "sts_benchmark_performance": "Below Average",
+          "trunk_sway": "present",
+          "hip_sway": "present"
+        },
+        "risk_level": "high",
+        "reasoning": "Patient has Below Average STS performance (7 reps vs 11-14 benchmark) AND both trunk sway and hip sway present. According to decision logic: 'Below Average' OR (trunk_sway AND hip_sway both present): HIGH RISK → REJECT, suggest non-weight-bearing alternative.",
+        "verdict": "high_risk"
+      },
+      "kneeling_check": {
+        "objective_data": {
+          "sp5_kneeling": 3,
+          "pain_avg": 1.33
+        },
+        "risk_level": "moderate",
+        "reasoning": "Kneeling score = 3 (Severe difficulty) and pain.avg = 1.33 (<3.0). According to decision logic: Kneeling score = 3: MODERATE RISK → APPROVE WITH MODIFICATIONS (thick padding, shorter holds, monitor pain).",
+        "verdict": "moderate_risk"
+      },
+      "core_stability_check": {
+        "objective_data": {
+          "trunk_sway": "present",
+          "hip_sway": "present",
+          "f2_standing": 4,
+          "sp4_twisting": 3,
+          "function_ADL_normalized": 39.2
+        },
+        "risk_level": "high",
+        "reasoning": "BOTH trunk and hip sway present, AND function_ADL.normalized_0_100 = 39.2 (<70). Additionally, Ascending stairs (F2) score = 4 (Extreme difficulty) and Twisting/pivoting (SP4) score = 3 (Severe difficulty). According to decision logic: BOTH sways present OR (Ascending stairs≥3 OR Standing≥3 OR Twisting≥3): HIGH RISK → REJECT, suggest bilateral alternatives.",
+        "verdict": "high_risk"
+      }
+    },
+    "exercise_decisions": [
+      {
+        "exercise_id": 9,
+        "exercise_name": "Side lying Clamshell",
+        "safety_constraints_triggered": [],
+        "decision": "APPROVED",
+        "modifications": [],
+        "reasoning": "Exercise is in side_lying position only, no weight-bearing, kneeling, or core stability constraints triggered. Safe for all patients regardless of functional level.",
+        "replacement_suggestion": ""
+      },
+      {
+        "exercise_id": 10,
+        "exercise_name": "Side plank on knees hip dip",
+        "safety_constraints_triggered": [
+          "kneeling"
+        ],
+        "decision": "APPROVED WITH MODIFICATIONS",
+        "modifications": [
+          "Use thick padding under knees",
+          "Limit holds to 10-15 seconds initially",
+          "Monitor pain during and after exercise",
+          "Progress gradually based on tolerance"
+        ],
+        "reasoning": "Exercise involves kneeling position (side_lying with kneeling component). Patient has kneeling score = 3 (Severe difficulty) but pain.avg = 1.33 (<3.0). Moderate risk - approve with modifications for kneeling tolerance.",
+        "replacement_suggestion": ""
+      },
+      {
+        "exercise_id": 2,
+        "exercise_name": "Double leg glute bridging",
+        "safety_constraints_triggered": [],
+        "decision": "APPROVED",
+        "modifications": [],
+        "reasoning": "Exercise is in supine_lying position only, no weight-bearing, kneeling, or core stability constraints triggered. Safe for all patients regardless of functional level.",
+        "replacement_suggestion": ""
+      },
+      {
+        "exercise_id": 3,
+        "exercise_name": "Double leg hamstrings bridging",
+        "safety_constraints_triggered": [],
+        "decision": "APPROVED",
+        "modifications": [],
+        "reasoning": "Exercise is in supine_lying position only, no weight-bearing, kneeling, or core stability constraints triggered. Safe for all patients regardless of functional level.",
+        "replacement_suggestion": ""
+      }
+    ],
+    "final_prescription": [
+      {
+        "exercise_id": 9,
+        "exercise_name": "Side lying Clamshell",
+        "exercise_name_ch": "側臥蚌殼式",
+        "positions": [
+          "side_lying"
+        ],
+        "difficulty": 1,
+        "modifications": [],
+        "clinical_rationale": "Foundational exercise for gluteus medius/minimus strengthening to address dynamic knee valgus alignment. Core_contra=true provides contralateral core stability training. Safe side-lying position appropriate for patient's Below Average functional strength and high risk for weight-bearing activities."
+      },
+      {
+        "exercise_id": 10,
+        "exercise_name": "Side plank on knees hip dip",
+        "exercise_name_ch": "跪姿側棒式臀部升降",
+        "positions": [
+          "side_lying"
+        ],
+        "difficulty": 2,
+        "modifications": [
+          "Use thick padding under knees",
+          "Limit holds to 10-15 seconds initially",
+          "Monitor pain during and after exercise",
+          "Progress gradually based on tolerance"
+        ],
+        "clinical_rationale": "Progresses from clamshell to address knee instability (glute_med_min:4) and core instability (core_ipsi=true). Kneeling side plank variation provides ipsilateral core stability training to address trunk sway. Modified for kneeling tolerance (score=3) with padding and limited holds."
+      },
+      {
+        "exercise_id": 2,
+        "exercise_name": "Double leg glute bridging",
+        "exercise_name_ch": "雙腳臀橋",
+        "positions": [
+          "supine_lying"
+        ],
+        "difficulty": 2,
+        "modifications": [],
+        "clinical_rationale": "Addresses limited posterior chain flexibility (cannot touch toes) by targeting glute_max:4 and hamstring:3. Toe_touch=true promotes posterior chain mobility. Double-leg version is safe and appropriate for patient's functional level, providing foundational posterior chain strengthening."
+      },
+      {
+        "exercise_id": 3,
+        "exercise_name": "Double leg hamstrings bridging",
+        "exercise_name_ch": "雙腳膕旁肌橋式",
+        "positions": [
+          "supine_lying"
+        ],
+        "difficulty": 3,
+        "modifications": [],
+        "clinical_rationale": "Further addresses posterior chain flexibility with stronger hamstring focus (hamstring:4, glute_max:4). Provides progression from glute bridges while maintaining safety in supine position. Toe_touch=true promotes flexibility gains needed for limited toe touch ability. Appropriate intermediate-level exercise for supine strengthening."
+      }
+    ]
+  }
+}

@@ -1,0 +1,712 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercise Prescription Report - Test_04</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 32px;
+        }
+        .header .timestamp {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .section {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section-title {
+            color: #667eea;
+            font-size: 24px;
+            margin-top: 0;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        .subsection-title {
+            color: #764ba2;
+            font-size: 18px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .info-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #555;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .info-value {
+            font-size: 18px;
+            color: #333;
+        }
+        .exercise-card {
+            background: #f8f9fa;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border-left: 5px solid #667eea;
+        }
+        .exercise-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .exercise-name {
+            font-size: 22px;
+            font-weight: 600;
+            color: #333;
+        }
+        .exercise-name-ch {
+            font-size: 18px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .difficulty-badge {
+            background: #667eea;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .muscle-targets {
+            margin: 15px 0;
+        }
+        .muscle-category {
+            display: inline-block;
+            margin-right: 15px;
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            background: #e3f2fd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .muscle-category.primary {
+            background: #c8e6c9;
+        }
+        .muscle-category.secondary {
+            background: #fff9c4;
+        }
+        .muscle-category.stabiliser {
+            background: #ffe0b2;
+        }
+        .rationale {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            border-left: 3px solid #764ba2;
+            line-height: 1.6;
+        }
+        .modifications {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #ffc107;
+        }
+        .modifications-title {
+            font-weight: 600;
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .modifications ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .modifications li {
+            margin-bottom: 8px;
+            color: #856404;
+        }
+        .safety-review {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+        .risk-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .risk-low {
+            background: #4caf50;
+            color: white;
+        }
+        .risk-moderate {
+            background: #ff9800;
+            color: white;
+        }
+        .risk-high {
+            background: #f44336;
+            color: white;
+        }
+        .decision-badge {
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        .decision-approved {
+            background: #4caf50;
+            color: white;
+        }
+        .decision-modified {
+            background: #ff9800;
+            color: white;
+        }
+        .decision-rejected {
+            background: #f44336;
+            color: white;
+        }
+        .biomechanical-target {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+        .target-issue {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+        .target-strategy {
+            color: #555;
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        .target-examples {
+            color: #666;
+            font-style: italic;
+            font-size: 14px;
+        }
+        .rule-based-badge {
+            display: inline-block;
+            background: #4caf50;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+        }
+        .print-button {
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .print-button:hover {
+            background: #5568d3;
+        }
+        @media print {
+            body {
+                background: white;
+            }
+            .print-button {
+                display: none;
+            }
+            .section {
+                box-shadow: none;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="print-button" onclick="window.print()">🖨️ Print Report</button>
+    
+    <div class="header">
+        <h1>🏥 Exercise Prescription Report</h1>
+        <div class="timestamp">Generated: 2026-02-21 23:10:24</div>
+    </div>
+
+    <!-- Patient Overview -->
+    <div class="section">
+        <h2 class="section-title">📋 Patient Overview</h2>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Patient ID</div>
+                <div class="info-value">Test_04</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Age / Gender</div>
+                <div class="info-value">73 years / Male</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Height / Weight</div>
+                <div class="info-value">181.0 cm / 65.0 kg</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">BMI</div>
+                <div class="info-value">19.8</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STS Assessment -->
+    <div class="section">
+        <h2 class="section-title">💪 Sit-to-Stand (STS) Assessment</h2>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Repetitions</div>
+                <div class="info-value">8 reps</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Performance Level</div>
+                <div class="info-value">Below Average</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">HK Benchmark Range</div>
+                <div class="info-value">11 - 14</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Knee Alignment</div>
+                <div class="info-value">Varus</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Trunk Sway</div>
+                <div class="info-value">Absent</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Hip Sway</div>
+                <div class="info-value">Absent</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Questionnaire Results -->
+    <div class="section">
+        <h2 class="section-title">📝 KOOS Questionnaire Results</h2>
+        <p style="color: #666; margin-bottom: 20px;">All scores normalized to 0-100 scale (higher = better function)</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Score (0-100)</th>
+                    <th>Average Item Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Symptoms</td>
+                    <td><strong>46.7</strong></td>
+                    <td>2.60</td>
+                </tr>
+                <tr>
+                    <td>Stiffness</td>
+                    <td><strong>50.0</strong></td>
+                    <td>2.50</td>
+                </tr>
+                <tr>
+                    <td>Pain</td>
+                    <td><strong>81.5</strong></td>
+                    <td>1.56</td>
+                </tr>
+                <tr>
+                    <td>Function Adl</td>
+                    <td><strong>49.0</strong></td>
+                    <td>2.53</td>
+                </tr>
+                <tr>
+                    <td>Function Sports</td>
+                    <td><strong>26.7</strong></td>
+                    <td>3.20</td>
+                </tr>
+                <tr>
+                    <td>Quality Of Life</td>
+                    <td><strong>41.7</strong></td>
+                    <td>2.75</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h3 class="subsection-title">Position-Relevant Questions</h3>
+        <p style="color: #666; font-size: 14px;">Scale: 0=None, 1=Mild, 2=Moderate, 3=Severe, 4=Extreme</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Question</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Weight-bearing</td>
+                    <td>Descending stairs</td>
+                    <td><strong>3</strong></td>
+                </tr>
+                <tr>
+                    <td>Weight-bearing</td>
+                    <td>Ascending stairs</td>
+                    <td><strong>3</strong></td>
+                </tr>
+                <tr>
+                    <td>Weight-bearing</td>
+                    <td>Standing</td>
+                    <td><strong>2</strong></td>
+                </tr>
+                <tr>
+                    <td>Weight-bearing</td>
+                    <td>Squatting</td>
+                    <td><strong>3</strong></td>
+                </tr>
+                <tr>
+                    <td>Weight-bearing</td>
+                    <td>Twisting/pivoting on your injured knee</td>
+                    <td><strong>2</strong></td>
+                </tr>
+                <tr>
+                    <td>Quadruped</td>
+                    <td>Kneeling</td>
+                    <td><strong>3</strong></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="info-grid" style="margin-top: 20px;">
+            <div class="info-item">
+                <div class="info-label">Flexibility (Toe Touch)</div>
+                <div class="info-value">Cannot</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Biomechanical Targets (Rule-Based) -->
+    <div class="section">
+        <h2 class="section-title">🎯 Biomechanical Targets<span class="rule-based-badge">RULE-BASED</span></h2>
+        <p style="color: #666; margin-bottom: 20px;">These targets were identified using rule-based clinical criteria before LLM analysis</p>
+
+        <div class="biomechanical-target">
+            <div class="target-issue">🎯 Dynamic knee instability (Varus alignment - bow-legged)</div>
+            <div class="target-strategy"><strong>Strategy:</strong> Dynamic knee instability usually associates with weak core anti-rotation control, to prioritize exercises with `core_contra=true`. Prioritize exercises with high adductors in muscles (value 4-5). Match muscle role to functional capacity: for lower function patient, try to find those muscle target in muscles.primary_movers or muscles.secondary_movers; for higher function patient, prioritize finding those muscle target in muscles.stabiliser</div>
+            <div class="target-examples"><strong>Examples:</strong> Copenhagen adductor exercises, adductor squeezes</div>
+        </div>
+        <div class="biomechanical-target">
+            <div class="target-issue">🎯 Limited posterior chain flexibility (cannot touch toes)</div>
+            <div class="target-strategy"><strong>Strategy:</strong> Prioritize exercises with high hamstring + glute_max in muscles (value 4-5 each)</div>
+            <div class="target-examples"><strong>Examples:</strong> Glute bridges, hamstring bridges, hip hinge exercises</div>
+        </div>
+    </div>
+
+    <!-- LLM 1: Patient Assessment -->
+    <div class="section">
+        <h2 class="section-title">🤖 LLM #1: Clinical Assessment & Exercise Selection</h2>
+        
+        <h3 class="subsection-title">Capability Summary</h3>
+        <div class="rationale">
+            {llm1_output['patient_assessment']['capability_summary']}
+        </div>
+
+        <div class="info-grid" style="margin-top: 20px;">
+            <div class="info-item">
+                <div class="info-label">Recommended Positions</div>
+                <div class="info-value">Supine Lying, Side Lying</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Difficulty Range</div>
+                <div class="info-value">1-4</div>
+            </div>
+        </div>
+        
+        <h3 class="subsection-title">Selected Exercises (Pre-Safety Review)</h3>
+        <div class="exercise-card">
+            <div class="exercise-header">
+                <div>
+                    <div class="exercise-name">1. Double leg glute bridging</div>
+                    <div class="exercise-name-ch">雙腳臀橋</div>
+                </div>
+                <div class="difficulty-badge">Difficulty: 2/10</div>
+            </div>
+            <div><strong>Exercise ID:</strong> 2</div>
+            <div><strong>Positions:</strong> Supine Lying</div>
+            <div class="muscle-targets">
+                <div class="muscle-category primary"><strong>Primary:</strong> glute_max:4</div>
+                <div class="muscle-category secondary"><strong>Secondary:</strong> hamstring:3</div>
+                <div class="muscle-category stabiliser"><strong>Stabiliser:</strong> None</div>
+            </div>
+            <div class="rationale">
+                <strong>Reasoning:</strong> Addresses posterior chain flexibility limitation with glute_max (4) and hamstring (3) activation. Safe supine position, beginner difficulty appropriate for patient's below average functional strength. Provides toe touch component to improve hamstring flexibility.
+            </div>
+        </div>
+        <div class="exercise-card">
+            <div class="exercise-header">
+                <div>
+                    <div class="exercise-name">2. Double leg hamstrings bridging</div>
+                    <div class="exercise-name-ch">雙腳膕旁肌橋式</div>
+                </div>
+                <div class="difficulty-badge">Difficulty: 3/10</div>
+            </div>
+            <div><strong>Exercise ID:</strong> 3</div>
+            <div><strong>Positions:</strong> Supine Lying</div>
+            <div class="muscle-targets">
+                <div class="muscle-category primary"><strong>Primary:</strong> hamstring:4</div>
+                <div class="muscle-category secondary"><strong>Secondary:</strong> glute_max:4</div>
+                <div class="muscle-category stabiliser"><strong>Stabiliser:</strong> None</div>
+            </div>
+            <div class="rationale">
+                <strong>Reasoning:</strong> Specifically targets hamstring flexibility limitation with high hamstring activation (4) and glute_max (4). Progresses from double leg glute bridge, maintains safe supine position. Addresses posterior chain tightness while building strength.
+            </div>
+        </div>
+        <div class="exercise-card">
+            <div class="exercise-header">
+                <div>
+                    <div class="exercise-name">3. Side lying Clamshell</div>
+                    <div class="exercise-name-ch">側臥蚌殼式</div>
+                </div>
+                <div class="difficulty-badge">Difficulty: 1/10</div>
+            </div>
+            <div><strong>Exercise ID:</strong> 9</div>
+            <div><strong>Positions:</strong> Side Lying</div>
+            <div class="muscle-targets">
+                <div class="muscle-category primary"><strong>Primary:</strong> glute_med_min:4</div>
+                <div class="muscle-category secondary"><strong>Secondary:</strong> glute_max:2</div>
+                <div class="muscle-category stabiliser"><strong>Stabiliser:</strong> None</div>
+            </div>
+            <div class="rationale">
+                <strong>Reasoning:</strong> Targets glute med/min for varus alignment stabilization. Core_contra=true helps address dynamic knee instability. Beginner difficulty safe for patient's capability. Side lying position avoids weight-bearing stress on painful knees.
+            </div>
+        </div>
+        <div class="exercise-card">
+            <div class="exercise-header">
+                <div>
+                    <div class="exercise-name">4. Copenhagen adductor lv1</div>
+                    <div class="exercise-name-ch">哥本哈根內收肌運動 Lv1</div>
+                </div>
+                <div class="difficulty-badge">Difficulty: 1/10</div>
+            </div>
+            <div><strong>Exercise ID:</strong> 14</div>
+            <div><strong>Positions:</strong> Side Lying</div>
+            <div class="muscle-targets">
+                <div class="muscle-category primary"><strong>Primary:</strong> adductors:3</div>
+                <div class="muscle-category secondary"><strong>Secondary:</strong> None</div>
+                <div class="muscle-category stabiliser"><strong>Stabiliser:</strong> None</div>
+            </div>
+            <div class="rationale">
+                <strong>Reasoning:</strong> Directly addresses varus alignment with adductor strengthening (3). Beginner level appropriate for patient's functional capacity. Side lying position safe, avoids weight-bearing. Adductor strengthening crucial for dynamic knee stability in varus alignment.
+            </div>
+        </div>
+    </div>
+
+    <!-- LLM 2: Safety Review -->
+    <div class="section">
+        <h2 class="section-title">🛡️ LLM #2: Safety Verification</h2>
+        
+        <h3 class="subsection-title">Safety Checks</h3>
+        <div class="safety-review">
+            <strong>1. Weight-Bearing Check</strong>
+            <span class="risk-badge risk-high">HIGH RISK</span>
+            <div style="margin-top: 10px;">
+                <strong>Objective Data:</strong><br>
+                • STS Performance: Below Average<br>
+                • Trunk Sway: absent<br>
+                • Hip Sway: absent
+            </div>
+            <div style="margin-top: 10px;">
+                <strong>Reasoning:</strong> Patient has 'Below Average' STS benchmark performance. According to decision logic: 'Below Average' OR (trunk_sway AND hip_sway both present) = HIGH RISK. Patient has Below Average performance, so high risk for weight-bearing exercises.
+            </div>
+        </div>
+        <div class="safety-review">
+            <strong>2. Kneeling Check</strong>
+            <span class="risk-badge risk-moderate">MODERATE RISK</span>
+            <div style="margin-top: 10px;">
+                <strong>Objective Data:</strong><br>
+                • SP5 (Kneeling): 3<br>
+                • Pain Average: 1.56
+            </div>
+            <div style="margin-top: 10px;">
+                <strong>Reasoning:</strong> Kneeling score = 3 (Severe difficulty). According to decision logic: Kneeling score = 3 = MODERATE RISK. Pain average is 1.56 (<3.0), which doesn't add additional risk. Moderate risk requires modifications.
+            </div>
+        </div>
+        <div class="safety-review">
+            <strong>3. Core Stability Check</strong>
+            <span class="risk-badge risk-moderate">MODERATE RISK</span>
+            <div style="margin-top: 10px;">
+                <strong>Objective Data:</strong><br>
+                • Trunk Sway: absent<br>
+                • Hip Sway: absent<br>
+                • F2 (Standing): 3<br>
+                • SP4 (Twisting): 2<br>
+                • Function ADL Score: 49.0
+            </div>
+            <div style="margin-top: 10px;">
+                <strong>Reasoning:</strong> Trunk sway absent, hip sway absent, but F2 standing score = 3 (Severe difficulty with ascending stairs). According to soft start approach: ONE sway present OR valgus/varus present BUT function_ADL.normalized_0_100 > 70 = MODERATE RISK. However, patient has varus alignment AND function_ADL.normalized_0_100 = 49.0 (<70). Additionally, F2 standing score = 3 indicates difficulty with weight-bearing tasks. This suggests moderate risk requiring modifications.
+            </div>
+        </div>
+        <h3 class="subsection-title">Exercise-by-Exercise Decisions</h3>
+        <div class="exercise-card">
+            <div class="exercise-header">
+                <div class="exercise-name">Double leg glute bridging (ID: 2)</div>
+                <div class="decision-badge decision-approved">APPROVED</div>
+            </div>
+            <div class="rationale">
+                <strong>Reasoning:</strong> Supine lying position, no weight-bearing or kneeling constraints. No safety concerns. Appropriate for patient's below average functional capacity.
+            </div>
+        </div>
+        <div class="exercise-card">
+            <div class="exercise-header">
+                <div class="exercise-name">Double leg hamstrings bridging (ID: 3)</div>
+                <div class="decision-badge decision-approved">APPROVED</div>
+            </div>
+            <div class="rationale">
+                <strong>Reasoning:</strong> Supine lying position, no weight-bearing or kneeling constraints. Addresses hamstring flexibility limitation safely. Appropriate progression from double leg glute bridge.
+            </div>
+        </div>
+        <div class="exercise-card">
+            <div class="exercise-header">
+                <div class="exercise-name">Side lying Clamshell (ID: 9)</div>
+                <div class="decision-badge decision-approved">APPROVED</div>
+            </div>
+            <div class="rationale">
+                <strong>Reasoning:</strong> Side lying position, no weight-bearing or kneeling constraints. Core_contra=true helps address varus alignment. Beginner difficulty safe for patient's functional capacity.
+            </div>
+        </div>
+        <div class="exercise-card">
+            <div class="exercise-header">
+                <div class="exercise-name">Copenhagen adductor lv1 (ID: 14)</div>
+                <div class="decision-badge decision-approved">APPROVED</div>
+            </div>
+            <div class="rationale">
+                <strong>Reasoning:</strong> Side lying position, no weight-bearing or kneeling constraints. Directly addresses varus alignment with adductor strengthening. Beginner level appropriate.
+            </div>
+        </div>
+    </div>
+
+    <!-- Final Prescription -->
+    <div class="section">
+        <h2 class="section-title">✅ Final Exercise Prescription</h2>
+        <p style="background: #fff3cd; padding: 15px; border-radius: 6px; border-left: 4px solid #ffc107;">
+            <strong>⚠️ Important:</strong> This prescription should be reviewed by a supervising physiotherapist before patient execution.
+        </p>
+        <div class="exercise-card">
+            <div class="exercise-header">
+                <div>
+                    <div class="exercise-name">1. Double leg glute bridging</div>
+                    <div class="exercise-name-ch">雙腳臀橋</div>
+                </div>
+                <div class="difficulty-badge">Difficulty: 2/10</div>
+            </div>
+            <div><strong>Exercise ID:</strong> 2</div>
+            <div><strong>Positions:</strong> Supine Lying</div>
+            <div class="rationale">
+                <strong>Clinical Rationale:</strong><br>
+                Addresses posterior chain flexibility limitation with glute_max (4) and hamstring (3) activation. Safe supine position appropriate for patient's below average functional strength. Provides toe touch component to improve hamstring flexibility. Builds foundational glute strength without weight-bearing stress.
+            </div>
+        </div>
+        <div class="exercise-card">
+            <div class="exercise-header">
+                <div>
+                    <div class="exercise-name">2. Double leg hamstrings bridging</div>
+                    <div class="exercise-name-ch">雙腳膕旁肌橋式</div>
+                </div>
+                <div class="difficulty-badge">Difficulty: 3/10</div>
+            </div>
+            <div><strong>Exercise ID:</strong> 3</div>
+            <div><strong>Positions:</strong> Supine Lying</div>
+            <div class="rationale">
+                <strong>Clinical Rationale:</strong><br>
+                Specifically targets hamstring flexibility limitation with high hamstring activation (4) and glute_max (4). Progresses from double leg glute bridge, maintains safe supine position. Addresses posterior chain tightness while building strength. Important for improving knee stability and function.
+            </div>
+        </div>
+        <div class="exercise-card">
+            <div class="exercise-header">
+                <div>
+                    <div class="exercise-name">3. Side lying Clamshell</div>
+                    <div class="exercise-name-ch">側臥蚌殼式</div>
+                </div>
+                <div class="difficulty-badge">Difficulty: 1/10</div>
+            </div>
+            <div><strong>Exercise ID:</strong> 9</div>
+            <div><strong>Positions:</strong> Side Lying</div>
+            <div class="rationale">
+                <strong>Clinical Rationale:</strong><br>
+                Targets glute med/min (4) for varus alignment stabilization. Core_contra=true helps address dynamic knee instability by engaging contralateral core stabilization. Beginner difficulty safe for patient's capability. Side lying position avoids weight-bearing stress on painful knees while building hip stability.
+            </div>
+        </div>
+        <div class="exercise-card">
+            <div class="exercise-header">
+                <div>
+                    <div class="exercise-name">4. Copenhagen adductor lv1</div>
+                    <div class="exercise-name-ch">哥本哈根內收肌運動 Lv1</div>
+                </div>
+                <div class="difficulty-badge">Difficulty: 1/10</div>
+            </div>
+            <div><strong>Exercise ID:</strong> 14</div>
+            <div><strong>Positions:</strong> Side Lying</div>
+            <div class="rationale">
+                <strong>Clinical Rationale:</strong><br>
+                Directly addresses varus alignment with adductor strengthening (3). Beginner level appropriate for patient's functional capacity. Side lying position safe, avoids weight-bearing. Adductor strengthening crucial for dynamic knee stability in varus alignment by improving medial joint support and alignment control.
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align: center; padding: 20px; color: #666; font-size: 14px;">
+        <p>Report generated by PhysioAIign LLM-Based Exercise Recommendation System</p>
+        <p>Two-LLM Architecture: Rule-Based Biomechanical Analysis + LLM Exercise Selection + LLM Safety Verification</p>
+    </div>
+
+</body>
+</html>

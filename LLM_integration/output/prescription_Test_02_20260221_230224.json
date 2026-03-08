@@ -1,0 +1,256 @@
+{
+  "patient_username": "Test_02",
+  "patient_profile_summary": {
+    "age": 66,
+    "gender": "female",
+    "sts_benchmark_performance": "Below Average",
+    "knee_alignment": "varus",
+    "flexibility": "cannot"
+  },
+  "llm1_recommendations": {
+    "patient_assessment": {
+      "capability_summary": "This 66-year-old female with knee OA demonstrates moderate functional limitations with Below Average STS performance (9 reps), trunk and hip sway present, and varus knee alignment. She has difficulty with stair descent/ascent (score 3) but tolerates standing (score 1) and squatting (score 2). Pain levels are moderate (avg 1.56), and she cannot touch toes, indicating posterior chain tightness. Quadruped position is safe (kneeling score 1).",
+      "recommended_positions": [
+        "supine_lying",
+        "side_lying"
+      ],
+      "difficulty_range": "1-4"
+    },
+    "selected_exercises": [
+      {
+        "exercise_id": 2,
+        "exercise_name": "Double leg glute bridging",
+        "exercise_name_ch": "雙腳臀橋",
+        "positions": [
+          "supine_lying"
+        ],
+        "difficulty": 2,
+        "muscle_targets": {
+          "primary": [
+            "glute_max:4"
+          ],
+          "secondary": [
+            "hamstring:3"
+          ],
+          "stabiliser": []
+        },
+        "reasoning": "Addresses posterior chain flexibility deficit (cannot touch toes) by targeting glute_max (4) and hamstrings (3). Safe supine position, appropriate difficulty level for patient's Below Average functional strength. Provides foundation for hip extension strength."
+      },
+      {
+        "exercise_id": 4,
+        "exercise_name": "Single leg glute bridging",
+        "exercise_name_ch": "單腳臀橋",
+        "positions": [
+          "supine_lying"
+        ],
+        "difficulty": 4,
+        "muscle_targets": {
+          "primary": [
+            "glute_max:5"
+          ],
+          "secondary": [
+            "hamstring:3"
+          ],
+          "stabiliser": [
+            "glute_med_min:4"
+          ]
+        },
+        "reasoning": "Progresses from double-leg bridging to address core instability (core_ipsi=true) and varus alignment. Targets glute_max (5) for posterior chain and glute_med_min (4) for hip stability. Single-leg challenge appropriate for progression while maintaining safe supine position."
+      },
+      {
+        "exercise_id": 14,
+        "exercise_name": "Copenhagen adductor lv1",
+        "exercise_name_ch": "哥本哈根內收肌運動 Lv1",
+        "positions": [
+          "side_lying"
+        ],
+        "difficulty": 1,
+        "muscle_targets": {
+          "primary": [
+            "adductors:3"
+          ],
+          "secondary": [],
+          "stabiliser": []
+        },
+        "reasoning": "Directly addresses dynamic knee instability from varus alignment by targeting adductors (3). Side-lying position is safe and appropriate for patient's capability. Level 1 difficulty provides gentle introduction to adductor strengthening without excessive challenge."
+      },
+      {
+        "exercise_id": 10,
+        "exercise_name": "Side plank on knees hip dip",
+        "exercise_name_ch": "跪姿側棒式臀部升降",
+        "positions": [
+          "side_lying"
+        ],
+        "difficulty": 2,
+        "muscle_targets": {
+          "primary": [
+            "glute_med_min:4"
+          ],
+          "secondary": [
+            "glute_max:4"
+          ],
+          "stabiliser": []
+        },
+        "reasoning": "Addresses core instability (core_ipsi=true) and hip sway by targeting glute_med_min (4) and glute_max (4). Kneeling modification reduces load while providing effective hip stability training. Appropriate progression from clamshell for patient with Below Average functional strength."
+      }
+    ],
+    "biomechanical_targets": [
+      {
+        "issue": "Dynamic knee instability (Varus alignment - bow-legged)",
+        "strategy": "Dynamic knee instability usually associates with weak core anti-rotation control, to prioritize exercises with `core_contra=true`. Prioritize exercises with high adductors in muscles (value 4-5). Match muscle role to functional capacity: for lower function patient, try to find those muscle target in muscles.primary_movers or muscles.secondary_movers; for higher function patient, prioritize finding those muscle target in muscles.stabiliser",
+        "examples": [
+          "Copenhagen adductor exercises",
+          "adductor squeezes"
+        ]
+      },
+      {
+        "issue": "Limited posterior chain flexibility (cannot touch toes)",
+        "strategy": "Prioritize exercises with high hamstring + glute_max in muscles (value 4-5 each)",
+        "examples": [
+          "Glute bridges",
+          "hamstring bridges",
+          "hip hinge exercises"
+        ]
+      },
+      {
+        "issue": "Core instability (trunk sway and hip sway present)",
+        "strategy": "Prioritize exercises where `core_ipsi=true`",
+        "examples": [
+          "Exercises requiring ipsilateral core stability"
+        ]
+      }
+    ]
+  },
+  "llm2_safety_review": {
+    "safety_review": {
+      "weight_bearing_check": {
+        "objective_data": {
+          "sts_benchmark_performance": "Below Average",
+          "trunk_sway": "present",
+          "hip_sway": "present"
+        },
+        "risk_level": "high",
+        "reasoning": "Patient has Below Average STS performance (9 reps vs 11-14 benchmark) with BOTH trunk sway and hip sway present. According to decision logic: 'Below Average' OR (trunk_sway AND hip_sway both present): HIGH RISK → REJECT, suggest non-weight-bearing alternative.",
+        "verdict": "high_risk"
+      },
+      "kneeling_check": {
+        "objective_data": {
+          "sp5_kneeling": 1,
+          "pain_avg": 1.56
+        },
+        "risk_level": "low",
+        "reasoning": "Kneeling score is 1 (mild difficulty) which is ≤ 2, and pain average is 1.56 (< 3.0). According to decision logic: Kneeling score ≤ 2: LOW RISK → APPROVE (mild or no difficulty with kneeling).",
+        "verdict": "safe"
+      },
+      "core_stability_check": {
+        "objective_data": {
+          "trunk_sway": "present",
+          "hip_sway": "present",
+          "f2_standing": 3,
+          "sp4_twisting": 1,
+          "function_ADL_normalized": 74.5
+        },
+        "risk_level": "high",
+        "reasoning": "BOTH trunk sway and hip sway present, AND F2 (Ascending stairs) score is 3 (Severe difficulty). According to decision logic: BOTH sways present OR (Ascending stairs≥3 OR Standing≥3 OR Twisting≥3): HIGH RISK → REJECT, suggest bilateral alternatives. Patient has both sways present AND F2=3, indicating significant core stability deficits.",
+        "verdict": "high_risk"
+      }
+    },
+    "exercise_decisions": [
+      {
+        "exercise_id": 2,
+        "exercise_name": "Double leg glute bridging",
+        "safety_constraints_triggered": [],
+        "decision": "APPROVED",
+        "modifications": [],
+        "reasoning": "Supine lying position, no weight-bearing or kneeling constraints. Safe for all patients regardless of functional status. Addresses posterior chain flexibility deficit appropriately.",
+        "replacement_suggestion": ""
+      },
+      {
+        "exercise_id": 4,
+        "exercise_name": "Single leg glute bridging",
+        "safety_constraints_triggered": [
+          "core_stability"
+        ],
+        "decision": "APPROVED WITH MODIFICATIONS",
+        "modifications": [
+          "Start with double-leg bridging as warm-up",
+          "Monitor for compensatory trunk rotation",
+          "Progress only when patient can maintain neutral pelvis without hip hiking"
+        ],
+        "reasoning": "Core_ipsi=true triggers core stability check. Patient has BOTH trunk and hip sway present with F2=3 (severe difficulty ascending stairs). Using soft start approach: function_ADL_normalized=74.5 (>70) allows modifications. Regress to lying exercise with core_ipsi=true is appropriate but requires careful monitoring.",
+        "replacement_suggestion": ""
+      },
+      {
+        "exercise_id": 14,
+        "exercise_name": "Copenhagen adductor lv1",
+        "safety_constraints_triggered": [],
+        "decision": "APPROVED",
+        "modifications": [],
+        "reasoning": "Side-lying position, no weight-bearing or kneeling constraints. Safe for all patients. Directly addresses varus alignment by targeting adductors. Level 1 difficulty appropriate for patient's functional status.",
+        "replacement_suggestion": ""
+      },
+      {
+        "exercise_id": 10,
+        "exercise_name": "Side plank on knees hip dip",
+        "safety_constraints_triggered": [
+          "kneeling",
+          "core_stability"
+        ],
+        "decision": "REJECTED",
+        "modifications": [],
+        "reasoning": "Positions array contains 'side_lying' but exercise requires kneeling position (implied by 'on knees'). Kneeling check: score=1 (low risk). However, core stability check: BOTH trunk and hip sway present with F2=3 → HIGH RISK. Core_ipsi=true requires core stability. According to decision logic: BOTH sways present → HIGH RISK → REJECT, suggest bilateral alternatives.",
+        "replacement_suggestion": "Exercise ID: 9, Side lying Clamshell"
+      }
+    ],
+    "final_prescription": [
+      {
+        "exercise_id": 2,
+        "exercise_name": "Double leg glute bridging",
+        "exercise_name_ch": "雙腳臀橋",
+        "positions": [
+          "supine_lying"
+        ],
+        "difficulty": 2,
+        "modifications": [],
+        "clinical_rationale": "Addresses posterior chain flexibility deficit (cannot touch toes) by targeting glute_max (4) and hamstrings (3). Safe supine position provides foundation for hip extension strength without weight-bearing risk. Appropriate for patient's Below Average functional strength."
+      },
+      {
+        "exercise_id": 4,
+        "exercise_name": "Single leg glute bridging",
+        "exercise_name_ch": "單腳臀橋",
+        "positions": [
+          "supine_lying"
+        ],
+        "difficulty": 4,
+        "modifications": [
+          "Start with double-leg bridging as warm-up",
+          "Monitor for compensatory trunk rotation",
+          "Progress only when patient can maintain neutral pelvis without hip hiking"
+        ],
+        "clinical_rationale": "Progresses from double-leg bridging to address core instability (core_ipsi=true) and varus alignment. Targets glute_max (5) for posterior chain and glute_med_min (4) for hip stability. Single-leg challenge appropriate for progression while maintaining safe supine position. Modifications address core stability deficits."
+      },
+      {
+        "exercise_id": 14,
+        "exercise_name": "Copenhagen adductor lv1",
+        "exercise_name_ch": "哥本哈根內收肌運動 Lv1",
+        "positions": [
+          "side_lying"
+        ],
+        "difficulty": 1,
+        "modifications": [],
+        "clinical_rationale": "Directly addresses dynamic knee instability from varus alignment by targeting adductors (3). Side-lying position is safe and appropriate for patient's capability. Level 1 difficulty provides gentle introduction to adductor strengthening without excessive challenge."
+      },
+      {
+        "exercise_id": 9,
+        "exercise_name": "Side lying Clamshell",
+        "exercise_name_ch": "側躺蚌殼式",
+        "positions": [
+          "side_lying"
+        ],
+        "difficulty": 1,
+        "modifications": [],
+        "clinical_rationale": "Replaces rejected Side plank on knees hip dip. Targets glute_med_min (4) for hip stability without kneeling or advanced core demands. Core_contra=true provides contralateral core activation. Safe side-lying position addresses hip sway and varus alignment while avoiding high-risk core stability challenges."
+      }
+    ]
+  }
+}
