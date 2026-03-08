@@ -47,11 +47,13 @@ def get_deepseek_recommendations(
             "Please set it in .env file or docker-compose.yml"
         )
 
-    # Initialize DeepSeek LLM
+    # Initialize DeepSeek LLM with timeout settings
     llm = ChatDeepSeek(
         model="deepseek-chat",
         api_key=api_key,
         temperature=0,
+        request_timeout=180,  # 3 minutes timeout for each API call
+        max_retries=2,  # Retry failed requests
     )
 
     # Step 1: Transform data to LLM-ready format

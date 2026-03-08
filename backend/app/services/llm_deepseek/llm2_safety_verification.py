@@ -153,26 +153,41 @@ PROPOSED EXERCISES FROM LLM #1:
 
 Review each proposed exercise for safety using the constraint checks. Remember to use the flexible "soft start" approach for core stability assessment."""
 
-    # Invoke structured LLM
-    try:
-        result = structured_llm.invoke(
-            [
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": user_message},
-            ]
-        )
+    # Invoke structured LLM with retry logic
+    max_retries = 3
+    retry_delay = 2  # seconds
 
-        # Convert Pydantic model to dict
-        result_dict = result.model_dump()
-
-        # Validate output
-        if len(result_dict["final_prescription"]) != 4:
-            raise ValueError(
-                f"LLM returned {len(result_dict['final_prescription'])} exercises in final prescription, expected 4"
+    for attempt in range(max_retries):
+        try:
+            print(f"LLM #2 (Safety Verification) - Attempt {attempt + 1}/{max_retries}")
+            result = structured_llm.invoke(
+                [
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": user_message},
+                ]
             )
 
-        return result_dict
+            # Convert Pydantic model to dict
+            result_dict = result.model_dump()
 
-    except Exception as e:
-        print(f"ERROR in LLM #2: {e}")
-        raise
+            # Validate output
+            if len(result_dict["final_prescription"]) != 4:
+                raise ValueError(
+                    f"LLM returned {len(result_dict['final_prescription'])} exercises in final prescription, expected 4"
+                )
+
+            print("LLM #2 (Safety Verification) - Success")
+            return result_dict
+
+        except Exception as e:
+            error_msg = str(e)
+            print(f"ERROR in LLM #2 (Attempt {attempt + 1}/{max_retries}): {error_msg}")
+
+            if attempt < max_retries - 1:
+                import time
+                print(f"Retrying in {retry_delay} seconds...")
+                time.sleep(retry_delay)
+                retry_delay *= 2  # Exponential backoff
+            else:
+                print("LLM #2 - All retry attempts failed")
+                raise Exception(f"DeepSeek Safety Verification failed after {max_retries} attempts: {error_msg}")

@@ -43,12 +43,13 @@ export default function ResultsPage() {
   };
 
   const handleDeepSeek = async () => {
-    console.log('DeepSeek button clicked, currentUser:', currentUser, 'language:', language);
+    const lang = language || 'en';  // Default to 'en' if language is undefined
+    console.log('DeepSeek button clicked, currentUser:', currentUser, 'language:', lang);
     setDeepseekLoading(true);
     setError('');
     try {
       console.log('Calling getDeepSeekRecommendations API...');
-      const res = await getDeepSeekRecommendations(currentUser, language);
+      const res = await getDeepSeekRecommendations(currentUser, lang);
       console.log('DeepSeek API response:', res.data);
       setDeepseekResults(res.data);
     } catch (err) {
