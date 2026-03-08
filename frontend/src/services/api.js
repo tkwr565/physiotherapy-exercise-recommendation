@@ -53,7 +53,9 @@ export const getAlgorithmRecommendations = (username) =>
 export const getLLMRecommendations = (username, language = 'en') =>
   api.post('/recommendations/llm', { username, language });
 
-export const getDeepSeekRecommendations = (username, language = 'en') =>
-  api.post('/recommendations/deepseek', { username, language });
+export const getDeepSeekRecommendations = (username, language = 'en') => {
+  console.log('API: Sending DeepSeek request to /recommendations/deepseek with:', { username, language });
+  return api.post('/recommendations/deepseek', { username, language });
+};
 
 export default api;

@@ -43,12 +43,16 @@ export default function ResultsPage() {
   };
 
   const handleDeepSeek = async () => {
+    console.log('DeepSeek button clicked, currentUser:', currentUser, 'language:', language);
     setDeepseekLoading(true);
     setError('');
     try {
+      console.log('Calling getDeepSeekRecommendations API...');
       const res = await getDeepSeekRecommendations(currentUser, language);
+      console.log('DeepSeek API response:', res.data);
       setDeepseekResults(res.data);
     } catch (err) {
+      console.error('DeepSeek API error:', err);
       setError(err.response?.data?.detail || 'Failed to get DeepSeek AI recommendations');
     } finally {
       setDeepseekLoading(false);
