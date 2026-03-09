@@ -1,4 +1,6 @@
 from datetime import date, datetime
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -17,6 +19,9 @@ from app.services.llm_recommendation import get_llm_recommendations
 from app.services.llm_deepseek import get_deepseek_recommendations
 
 router = APIRouter()
+
+# Thread pool for running blocking LLM calls asynchronously
+executor = ThreadPoolExecutor(max_workers=3)
 
 
 def _calculate_age(dob: date) -> int:
@@ -159,8 +164,8 @@ def get_llm_recommendation_endpoint(body: LLMRecommendationRequest, db: Session 
 
 
 @router.post("/deepseek", response_model=DeepSeekRecommendationResponse)
-def get_deepseek_recommendation_endpoint(body: DeepSeekRecommendationRequest, db: Session = Depends(get_db)):
-    """Get DeepSeek LLM-enhanced recommendations using two-LLM architecture."""
+async def get_deepseek_recommendation_endpoint(body: DeepSeekRecommendationRequest, db: Session = Depends(get_db)):
+    """Get DeepSeek LLM-enhanced recommendations using two-LLM architecture (async, non-blocking)."""
     print("\n" + "="*80)
     print(f"📥 RECEIVED DeepSeek request for username: {body.username}, language: {body.language}")
     print("="*80)
@@ -207,15 +212,19 @@ def get_deepseek_recommendation_endpoint(body: DeepSeekRecommendationRequest, db
         "weight_kg": float(demo.weight_kg),
     }
 
-    # Call DeepSeek two-LLM service
-    print("✓ All data fetched from database, calling DeepSeek service...")
+    # Call DeepSeek two-LLM service asynchronously (non-blocking)
+    print("✓ All data fetched from database, calling DeepSeek service asynchronously...")
     try:
-        deepseek_results = get_deepseek_recommendations(
-            questionnaire_dict=questionnaire_dict,
-            sts_dict=sts_dict,
-            exercise_dicts=exercise_dicts,
-            demographics=demographics_dict,
-            language=body.language,
+        # Run the blocking DeepSeek call in a thread pool to avoid blocking the event loop
+        loop = asyncio.get_event_loop()
+        deepseek_results = await loop.run_in_executor(
+            executor,
+            get_deepseek_recommendations,
+            questionnaire_dict,
+            sts_dict,
+            exercise_dicts,
+            demographics_dict,
+            body.language,
         )
         print("✓ DeepSeek service completed successfully")
         return deepseek_results
