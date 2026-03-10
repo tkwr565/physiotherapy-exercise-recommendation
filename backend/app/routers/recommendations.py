@@ -111,11 +111,17 @@ def get_algorithm_recommendations(body: RecommendationRequest, db: Session = Dep
 
 
 @router.post("/llm")
-def get_llm_recommendation_endpoint(body: LLMRecommendationRequest, db: Session = Depends(get_db)):
-    """Get LLM-enhanced recommendations using LangChain."""
+async def get_llm_recommendation_endpoint(body: LLMRecommendationRequest, db: Session = Depends(get_db)):
+    """Get OpenAI LLM-enhanced recommendations using LangChain (async, non-blocking)."""
+    print("\n" + "="*80)
+    print(f"📥 RECEIVED OpenAI request for username: {body.username}, language: {body.language}")
+    print("="*80)
+
     user = db.query(User).filter(User.username == body.username).first()
     if not user:
+        print(f"❌ User not found: {body.username}")
         raise HTTPException(status_code=404, detail="User not found")
+    print(f"✓ User found: {body.username}")
 
     demo = db.query(PatientDemographics).filter(PatientDemographics.username == body.username).first()
     if not demo:
@@ -149,18 +155,31 @@ def get_llm_recommendation_endpoint(body: LLMRecommendationRequest, db: Session 
     }
 
     # First run the algorithm
+    print("✓ Running algorithm recommendations...")
     algorithm_results = calculate_recommendations(questionnaire_dict, sts_dict, exercise_dicts)
 
-    # Then enhance with LLM
-    llm_results = get_llm_recommendations(
-        algorithm_results=algorithm_results,
-        exercises=exercise_dicts,
-        sts_data=sts_dict,
-        questionnaire=questionnaire_dict,
-        language=body.language,
-    )
-
-    return llm_results
+    # Then enhance with OpenAI LLM asynchronously (non-blocking)
+    print("✓ All data fetched from database, calling OpenAI service asynchronously...")
+    try:
+        # Run the blocking OpenAI call in a thread pool to avoid blocking the event loop
+        loop = asyncio.get_event_loop()
+        llm_results = await loop.run_in_executor(
+            executor,
+            get_llm_recommendations,
+            algorithm_results,
+            exercise_dicts,
+            sts_dict,
+            questionnaire_dict,
+            body.language,
+        )
+        print("✓ OpenAI service completed successfully")
+        return llm_results
+    except ValueError as e:
+        print(f"❌ ValueError in OpenAI service: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        print(f"❌ Exception in OpenAI service: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"OpenAI LLM error: {str(e)}")
 
 
 @router.post("/deepseek", response_model=DeepSeekRecommendationResponse)

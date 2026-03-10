@@ -5,6 +5,7 @@ Uses the algorithm results + clinical guidelines to produce
 natural-language reasoning and enhanced recommendations.
 """
 
+import time
 from typing import Dict, List, Any
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
@@ -89,8 +90,13 @@ def get_llm_recommendations(
     language: str = "en",
 ) -> Dict[str, Any]:
     """Generate LLM-enhanced exercise recommendations using LangChain."""
+    start_time = time.time()
+    print("=" * 80)
+    print("🚀 OPENAI RECOMMENDATION SERVICE - START")
+    print("=" * 80)
 
     if not settings.openai_api_key or settings.openai_api_key == "your-openai-api-key-here":
+        print("❌ OpenAI API key not configured")
         # Fallback: return algorithm results with a note
         return {
             "recommendations": [
@@ -111,13 +117,22 @@ def get_llm_recommendations(
             "clinical_justification": "Based on rule-based algorithm analysis.",
         }
 
+    print("✓ OpenAI API key found")
+
     try:
+        step1_start = time.time()
+        print("\n🤖 Initializing OpenAI LLM (gpt-4o-mini)...")
         llm = ChatOpenAI(
             model="gpt-4o-mini",
             temperature=0.3,
             api_key=settings.openai_api_key,
+            request_timeout=120,  # 2 minutes timeout
+            max_retries=2,
         )
+        print(f"✓ OpenAI LLM initialized ({time.time() - step1_start:.2f}s)")
 
+        step2_start = time.time()
+        print("\n📝 Preparing prompts and parsing data...")
         parser = PydanticOutputParser(pydantic_object=LLMRecommendationOutput)
 
         prompt = ChatPromptTemplate.from_messages([
@@ -153,9 +168,15 @@ def get_llm_recommendations(
         )
 
         scores = algorithm_results.get("scores", {})
+        print(f"✓ Prompts prepared ({time.time() - step2_start:.2f}s)")
 
+        step3_start = time.time()
+        print("\n🔗 Creating LangChain pipeline...")
         chain = prompt | llm | parser
+        print(f"✓ Pipeline created ({time.time() - step3_start:.2f}s)")
 
+        step4_start = time.time()
+        print("\n🌐 Calling OpenAI API...")
         result = chain.invoke({
             "format_instructions": parser.get_format_instructions(),
             "pain_score": scores.get("pain_score", 0),
@@ -171,14 +192,28 @@ def get_llm_recommendations(
             "exercise_database": ex_db_str,
             "language": language,
         })
+        print(f"✓ OpenAI API response received ({time.time() - step4_start:.2f}s)")
 
-        return {
+        final_result = {
             "recommendations": [r.model_dump() for r in result.recommendations],
             "reasoning": result.clinical_justification,
+            "clinical_reasoning": result.clinical_justification,  # Match frontend expectation
             "clinical_justification": result.progression_notes,
+            "llm_enhanced": True,
         }
 
+        total_time = time.time() - start_time
+        print("=" * 80)
+        print(f"✅ OPENAI RECOMMENDATION SERVICE - COMPLETE (Total: {total_time:.2f}s)")
+        print("=" * 80)
+
+        return final_result
+
     except Exception as e:
+        print(f"\n❌ ERROR in OpenAI LLM: {str(e)}")
+        print("=" * 80)
+        print("⚠️  FALLBACK: Returning algorithm-based results")
+        print("=" * 80)
         # Fallback to algorithm results on any LLM error
         return {
             "recommendations": [
