@@ -180,25 +180,80 @@ export default function ResultsPage() {
           </>
         )}
 
-        {/* LLM Recommendations (OpenAI) */}
+        {/* AI-Enhanced Recommendations (Unified Section) */}
         <section className="llm-section">
-          <h2>{t('results.llmTitle')}</h2>
-          {!llmResults && (
-            <button
-              className="btn btn-accent"
-              onClick={handleLLM}
-              disabled={llmLoading}
-            >
-              {llmLoading ? t('results.llmLoading') : t('results.llmButton')}
-            </button>
+          <h2>🤖 AI-Enhanced Recommendations</h2>
+          <p style={{fontSize: '0.9em', color: '#666', marginBottom: '1rem'}}>
+            Choose an AI model to generate personalized exercise recommendations
+          </p>
+
+          {/* Show buttons only if neither result exists and not loading */}
+          {!llmResults && !deepseekResults && !llmLoading && !deepseekLoading && (
+            <div style={{display: 'flex', gap: '1rem', flexWrap: 'wrap'}}>
+              <button
+                className="btn btn-accent"
+                onClick={handleLLM}
+                style={{flex: '1', minWidth: '200px'}}
+              >
+                Get AI Recommendations (OpenAI)
+              </button>
+              <button
+                className="btn btn-accent"
+                onClick={handleDeepSeek}
+                style={{flex: '1', minWidth: '200px'}}
+              >
+                Get AI Recommendations (DeepSeek)
+              </button>
+            </div>
           )}
+
+          {/* Loading spinner */}
+          {(llmLoading || deepseekLoading) && (
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              padding: '2rem',
+              gap: '1rem'
+            }}>
+              <div style={{
+                width: '50px',
+                height: '50px',
+                border: '5px solid #f3f3f3',
+                borderTop: '5px solid #3498db',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite'
+              }}></div>
+              <p style={{fontSize: '1.1em', color: '#666'}}>
+                Generating AI Recommendations...
+              </p>
+              {deepseekLoading && (
+                <p style={{fontSize: '0.9em', color: '#888'}}>
+                  (This may take 1-2 minutes)
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* OpenAI Results */}
           {llmResults && (
             <div className="llm-results">
-              {llmResults.llm_enhanced && (
-                <div className="llm-badge">✨ AI-Enhanced</div>
-              )}
+              <div style={{
+                padding: '0.5rem 1rem',
+                background: '#e3f2fd',
+                borderRadius: '8px',
+                marginBottom: '1rem',
+                display: 'inline-block'
+              }}>
+                <strong>✨ Powered by OpenAI</strong>
+              </div>
               {llmResults.clinical_reasoning && (
-                <div className="llm-reasoning">
+                <div className="llm-reasoning" style={{
+                  marginBottom: '1.5rem',
+                  padding: '1rem',
+                  background: '#f5f5f5',
+                  borderRadius: '8px'
+                }}>
                   <h4>Clinical Reasoning</h4>
                   <p>{llmResults.clinical_reasoning}</p>
                 </div>
@@ -229,25 +284,19 @@ export default function ResultsPage() {
               )}
             </div>
           )}
-        </section>
 
-        {/* DeepSeek LLM Recommendations (Two-LLM Architecture) */}
-        <section className="llm-section deepseek-section">
-          <h2>🤖 DeepSeek AI Recommendations (Two-LLM Safety System)</h2>
-          <p style={{fontSize: '0.9em', color: '#666', marginBottom: '1rem'}}>
-            Uses a two-stage AI system: Exercise Recommendation Agent + Safety Verification Agent
-          </p>
-          {!deepseekResults && (
-            <button
-              className="btn btn-accent"
-              onClick={handleDeepSeek}
-              disabled={deepseekLoading}
-            >
-              {deepseekLoading ? 'Loading DeepSeek AI (may take 1-2 minutes)...' : 'Get DeepSeek AI Recommendations'}
-            </button>
-          )}
+          {/* DeepSeek Results */}
           {deepseekResults && (
             <div className="llm-results">
+              <div style={{
+                padding: '0.5rem 1rem',
+                background: '#e8f5e9',
+                borderRadius: '8px',
+                marginBottom: '1rem',
+                display: 'inline-block'
+              }}>
+                <strong>🤖 Powered by DeepSeek (Two-LLM Safety System)</strong>
+              </div>
               {/* Biomechanical Targets */}
               {deepseekResults.biomechanical_targets && deepseekResults.biomechanical_targets.length > 0 && (
                 <div className="biomech-targets" style={{marginBottom: '1.5rem', padding: '1rem', background: '#f0f8ff', borderRadius: '8px'}}>
