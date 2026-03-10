@@ -2,14 +2,16 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { getAlgorithmRecommendations, getLLMRecommendations, getDeepSeekRecommendations } from '../services/api';
+import { getDemographics, getQuestionnaire, getSTSAssessment, getLLMRecommendations, getDeepSeekRecommendations } from '../services/api';
 
 export default function ResultsPage() {
   const { currentUser } = useAuth();
   const { t, language } = useLanguage();
   const navigate = useNavigate();
 
-  const [results, setResults] = useState(null);
+  const [demographics, setDemographics] = useState(null);
+  const [questionnaire, setQuestionnaire] = useState(null);
+  const [stsAssessment, setStsAssessment] = useState(null);
   const [llmResults, setLlmResults] = useState(null);
   const [deepseekResults, setDeepseekResults] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -20,12 +22,20 @@ export default function ResultsPage() {
   useEffect(() => {
     if (!currentUser) return;
     setLoading(true);
-    getAlgorithmRecommendations(currentUser)
-      .then((res) => {
-        setResults(res.data);
+
+    // Fetch all dashboard data in parallel
+    Promise.all([
+      getDemographics(currentUser),
+      getQuestionnaire(currentUser),
+      getSTSAssessment(currentUser),
+    ])
+      .then(([demoRes, qRes, stsRes]) => {
+        setDemographics(demoRes.data);
+        setQuestionnaire(qRes.data);
+        setStsAssessment(stsRes.data);
       })
       .catch((err) => {
-        setError(err.response?.data?.detail || 'Failed to load results');
+        setError(err.response?.data?.detail || 'Failed to load assessment data');
       })
       .finally(() => setLoading(false));
   }, [currentUser]);
@@ -64,6 +74,88 @@ export default function ResultsPage() {
     navigate('/demographics');
   };
 
+  // Helper function to calculate BMI
+  const calculateBMI = () => {
+    if (!demographics) return null;
+    const heightM = demographics.height_cm / 100;
+    const bmi = demographics.weight_kg / (heightM * heightM);
+    return bmi.toFixed(1);
+  };
+
+  // Helper function to calculate age
+  const calculateAge = () => {
+    if (!demographics?.date_of_birth) return null;
+    const birthDate = new Date(demographics.date_of_birth);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  // Helper function to calculate KOOS scores
+  const calculateKOOSScores = () => {
+    if (!questionnaire) return null;
+
+    // Symptoms: s1-s5 (7 items total with s4_a-s4_d)
+    const symptomFields = ['s1', 's2', 's3', 's4', 's5'];
+    const symptomTotal = symptomFields.reduce((sum, field) => sum + (questionnaire[field] || 0), 0);
+    const symptomScore = ((symptomTotal / 20) * 100).toFixed(0); // max 20 points (5 questions * 4 max)
+
+    // Stiffness: st1-st2
+    const stiffnessFields = ['st1', 'st2'];
+    const stiffnessTotal = stiffnessFields.reduce((sum, field) => sum + (questionnaire[field] || 0), 0);
+    const stiffnessScore = ((stiffnessTotal / 8) * 100).toFixed(0); // max 8 points
+
+    // Pain: p1-p9
+    const painFields = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8', 'p9'];
+    const painTotal = painFields.reduce((sum, field) => sum + (questionnaire[field] || 0), 0);
+    const painScore = ((painTotal / 36) * 100).toFixed(0); // max 36 points
+
+    // Function ADL: f1-f17
+    const adlFields = ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'f10', 'f11', 'f12', 'f13', 'f14', 'f15', 'f16', 'f17'];
+    const adlTotal = adlFields.reduce((sum, field) => sum + (questionnaire[field] || 0), 0);
+    const adlScore = ((adlTotal / 68) * 100).toFixed(0); // max 68 points
+
+    // Function Sports: sp1-sp5
+    const sportsFields = ['sp1', 'sp2', 'sp3', 'sp4', 'sp5'];
+    const sportsTotal = sportsFields.reduce((sum, field) => sum + (questionnaire[field] || 0), 0);
+    const sportsScore = ((sportsTotal / 20) * 100).toFixed(0); // max 20 points
+
+    // Quality of Life: q1-q4
+    const qolFields = ['q1', 'q2', 'q3', 'q4'];
+    const qolTotal = qolFields.reduce((sum, field) => sum + (questionnaire[field] || 0), 0);
+    const qolScore = ((qolTotal / 16) * 100).toFixed(0); // max 16 points
+
+    return {
+      symptoms: symptomScore,
+      stiffness: stiffnessScore,
+      pain: painScore,
+      functionAdl: adlScore,
+      functionSports: sportsScore,
+      qualityOfLife: qolScore,
+    };
+  };
+
+  // Helper function to get STS performance level
+  const getSTSPerformanceLevel = () => {
+    if (!stsAssessment || !demographics) return null;
+    const age = calculateAge();
+    const gender = demographics.gender?.toLowerCase();
+    const reps = stsAssessment.repetition_count;
+
+    // HK benchmark ranges (simplified)
+    if (gender === 'male') {
+      if (age < 60) return reps >= 20 ? 'Excellent' : reps >= 15 ? 'Good' : reps >= 10 ? 'Fair' : 'Poor';
+      else return reps >= 15 ? 'Excellent' : reps >= 12 ? 'Good' : reps >= 8 ? 'Fair' : 'Poor';
+    } else {
+      if (age < 60) return reps >= 18 ? 'Excellent' : reps >= 13 ? 'Good' : reps >= 8 ? 'Fair' : 'Poor';
+      else return reps >= 13 ? 'Excellent' : reps >= 10 ? 'Good' : reps >= 6 ? 'Fair' : 'Poor';
+    }
+  };
+
   if (loading) {
     return (
       <div className="page-container">
@@ -74,7 +166,7 @@ export default function ResultsPage() {
     );
   }
 
-  if (error && !results) {
+  if (error && !demographics) {
     return (
       <div className="page-container">
         <div className="card">
@@ -87,98 +179,156 @@ export default function ResultsPage() {
     );
   }
 
+  const koosScores = calculateKOOSScores();
+  const age = calculateAge();
+  const bmi = calculateBMI();
+  const stsPerformance = getSTSPerformanceLevel();
+
   return (
     <div className="page-container">
       <div className="card results-card">
-        <h1 className="page-title">{t('results.title')}</h1>
-        <p className="page-subtitle">{t('results.subtitle')}</p>
+        <h1 className="page-title">Assessment Dashboard</h1>
+        <p className="page-subtitle">Comprehensive knee osteoarthritis assessment results</p>
 
-        {/* Scores Summary */}
-        {results && (
-          <>
-            <section className="scores-section">
-              <h2>{t('results.summaryTitle')}</h2>
-              <div className="scores-grid">
-                <div className="score-card">
-                  <span className="score-label">{t('results.painScore')}</span>
-                  <span className="score-value">
-                    {results.scores?.pain_score !== undefined
-                      ? Number(results.scores.pain_score).toFixed(2)
-                      : '—'}
-                  </span>
-                </div>
-                <div className="score-card">
-                  <span className="score-label">{t('results.symptomScore')}</span>
-                  <span className="score-value">
-                    {results.scores?.symptom_score !== undefined
-                      ? Number(results.scores.symptom_score).toFixed(2)
-                      : '—'}
-                  </span>
-                </div>
-                <div className="score-card">
-                  <span className="score-label">{t('results.stsScore')}</span>
-                  <span className="score-value">
-                    {results.scores?.sts_score !== undefined
-                      ? Number(results.scores.sts_score).toFixed(2)
-                      : '—'}
-                  </span>
-                </div>
-                <div className="score-card highlight">
-                  <span className="score-label">{t('results.combinedScore')}</span>
-                  <span className="score-value">
-                    {results.scores?.combined_score !== undefined
-                      ? Number(results.scores.combined_score).toFixed(2)
-                      : '—'}
-                  </span>
-                </div>
+        {/* 1. Patient Demographics */}
+        <section className="dashboard-section" style={{marginBottom: '2rem'}}>
+          <h2 style={{marginBottom: '1rem', fontSize: '1.3em', color: '#374151'}}>👤 Patient Demographics</h2>
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem'}}>
+            <div className="info-card" style={{padding: '1rem', background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb'}}>
+              <div style={{fontSize: '0.85em', color: '#6b7280', marginBottom: '0.25rem'}}>Age / Gender</div>
+              <div style={{fontSize: '1.5em', fontWeight: 'bold', color: '#111827'}}>
+                {age || '—'} years / {demographics?.gender || '—'}
               </div>
-            </section>
+            </div>
+            <div className="info-card" style={{padding: '1rem', background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb'}}>
+              <div style={{fontSize: '0.85em', color: '#6b7280', marginBottom: '0.25rem'}}>Height</div>
+              <div style={{fontSize: '1.5em', fontWeight: 'bold', color: '#111827'}}>
+                {demographics?.height_cm || '—'} cm
+              </div>
+            </div>
+            <div className="info-card" style={{padding: '1rem', background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb'}}>
+              <div style={{fontSize: '0.85em', color: '#6b7280', marginBottom: '0.25rem'}}>Weight</div>
+              <div style={{fontSize: '1.5em', fontWeight: 'bold', color: '#111827'}}>
+                {demographics?.weight_kg || '—'} kg
+              </div>
+            </div>
+            <div className="info-card" style={{padding: '1rem', background: '#dbeafe', borderRadius: '8px', border: '1px solid #3b82f6'}}>
+              <div style={{fontSize: '0.85em', color: '#1e40af', marginBottom: '0.25rem'}}>BMI</div>
+              <div style={{fontSize: '1.5em', fontWeight: 'bold', color: '#1e3a8a'}}>
+                {bmi || '—'}
+              </div>
+            </div>
+          </div>
+        </section>
 
-            {/* Exercise Recommendations */}
-            <section className="exercises-section">
-              <h2>{t('results.exercisesTitle')}</h2>
-              {results.recommendations && results.recommendations.length > 0 ? (
-                <div className="exercise-list">
-                  {results.recommendations.map((positionGroup, posIdx) => (
-                    <div key={posIdx} className="position-group">
-                      <h3 className="position-title">
-                        {positionGroup.position} (Multiplier: {Number(positionGroup.position_multiplier).toFixed(2)})
-                      </h3>
-                      {positionGroup.exercises && positionGroup.exercises.map((scoredEx, exIdx) => (
-                        <div key={exIdx} className="exercise-card">
-                          <div className="exercise-header">
-                            <h4 className="exercise-name">
-                              {scoredEx.exercise?.exercise_name || scoredEx.exercise?.exercise_name_ch || 'Unknown'}
-                            </h4>
-                            <span className="exercise-score">
-                              {t('results.finalScore')}: {Number(scoredEx.final_score).toFixed(3)}
-                            </span>
-                          </div>
-                          <div className="exercise-details">
-                            <span className="exercise-tag">
-                              {t('results.difficulty')}: Level {scoredEx.exercise?.difficulty_level || '—'}
-                            </span>
-                            <span className="exercise-tag">
-                              Difficulty Match: {Number(scoredEx.difficulty_score).toFixed(3)}
-                            </span>
-                            <span className="exercise-tag">
-                              Alignment Modifier: {Number(scoredEx.alignment_modifier).toFixed(2)}
-                            </span>
-                            <span className="exercise-tag">
-                              Flexibility Modifier: {Number(scoredEx.flexibility_modifier).toFixed(2)}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p>No exercises recommended.</p>
-              )}
-            </section>
-          </>
-        )}
+        {/* 2. STS Assessment */}
+        <section className="dashboard-section" style={{marginBottom: '2rem'}}>
+          <h2 style={{marginBottom: '1rem', fontSize: '1.3em', color: '#374151'}}>📊 Sit-to-Stand (STS) Assessment</h2>
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem'}}>
+            <div className="info-card" style={{padding: '1rem', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #22c55e'}}>
+              <div style={{fontSize: '0.85em', color: '#166534', marginBottom: '0.25rem'}}>Repetitions</div>
+              <div style={{fontSize: '1.5em', fontWeight: 'bold', color: '#166534'}}>
+                {stsAssessment?.repetition_count || '—'} reps
+              </div>
+              <div style={{fontSize: '0.8em', color: '#166534', marginTop: '0.25rem'}}>
+                Performance: {stsPerformance || '—'}
+              </div>
+            </div>
+            <div className="info-card" style={{padding: '1rem', background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb'}}>
+              <div style={{fontSize: '0.85em', color: '#6b7280', marginBottom: '0.25rem'}}>Knee Alignment</div>
+              <div style={{fontSize: '1.3em', fontWeight: 'bold', color: '#111827'}}>
+                {stsAssessment?.knee_alignment || '—'}
+              </div>
+            </div>
+            <div className="info-card" style={{padding: '1rem', background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb'}}>
+              <div style={{fontSize: '0.85em', color: '#6b7280', marginBottom: '0.25rem'}}>Trunk Sway</div>
+              <div style={{fontSize: '1.3em', fontWeight: 'bold', color: '#111827'}}>
+                {stsAssessment?.trunk_sway || '—'}
+              </div>
+            </div>
+            <div className="info-card" style={{padding: '1rem', background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb'}}>
+              <div style={{fontSize: '0.85em', color: '#6b7280', marginBottom: '0.25rem'}}>Hip Sway</div>
+              <div style={{fontSize: '1.3em', fontWeight: 'bold', color: '#111827'}}>
+                {stsAssessment?.hip_sway || '—'}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 3. KOOS Questionnaire Results */}
+        <section className="dashboard-section" style={{marginBottom: '2rem'}}>
+          <h2 style={{marginBottom: '1rem', fontSize: '1.3em', color: '#374151'}}>📋 KOOS Questionnaire Results</h2>
+          <div style={{overflowX: 'auto'}}>
+            <table style={{width: '100%', borderCollapse: 'collapse', background: '#fff', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)'}}>
+              <thead style={{background: '#f3f4f6'}}>
+                <tr>
+                  <th style={{padding: '0.75rem', textAlign: 'left', fontSize: '0.9em', fontWeight: '600', color: '#374151', borderBottom: '2px solid #e5e7eb'}}>Category</th>
+                  <th style={{padding: '0.75rem', textAlign: 'center', fontSize: '0.9em', fontWeight: '600', color: '#374151', borderBottom: '2px solid #e5e7eb'}}>Score (0-100)</th>
+                  <th style={{padding: '0.75rem', textAlign: 'left', fontSize: '0.9em', fontWeight: '600', color: '#374151', borderBottom: '2px solid #e5e7eb'}}>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style={{borderBottom: '1px solid #f3f4f6'}}>
+                  <td style={{padding: '0.75rem', fontSize: '0.95em'}}>Symptoms</td>
+                  <td style={{padding: '0.75rem', textAlign: 'center', fontSize: '1.2em', fontWeight: 'bold', color: '#2563eb'}}>{koosScores?.symptoms || '—'}</td>
+                  <td style={{padding: '0.75rem'}}>
+                    <span style={{padding: '0.25rem 0.75rem', borderRadius: '12px', fontSize: '0.85em', background: koosScores?.symptoms >= 70 ? '#d1fae5' : koosScores?.symptoms >= 40 ? '#fed7aa' : '#fecaca', color: koosScores?.symptoms >= 70 ? '#065f46' : koosScores?.symptoms >= 40 ? '#92400e' : '#991b1b'}}>
+                      {koosScores?.symptoms >= 70 ? 'Good' : koosScores?.symptoms >= 40 ? 'Moderate' : 'Severe'}
+                    </span>
+                  </td>
+                </tr>
+                <tr style={{borderBottom: '1px solid #f3f4f6'}}>
+                  <td style={{padding: '0.75rem', fontSize: '0.95em'}}>Stiffness</td>
+                  <td style={{padding: '0.75rem', textAlign: 'center', fontSize: '1.2em', fontWeight: 'bold', color: '#2563eb'}}>{koosScores?.stiffness || '—'}</td>
+                  <td style={{padding: '0.75rem'}}>
+                    <span style={{padding: '0.25rem 0.75rem', borderRadius: '12px', fontSize: '0.85em', background: koosScores?.stiffness >= 70 ? '#d1fae5' : koosScores?.stiffness >= 40 ? '#fed7aa' : '#fecaca', color: koosScores?.stiffness >= 70 ? '#065f46' : koosScores?.stiffness >= 40 ? '#92400e' : '#991b1b'}}>
+                      {koosScores?.stiffness >= 70 ? 'Good' : koosScores?.stiffness >= 40 ? 'Moderate' : 'Severe'}
+                    </span>
+                  </td>
+                </tr>
+                <tr style={{borderBottom: '1px solid #f3f4f6'}}>
+                  <td style={{padding: '0.75rem', fontSize: '0.95em'}}>Pain</td>
+                  <td style={{padding: '0.75rem', textAlign: 'center', fontSize: '1.2em', fontWeight: 'bold', color: '#2563eb'}}>{koosScores?.pain || '—'}</td>
+                  <td style={{padding: '0.75rem'}}>
+                    <span style={{padding: '0.25rem 0.75rem', borderRadius: '12px', fontSize: '0.85em', background: koosScores?.pain >= 70 ? '#d1fae5' : koosScores?.pain >= 40 ? '#fed7aa' : '#fecaca', color: koosScores?.pain >= 70 ? '#065f46' : koosScores?.pain >= 40 ? '#92400e' : '#991b1b'}}>
+                      {koosScores?.pain >= 70 ? 'Good' : koosScores?.pain >= 40 ? 'Moderate' : 'Severe'}
+                    </span>
+                  </td>
+                </tr>
+                <tr style={{borderBottom: '1px solid #f3f4f6'}}>
+                  <td style={{padding: '0.75rem', fontSize: '0.95em'}}>Function (ADL)</td>
+                  <td style={{padding: '0.75rem', textAlign: 'center', fontSize: '1.2em', fontWeight: 'bold', color: '#2563eb'}}>{koosScores?.functionAdl || '—'}</td>
+                  <td style={{padding: '0.75rem'}}>
+                    <span style={{padding: '0.25rem 0.75rem', borderRadius: '12px', fontSize: '0.85em', background: koosScores?.functionAdl >= 70 ? '#d1fae5' : koosScores?.functionAdl >= 40 ? '#fed7aa' : '#fecaca', color: koosScores?.functionAdl >= 70 ? '#065f46' : koosScores?.functionAdl >= 40 ? '#92400e' : '#991b1b'}}>
+                      {koosScores?.functionAdl >= 70 ? 'Good' : koosScores?.functionAdl >= 40 ? 'Moderate' : 'Severe'}
+                    </span>
+                  </td>
+                </tr>
+                <tr style={{borderBottom: '1px solid #f3f4f6'}}>
+                  <td style={{padding: '0.75rem', fontSize: '0.95em'}}>Function (Sports)</td>
+                  <td style={{padding: '0.75rem', textAlign: 'center', fontSize: '1.2em', fontWeight: 'bold', color: '#2563eb'}}>{koosScores?.functionSports || '—'}</td>
+                  <td style={{padding: '0.75rem'}}>
+                    <span style={{padding: '0.25rem 0.75rem', borderRadius: '12px', fontSize: '0.85em', background: koosScores?.functionSports >= 70 ? '#d1fae5' : koosScores?.functionSports >= 40 ? '#fed7aa' : '#fecaca', color: koosScores?.functionSports >= 70 ? '#065f46' : koosScores?.functionSports >= 40 ? '#92400e' : '#991b1b'}}>
+                      {koosScores?.functionSports >= 70 ? 'Good' : koosScores?.functionSports >= 40 ? 'Moderate' : 'Severe'}
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{padding: '0.75rem', fontSize: '0.95em'}}>Quality of Life</td>
+                  <td style={{padding: '0.75rem', textAlign: 'center', fontSize: '1.2em', fontWeight: 'bold', color: '#2563eb'}}>{koosScores?.qualityOfLife || '—'}</td>
+                  <td style={{padding: '0.75rem'}}>
+                    <span style={{padding: '0.25rem 0.75rem', borderRadius: '12px', fontSize: '0.85em', background: koosScores?.qualityOfLife >= 70 ? '#d1fae5' : koosScores?.qualityOfLife >= 40 ? '#fed7aa' : '#fecaca', color: koosScores?.qualityOfLife >= 70 ? '#065f46' : koosScores?.qualityOfLife >= 40 ? '#92400e' : '#991b1b'}}>
+                      {koosScores?.qualityOfLife >= 70 ? 'Good' : koosScores?.qualityOfLife >= 40 ? 'Moderate' : 'Severe'}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p style={{marginTop: '0.75rem', fontSize: '0.85em', color: '#6b7280', fontStyle: 'italic'}}>
+            * Higher scores indicate better knee health. Scores: ≥70 = Good, 40-69 = Moderate, &lt;40 = Severe impairment
+          </p>
+        </section>
 
         {/* AI-Enhanced Recommendations (Unified Section) */}
         <section className="llm-section">
