@@ -139,21 +139,69 @@ export default function ResultsPage() {
     };
   };
 
-  // Helper function to get STS performance level
+  // Helper function to get STS performance level (returns translation key)
   const getSTSPerformanceLevel = () => {
     if (!stsAssessment || !demographics) return null;
     const age = calculateAge();
     const gender = demographics.gender?.toLowerCase();
     const reps = stsAssessment.repetition_count;
 
-    // HK benchmark ranges (simplified)
+    // HK benchmark ranges (simplified) - returns translation key
     if (gender === 'male') {
-      if (age < 60) return reps >= 20 ? 'Excellent' : reps >= 15 ? 'Good' : reps >= 10 ? 'Fair' : 'Poor';
-      else return reps >= 15 ? 'Excellent' : reps >= 12 ? 'Good' : reps >= 8 ? 'Fair' : 'Poor';
+      if (age < 60) return reps >= 20 ? 'results.perfExcellent' : reps >= 15 ? 'results.perfGood' : reps >= 10 ? 'results.perfFair' : 'results.perfPoor';
+      else return reps >= 15 ? 'results.perfExcellent' : reps >= 12 ? 'results.perfGood' : reps >= 8 ? 'results.perfFair' : 'results.perfPoor';
     } else {
-      if (age < 60) return reps >= 18 ? 'Excellent' : reps >= 13 ? 'Good' : reps >= 8 ? 'Fair' : 'Poor';
-      else return reps >= 13 ? 'Excellent' : reps >= 10 ? 'Good' : reps >= 6 ? 'Fair' : 'Poor';
+      if (age < 60) return reps >= 18 ? 'results.perfExcellent' : reps >= 13 ? 'results.perfGood' : reps >= 8 ? 'results.perfFair' : 'results.perfPoor';
+      else return reps >= 13 ? 'results.perfExcellent' : reps >= 10 ? 'results.perfGood' : reps >= 6 ? 'results.perfFair' : 'results.perfPoor';
     }
+  };
+
+  // Helper function to translate gender
+  const translateGender = (gender) => {
+    if (!gender) return '—';
+    const genderLower = gender.toLowerCase();
+    if (genderLower === 'male') return t('demographics.optionMale');
+    if (genderLower === 'female') return t('demographics.optionFemale');
+    return gender;
+  };
+
+  // Helper function to translate knee alignment
+  const translateKneeAlignment = (alignment) => {
+    if (!alignment) return '—';
+    const alignmentLower = alignment.toLowerCase();
+    if (alignmentLower === 'normal') return t('sts.kneeNormal');
+    if (alignmentLower === 'valgus') return t('sts.kneeValgus');
+    if (alignmentLower === 'varus') return t('sts.kneeVarus');
+    return alignment;
+  };
+
+  // Helper function to translate sway (present/absent)
+  const translateSway = (sway) => {
+    if (!sway) return '—';
+    const swayLower = sway.toLowerCase();
+    if (swayLower === 'present') return t('sts.present');
+    if (swayLower === 'absent') return t('sts.absent');
+    return sway;
+  };
+
+  // Helper function to get BMI category with color
+  const getBmiCategory = (val) => {
+    if (!val) return null;
+    const v = parseFloat(val);
+    if (v < 18.5) return { label: t('demographics.bmiUnderweight'), color: '#e67e22' };
+    if (v < 25) return { label: t('demographics.bmiNormal'), color: '#27ae60' };
+    if (v < 30) return { label: t('demographics.bmiOverweight'), color: '#e67e22' };
+    return { label: t('demographics.bmiObese'), color: '#e74c3c' };
+  };
+
+  // Helper function to get STS performance color
+  const getSTSPerformanceColor = (performanceKey) => {
+    if (!performanceKey) return '#22c55e'; // default green
+    if (performanceKey === 'results.perfExcellent') return '#22c55e'; // green
+    if (performanceKey === 'results.perfGood') return '#3b82f6'; // blue
+    if (performanceKey === 'results.perfFair') return '#f59e0b'; // amber/orange
+    if (performanceKey === 'results.perfPoor') return '#ef4444'; // red
+    return '#22c55e'; // default green
   };
 
   if (loading) {
@@ -187,69 +235,84 @@ export default function ResultsPage() {
   return (
     <div className="page-container">
       <div className="card results-card">
-        <h1 className="page-title">Assessment Dashboard</h1>
-        <p className="page-subtitle">Comprehensive knee osteoarthritis assessment results</p>
+        <h1 className="page-title">{t('results.title')}</h1>
+        <p className="page-subtitle">{t('results.subtitle')}</p>
 
         {/* 1. Patient Demographics */}
         <section className="dashboard-section" style={{marginBottom: '2rem'}}>
-          <h2 style={{marginBottom: '1rem', fontSize: '1.3em', color: '#374151'}}>👤 Patient Demographics</h2>
+          <h2 style={{marginBottom: '1rem', fontSize: '1.3em', color: '#374151'}}>👤 {t('results.demographicsTitle')}</h2>
           <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem'}}>
             <div className="info-card" style={{padding: '1rem', background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb'}}>
-              <div style={{fontSize: '0.85em', color: '#6b7280', marginBottom: '0.25rem'}}>Age / Gender</div>
+              <div style={{fontSize: '0.85em', color: '#6b7280', marginBottom: '0.25rem'}}>{t('results.ageGender')}</div>
               <div style={{fontSize: '1.5em', fontWeight: 'bold', color: '#111827'}}>
-                {age || '—'} years / {demographics?.gender || '—'}
+                {age || '—'} {t('results.years')} / {translateGender(demographics?.gender)}
               </div>
             </div>
             <div className="info-card" style={{padding: '1rem', background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb'}}>
-              <div style={{fontSize: '0.85em', color: '#6b7280', marginBottom: '0.25rem'}}>Height</div>
+              <div style={{fontSize: '0.85em', color: '#6b7280', marginBottom: '0.25rem'}}>{t('results.height')}</div>
               <div style={{fontSize: '1.5em', fontWeight: 'bold', color: '#111827'}}>
                 {demographics?.height_cm || '—'} cm
               </div>
             </div>
             <div className="info-card" style={{padding: '1rem', background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb'}}>
-              <div style={{fontSize: '0.85em', color: '#6b7280', marginBottom: '0.25rem'}}>Weight</div>
+              <div style={{fontSize: '0.85em', color: '#6b7280', marginBottom: '0.25rem'}}>{t('results.weight')}</div>
               <div style={{fontSize: '1.5em', fontWeight: 'bold', color: '#111827'}}>
                 {demographics?.weight_kg || '—'} kg
               </div>
             </div>
-            <div className="info-card" style={{padding: '1rem', background: '#dbeafe', borderRadius: '8px', border: '1px solid #3b82f6'}}>
-              <div style={{fontSize: '0.85em', color: '#1e40af', marginBottom: '0.25rem'}}>BMI</div>
-              <div style={{fontSize: '1.5em', fontWeight: 'bold', color: '#1e3a8a'}}>
+            <div className="info-card" style={{
+              padding: '1rem',
+              background: bmi && getBmiCategory(bmi) ? `${getBmiCategory(bmi).color}15` : '#dbeafe',
+              borderRadius: '8px',
+              border: `2px solid ${bmi && getBmiCategory(bmi) ? getBmiCategory(bmi).color : '#3b82f6'}`
+            }}>
+              <div style={{fontSize: '0.85em', color: bmi && getBmiCategory(bmi) ? getBmiCategory(bmi).color : '#1e40af', marginBottom: '0.25rem', fontWeight: '600'}}>{t('results.bmi')}</div>
+              <div style={{fontSize: '1.5em', fontWeight: 'bold', color: bmi && getBmiCategory(bmi) ? getBmiCategory(bmi).color : '#1e3a8a'}}>
                 {bmi || '—'}
               </div>
+              {bmi && getBmiCategory(bmi) && (
+                <div style={{fontSize: '0.85em', color: getBmiCategory(bmi).color, marginTop: '0.25rem', fontWeight: 'bold'}}>
+                  {getBmiCategory(bmi).label}
+                </div>
+              )}
             </div>
           </div>
         </section>
 
         {/* 2. STS Assessment */}
         <section className="dashboard-section" style={{marginBottom: '2rem'}}>
-          <h2 style={{marginBottom: '1rem', fontSize: '1.3em', color: '#374151'}}>📊 Sit-to-Stand (STS) Assessment</h2>
+          <h2 style={{marginBottom: '1rem', fontSize: '1.3em', color: '#374151'}}>📊 {t('results.stsTitle')}</h2>
           <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem'}}>
-            <div className="info-card" style={{padding: '1rem', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #22c55e'}}>
-              <div style={{fontSize: '0.85em', color: '#166534', marginBottom: '0.25rem'}}>Repetitions</div>
-              <div style={{fontSize: '1.5em', fontWeight: 'bold', color: '#166534'}}>
-                {stsAssessment?.repetition_count || '—'} reps
+            <div className="info-card" style={{
+              padding: '1rem',
+              background: stsPerformance ? `${getSTSPerformanceColor(stsPerformance)}15` : '#f0fdf4',
+              borderRadius: '8px',
+              border: `2px solid ${stsPerformance ? getSTSPerformanceColor(stsPerformance) : '#22c55e'}`
+            }}>
+              <div style={{fontSize: '0.85em', color: stsPerformance ? getSTSPerformanceColor(stsPerformance) : '#166534', marginBottom: '0.25rem', fontWeight: '600'}}>{t('results.repetitions')}</div>
+              <div style={{fontSize: '1.5em', fontWeight: 'bold', color: stsPerformance ? getSTSPerformanceColor(stsPerformance) : '#166534'}}>
+                {stsAssessment?.repetition_count || '—'} {t('results.reps')}
               </div>
-              <div style={{fontSize: '0.8em', color: '#166534', marginTop: '0.25rem'}}>
-                Performance: {stsPerformance || '—'}
-              </div>
-            </div>
-            <div className="info-card" style={{padding: '1rem', background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb'}}>
-              <div style={{fontSize: '0.85em', color: '#6b7280', marginBottom: '0.25rem'}}>Knee Alignment</div>
-              <div style={{fontSize: '1.3em', fontWeight: 'bold', color: '#111827'}}>
-                {stsAssessment?.knee_alignment || '—'}
-              </div>
-            </div>
-            <div className="info-card" style={{padding: '1rem', background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb'}}>
-              <div style={{fontSize: '0.85em', color: '#6b7280', marginBottom: '0.25rem'}}>Trunk Sway</div>
-              <div style={{fontSize: '1.3em', fontWeight: 'bold', color: '#111827'}}>
-                {stsAssessment?.trunk_sway || '—'}
+              <div style={{fontSize: '0.8em', color: stsPerformance ? getSTSPerformanceColor(stsPerformance) : '#166534', marginTop: '0.25rem', fontWeight: 'bold'}}>
+                {t('results.performance')}: {stsPerformance ? t(stsPerformance) : '—'}
               </div>
             </div>
             <div className="info-card" style={{padding: '1rem', background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb'}}>
-              <div style={{fontSize: '0.85em', color: '#6b7280', marginBottom: '0.25rem'}}>Hip Sway</div>
+              <div style={{fontSize: '0.85em', color: '#6b7280', marginBottom: '0.25rem'}}>{t('results.kneeAlignment')}</div>
               <div style={{fontSize: '1.3em', fontWeight: 'bold', color: '#111827'}}>
-                {stsAssessment?.hip_sway || '—'}
+                {translateKneeAlignment(stsAssessment?.knee_alignment)}
+              </div>
+            </div>
+            <div className="info-card" style={{padding: '1rem', background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb'}}>
+              <div style={{fontSize: '0.85em', color: '#6b7280', marginBottom: '0.25rem'}}>{t('results.trunkSway')}</div>
+              <div style={{fontSize: '1.3em', fontWeight: 'bold', color: '#111827'}}>
+                {translateSway(stsAssessment?.trunk_sway)}
+              </div>
+            </div>
+            <div className="info-card" style={{padding: '1rem', background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb'}}>
+              <div style={{fontSize: '0.85em', color: '#6b7280', marginBottom: '0.25rem'}}>{t('results.hipSway')}</div>
+              <div style={{fontSize: '1.3em', fontWeight: 'bold', color: '#111827'}}>
+                {translateSway(stsAssessment?.hip_sway)}
               </div>
             </div>
           </div>
@@ -257,68 +320,68 @@ export default function ResultsPage() {
 
         {/* 3. KOOS Questionnaire Results */}
         <section className="dashboard-section" style={{marginBottom: '2rem'}}>
-          <h2 style={{marginBottom: '1rem', fontSize: '1.3em', color: '#374151'}}>📋 KOOS Questionnaire Results</h2>
+          <h2 style={{marginBottom: '1rem', fontSize: '1.3em', color: '#374151'}}>📋 {t('results.koosTitle')}</h2>
           <div style={{overflowX: 'auto'}}>
             <table style={{width: '100%', borderCollapse: 'collapse', background: '#fff', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)'}}>
               <thead style={{background: '#f3f4f6'}}>
                 <tr>
-                  <th style={{padding: '0.75rem', textAlign: 'left', fontSize: '0.9em', fontWeight: '600', color: '#374151', borderBottom: '2px solid #e5e7eb'}}>Category</th>
-                  <th style={{padding: '0.75rem', textAlign: 'center', fontSize: '0.9em', fontWeight: '600', color: '#374151', borderBottom: '2px solid #e5e7eb'}}>Score (0-100)</th>
-                  <th style={{padding: '0.75rem', textAlign: 'left', fontSize: '0.9em', fontWeight: '600', color: '#374151', borderBottom: '2px solid #e5e7eb'}}>Status</th>
+                  <th style={{padding: '0.75rem', textAlign: 'left', fontSize: '0.9em', fontWeight: '600', color: '#374151', borderBottom: '2px solid #e5e7eb'}}>{t('results.koosCategory')}</th>
+                  <th style={{padding: '0.75rem', textAlign: 'center', fontSize: '0.9em', fontWeight: '600', color: '#374151', borderBottom: '2px solid #e5e7eb'}}>{t('results.koosScore')}</th>
+                  <th style={{padding: '0.75rem', textAlign: 'left', fontSize: '0.9em', fontWeight: '600', color: '#374151', borderBottom: '2px solid #e5e7eb'}}>{t('results.koosStatus')}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr style={{borderBottom: '1px solid #f3f4f6'}}>
-                  <td style={{padding: '0.75rem', fontSize: '0.95em'}}>Symptoms</td>
+                  <td style={{padding: '0.75rem', fontSize: '0.95em'}}>{t('results.koosSymptoms')}</td>
                   <td style={{padding: '0.75rem', textAlign: 'center', fontSize: '1.2em', fontWeight: 'bold', color: '#2563eb'}}>{koosScores?.symptoms || '—'}</td>
                   <td style={{padding: '0.75rem'}}>
                     <span style={{padding: '0.25rem 0.75rem', borderRadius: '12px', fontSize: '0.85em', background: koosScores?.symptoms >= 70 ? '#d1fae5' : koosScores?.symptoms >= 40 ? '#fed7aa' : '#fecaca', color: koosScores?.symptoms >= 70 ? '#065f46' : koosScores?.symptoms >= 40 ? '#92400e' : '#991b1b'}}>
-                      {koosScores?.symptoms >= 70 ? 'Good' : koosScores?.symptoms >= 40 ? 'Moderate' : 'Severe'}
+                      {koosScores?.symptoms >= 70 ? t('results.koosGood') : koosScores?.symptoms >= 40 ? t('results.koosModerate') : t('results.koosSevere')}
                     </span>
                   </td>
                 </tr>
                 <tr style={{borderBottom: '1px solid #f3f4f6'}}>
-                  <td style={{padding: '0.75rem', fontSize: '0.95em'}}>Stiffness</td>
+                  <td style={{padding: '0.75rem', fontSize: '0.95em'}}>{t('results.koosStiffness')}</td>
                   <td style={{padding: '0.75rem', textAlign: 'center', fontSize: '1.2em', fontWeight: 'bold', color: '#2563eb'}}>{koosScores?.stiffness || '—'}</td>
                   <td style={{padding: '0.75rem'}}>
                     <span style={{padding: '0.25rem 0.75rem', borderRadius: '12px', fontSize: '0.85em', background: koosScores?.stiffness >= 70 ? '#d1fae5' : koosScores?.stiffness >= 40 ? '#fed7aa' : '#fecaca', color: koosScores?.stiffness >= 70 ? '#065f46' : koosScores?.stiffness >= 40 ? '#92400e' : '#991b1b'}}>
-                      {koosScores?.stiffness >= 70 ? 'Good' : koosScores?.stiffness >= 40 ? 'Moderate' : 'Severe'}
+                      {koosScores?.stiffness >= 70 ? t('results.koosGood') : koosScores?.stiffness >= 40 ? t('results.koosModerate') : t('results.koosSevere')}
                     </span>
                   </td>
                 </tr>
                 <tr style={{borderBottom: '1px solid #f3f4f6'}}>
-                  <td style={{padding: '0.75rem', fontSize: '0.95em'}}>Pain</td>
+                  <td style={{padding: '0.75rem', fontSize: '0.95em'}}>{t('results.koosPain')}</td>
                   <td style={{padding: '0.75rem', textAlign: 'center', fontSize: '1.2em', fontWeight: 'bold', color: '#2563eb'}}>{koosScores?.pain || '—'}</td>
                   <td style={{padding: '0.75rem'}}>
                     <span style={{padding: '0.25rem 0.75rem', borderRadius: '12px', fontSize: '0.85em', background: koosScores?.pain >= 70 ? '#d1fae5' : koosScores?.pain >= 40 ? '#fed7aa' : '#fecaca', color: koosScores?.pain >= 70 ? '#065f46' : koosScores?.pain >= 40 ? '#92400e' : '#991b1b'}}>
-                      {koosScores?.pain >= 70 ? 'Good' : koosScores?.pain >= 40 ? 'Moderate' : 'Severe'}
+                      {koosScores?.pain >= 70 ? t('results.koosGood') : koosScores?.pain >= 40 ? t('results.koosModerate') : t('results.koosSevere')}
                     </span>
                   </td>
                 </tr>
                 <tr style={{borderBottom: '1px solid #f3f4f6'}}>
-                  <td style={{padding: '0.75rem', fontSize: '0.95em'}}>Function (ADL)</td>
+                  <td style={{padding: '0.75rem', fontSize: '0.95em'}}>{t('results.koosFunctionAdl')}</td>
                   <td style={{padding: '0.75rem', textAlign: 'center', fontSize: '1.2em', fontWeight: 'bold', color: '#2563eb'}}>{koosScores?.functionAdl || '—'}</td>
                   <td style={{padding: '0.75rem'}}>
                     <span style={{padding: '0.25rem 0.75rem', borderRadius: '12px', fontSize: '0.85em', background: koosScores?.functionAdl >= 70 ? '#d1fae5' : koosScores?.functionAdl >= 40 ? '#fed7aa' : '#fecaca', color: koosScores?.functionAdl >= 70 ? '#065f46' : koosScores?.functionAdl >= 40 ? '#92400e' : '#991b1b'}}>
-                      {koosScores?.functionAdl >= 70 ? 'Good' : koosScores?.functionAdl >= 40 ? 'Moderate' : 'Severe'}
+                      {koosScores?.functionAdl >= 70 ? t('results.koosGood') : koosScores?.functionAdl >= 40 ? t('results.koosModerate') : t('results.koosSevere')}
                     </span>
                   </td>
                 </tr>
                 <tr style={{borderBottom: '1px solid #f3f4f6'}}>
-                  <td style={{padding: '0.75rem', fontSize: '0.95em'}}>Function (Sports)</td>
+                  <td style={{padding: '0.75rem', fontSize: '0.95em'}}>{t('results.koosFunctionSports')}</td>
                   <td style={{padding: '0.75rem', textAlign: 'center', fontSize: '1.2em', fontWeight: 'bold', color: '#2563eb'}}>{koosScores?.functionSports || '—'}</td>
                   <td style={{padding: '0.75rem'}}>
                     <span style={{padding: '0.25rem 0.75rem', borderRadius: '12px', fontSize: '0.85em', background: koosScores?.functionSports >= 70 ? '#d1fae5' : koosScores?.functionSports >= 40 ? '#fed7aa' : '#fecaca', color: koosScores?.functionSports >= 70 ? '#065f46' : koosScores?.functionSports >= 40 ? '#92400e' : '#991b1b'}}>
-                      {koosScores?.functionSports >= 70 ? 'Good' : koosScores?.functionSports >= 40 ? 'Moderate' : 'Severe'}
+                      {koosScores?.functionSports >= 70 ? t('results.koosGood') : koosScores?.functionSports >= 40 ? t('results.koosModerate') : t('results.koosSevere')}
                     </span>
                   </td>
                 </tr>
                 <tr>
-                  <td style={{padding: '0.75rem', fontSize: '0.95em'}}>Quality of Life</td>
+                  <td style={{padding: '0.75rem', fontSize: '0.95em'}}>{t('results.koosQol')}</td>
                   <td style={{padding: '0.75rem', textAlign: 'center', fontSize: '1.2em', fontWeight: 'bold', color: '#2563eb'}}>{koosScores?.qualityOfLife || '—'}</td>
                   <td style={{padding: '0.75rem'}}>
                     <span style={{padding: '0.25rem 0.75rem', borderRadius: '12px', fontSize: '0.85em', background: koosScores?.qualityOfLife >= 70 ? '#d1fae5' : koosScores?.qualityOfLife >= 40 ? '#fed7aa' : '#fecaca', color: koosScores?.qualityOfLife >= 70 ? '#065f46' : koosScores?.qualityOfLife >= 40 ? '#92400e' : '#991b1b'}}>
-                      {koosScores?.qualityOfLife >= 70 ? 'Good' : koosScores?.qualityOfLife >= 40 ? 'Moderate' : 'Severe'}
+                      {koosScores?.qualityOfLife >= 70 ? t('results.koosGood') : koosScores?.qualityOfLife >= 40 ? t('results.koosModerate') : t('results.koosSevere')}
                     </span>
                   </td>
                 </tr>
@@ -326,15 +389,15 @@ export default function ResultsPage() {
             </table>
           </div>
           <p style={{marginTop: '0.75rem', fontSize: '0.85em', color: '#6b7280', fontStyle: 'italic'}}>
-            * Higher scores indicate better knee health. Scores: ≥70 = Good, 40-69 = Moderate, &lt;40 = Severe impairment
+            {t('results.koosNote')}
           </p>
         </section>
 
         {/* AI-Enhanced Recommendations (Unified Section) */}
         <section className="llm-section">
-          <h2>🤖 AI-Enhanced Recommendations</h2>
+          <h2>🤖 {t('results.llmTitle')}</h2>
           <p style={{fontSize: '0.9em', color: '#666', marginBottom: '1rem'}}>
-            Choose an AI model to generate personalized exercise recommendations
+            {t('results.llmSubtitle')}
           </p>
 
           {/* Show buttons only if neither result exists and not loading */}
@@ -345,14 +408,14 @@ export default function ResultsPage() {
                 onClick={handleLLM}
                 style={{flex: '1', minWidth: '200px'}}
               >
-                Get AI Recommendations (OpenAI)
+                {t('results.llmButtonOpenAI')}
               </button>
               <button
                 className="btn btn-accent"
                 onClick={handleDeepSeek}
                 style={{flex: '1', minWidth: '200px'}}
               >
-                Get AI Recommendations (DeepSeek)
+                {t('results.llmButtonDeepSeek')}
               </button>
             </div>
           )}
@@ -375,11 +438,11 @@ export default function ResultsPage() {
                 animation: 'spin 1s linear infinite'
               }}></div>
               <p style={{fontSize: '1.1em', color: '#666'}}>
-                Generating AI Recommendations...
+                {t('results.llmGenerating')}
               </p>
               {deepseekLoading && (
                 <p style={{fontSize: '0.9em', color: '#888'}}>
-                  (This may take 1-2 minutes)
+                  {t('results.llmWaitTime')}
                 </p>
               )}
             </div>
@@ -395,7 +458,7 @@ export default function ResultsPage() {
                 marginBottom: '1rem',
                 display: 'inline-block'
               }}>
-                <strong>✨ Powered by OpenAI</strong>
+                <strong>✨ {t('results.llmPoweredByOpenAI')}</strong>
               </div>
               {llmResults.clinical_reasoning && (
                 <div className="llm-reasoning" style={{
@@ -445,7 +508,7 @@ export default function ResultsPage() {
                 marginBottom: '1rem',
                 display: 'inline-block'
               }}>
-                <strong>🤖 Powered by DeepSeek (Two-LLM Safety System)</strong>
+                <strong>🤖 {t('results.llmPoweredByDeepSeek')}</strong>
               </div>
               {/* Biomechanical Targets */}
               {deepseekResults.biomechanical_targets && deepseekResults.biomechanical_targets.length > 0 && (

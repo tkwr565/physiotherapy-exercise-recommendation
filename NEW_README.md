@@ -1,6 +1,15 @@
 # Physiotherapy Exercise Recommendation System
 
-A full-stack application that provides personalized knee exercise recommendations based on clinical assessments (KOOS/WOMAC questionnaire and 30-second Sit-to-Stand test). Features both rule-based algorithm and AI-enhanced (LLM) recommendations.
+A full-stack application that provides personalized knee exercise recommendations based on clinical assessments (KOOS/WOMAC questionnaire and 30-second Sit-to-Stand test). Features rule-based algorithm and dual AI-enhanced (LLM) recommendation options with comprehensive bilingual dashboard.
+
+## Key Features
+
+- **Bilingual Support** — Full English and Traditional Chinese (繁體中文) interface
+- **Comprehensive Assessment Dashboard** — Visual presentation of patient demographics, STS performance, and KOOS questionnaire results with color-coded health indicators
+- **Dual AI Recommendation Systems**:
+  - **OpenAI (GPT-4o-mini)** — Single-LLM clinical reasoning enhancement
+  - **DeepSeek** — Two-LLM safety-verified architecture with biomechanical targeting
+- **Rule-Based Algorithm** — Fallback recommendation engine based on clinical guidelines
 
 ## Architecture
 
@@ -11,15 +20,13 @@ A full-stack application that provides personalized knee exercise recommendation
 │  (port 3000) │     │  (port 8000) │     │  (port 5432) │
 └─────────────┘     └──────────────┘     └──────────────┘
                           │
-                          ▼
-                    ┌──────────────┐
-                    │   OpenAI     │
-                    │  (optional)  │
-                    └──────────────┘
+                          ├──────▶ OpenAI API (optional)
+                          │
+                          └──────▶ DeepSeek API (optional)
 ```
 
-- **Frontend** — React 18, React Router, Axios, Vite, served via Nginx in production
-- **Backend** — Python 3.12, FastAPI, SQLAlchemy, LangChain, LangChain-OpenAI
+- **Frontend** — React 18, React Router, Axios, Vite, i18n, served via Nginx in production
+- **Backend** — Python 3.12, FastAPI, SQLAlchemy, LangChain, LangChain-OpenAI, LangChain-DeepSeek
 - **Database** — PostgreSQL 16
 
 ## Quick Start with Docker
@@ -42,8 +49,11 @@ Edit `.env` with your settings:
 
 | Variable | Description | Default |
 |---|---|---|
-| `OPENAI_API_KEY` | OpenAI API key for LLM recommendations (optional) | _(empty — falls back to algorithm)_ |
+| `OPENAI_API_KEY` | OpenAI API key for GPT-4o-mini recommendations (optional) | _(empty)_ |
+| `DEEPSEEK_API_KEY` | DeepSeek API key for two-LLM safety system (optional) | _(empty)_ |
 | `PHYSIO_PASSCODE` | Access passcode for patients | `physio2024` |
+
+**Note:** At least one AI API key is recommended to enable LLM-enhanced recommendations. The system works without API keys using the rule-based algorithm only.
 
 ### 2. Build & run
 
@@ -69,6 +79,7 @@ This will:
 2. Enter the passcode (default: `physio2024` from `.env`)
 3. Enter a username to create/login
 4. Complete the assessment flow: Demographics → Questionnaire → STS Assessment → Results
+5. On the Results Dashboard, optionally click "Get AI Recommendations" to generate LLM-enhanced exercise plans
 
 ### 4. Stop
 
@@ -101,6 +112,7 @@ pip install -r requirements.txt
 export DATABASE_URL="postgresql://user:password@localhost:5432/physio_db"
 export PHYSIO_PASSCODE="physio2024"
 export OPENAI_API_KEY="sk-..."  # optional
+export DEEPSEEK_API_KEY="sk-..."  # optional
 
 # Run the server
 uvicorn app.main:app --reload --port 8000
@@ -146,8 +158,13 @@ The Vite dev server runs on `http://localhost:5173` and proxies `/api/*` request
 │       │   ├── exercises.py
 │       │   └── recommendations.py
 │       └── services/
-│           ├── algorithm.py    # Rule-based recommendation engine
-│           └── llm_recommendation.py  # LangChain LLM enhancement
+│           ├── algorithm.py           # Rule-based recommendation engine
+│           ├── llm_recommendation.py  # OpenAI GPT-4o-mini integration
+│           └── llm_deepseek/          # DeepSeek two-LLM system
+│               ├── deepseek_recommendation_service.py  # Main orchestrator
+│               ├── data_transformer.py                  # Patient profile structuring
+│               ├── llm1_recommendation.py               # Exercise recommendation agent
+│               └── llm2_safety_verification.py         # Safety verification agent
 │
 ├── frontend/
 │   ├── Dockerfile
@@ -198,7 +215,8 @@ The Vite dev server runs on `http://localhost:5173` and proxies `/api/*` request
 | GET | `/api/sts-assessment/{username}` | Get STS assessment |
 | GET | `/api/exercises/` | List all exercises |
 | POST | `/api/recommendations/algorithm` | Get algorithm-based recommendations |
-| POST | `/api/recommendations/llm` | Get LLM-enhanced recommendations |
+| POST | `/api/recommendations/llm` | Get OpenAI GPT-4o-mini enhanced recommendations |
+| POST | `/api/recommendations/deepseek` | Get DeepSeek two-LLM safety-verified recommendations |
 
 ## Algorithm
 
@@ -211,13 +229,29 @@ The recommendation engine uses a **two-layer ranking system**:
    - Flexibility modifier (based on toe-touch test)
    - Core stability filter (based on trunk/hip sway)
 
-## LLM Enhancement
+## AI-Enhanced Recommendations
 
-When an OpenAI API key is provided, the system enhances recommendations using GPT-4o-mini via LangChain:
-- Validates algorithm recommendations against clinical reasoning
-- Provides exercise-specific rationale
-- Can adjust ordering based on holistic patient profile
-- Falls back gracefully to algorithm-only results if API key is missing
+The system offers two AI-powered recommendation engines, each with distinct advantages:
+
+### OpenAI (GPT-4o-mini) - Single LLM Approach
+
+When an OpenAI API key is configured:
+- Uses GPT-4o-mini via LangChain for clinical reasoning enhancement
+- Validates algorithm recommendations against evidence-based guidelines
+- Provides detailed exercise-specific rationale
+- Adjusts exercise selection based on holistic patient profile
+- **Best for:** Quick, clinically-reasoned recommendations with natural language explanations
+
+### DeepSeek - Two-LLM Safety Architecture
+
+When a DeepSeek API key is configured:
+- **LLM #1 (Recommendation Agent):** Analyzes patient biomechanics and generates exercise candidates
+- **LLM #2 (Safety Verification Agent):** Independently reviews recommendations for safety concerns and contraindications
+- Provides biomechanical target identification and safety rationale
+- Implements separation of concerns for enhanced clinical safety
+- **Best for:** Maximum safety assurance with dual-layer verification
+
+Both systems fall back gracefully to the rule-based algorithm if API keys are not configured.
 
 ## Exercise Data Setup
 
@@ -246,8 +280,42 @@ docker compose up --build
 
 ## Bilingual Support
 
-The application supports:
+The application provides comprehensive bilingual support:
 - **English** (default)
 - **Traditional Chinese (繁體中文)**
 
+**Translated Components:**
+- All UI elements, navigation, and labels
+- Patient demographics and assessment forms
+- KOOS questionnaire sections and questions
+- Results dashboard with color-coded health indicators
+- AI recommendation titles and interface elements
+
+**Note:** LLM-generated recommendation content (clinical reasoning, exercise rationale) is generated in the selected language by passing the language parameter to the AI models.
+
 Toggle between languages using the language button in the header.
+
+## Results Dashboard
+
+The Results page displays a comprehensive assessment dashboard with four main sections:
+
+### 1. Patient Demographics
+- Age, Gender, Height, Weight
+- **BMI with color-coded health category** (Underweight/Normal/Overweight/Obese)
+
+### 2. STS Assessment Results
+- **30-second repetition count with performance rating** (Excellent/Good/Fair/Poor) based on HK normative data
+- Knee alignment (Normal/Valgus/Varus)
+- Trunk and hip sway observations
+
+### 3. KOOS Questionnaire Scores
+- Six categories: Symptoms, Stiffness, Pain, Function (ADL), Function (Sports), Quality of Life
+- **Color-coded status indicators:** Green (≥70), Orange (40-69), Red (<40)
+- Scores normalized to 0-100 scale
+
+### 4. AI-Enhanced Recommendations
+- Choose between OpenAI or DeepSeek recommendation engines
+- Displays biomechanical targets, clinical reasoning, and personalized exercise prescription
+- Loading indicator with estimated wait time (1-2 minutes for DeepSeek)
+
+All dashboard cards use **dynamic color coding** to provide immediate visual feedback on health status.
