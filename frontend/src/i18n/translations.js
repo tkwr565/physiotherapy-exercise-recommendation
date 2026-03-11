@@ -66,6 +66,13 @@ export const translations = {
       absent: 'Absent',
       submitButton: 'Continue to Results',
       backButton: 'Back to Questionnaire',
+      // Mode selection
+      modeSelectionPrompt: 'Choose how you would like to complete the assessment:',
+      videoModeButton: 'Record Video with Real-Time Guidance',
+      manualModeButton: 'Enter Results Manually',
+      videoMode: 'Video Mode',
+      manualMode: 'Manual Entry',
+      videoModeInstructions: 'Follow the on-screen guidance to record your 30-second sit-to-stand test. The system will automatically analyze your movement.',
     },
     results: {
       title: 'Assessment Dashboard',
@@ -184,6 +191,13 @@ export const translations = {
       absent: '不存在',
       submitButton: '繼續查看結果',
       backButton: '返回問卷',
+      // Mode selection
+      modeSelectionPrompt: '選擇您希望完成評估的方式：',
+      videoModeButton: '錄製視頻並獲得實時指導',
+      manualModeButton: '手動輸入結果',
+      videoMode: '視頻模式',
+      manualMode: '手動輸入',
+      videoModeInstructions: '按照屏幕指示錄製您的30秒坐站測試。系統將自動分析您的動作。',
     },
     results: {
       title: '評估儀表板',

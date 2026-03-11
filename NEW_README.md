@@ -14,20 +14,50 @@ A full-stack application that provides personalized knee exercise recommendation
 ## Architecture
 
 ```
-┌─────────────┐     ┌──────────────┐     ┌──────────────┐
-│   Frontend   │────▶│   Backend    │────▶│  PostgreSQL  │
-│  React/Vite  │     │   FastAPI    │     │   Database   │
-│  (port 3000) │     │  (port 8000) │     │  (port 5432) │
-└─────────────┘     └──────────────┘     └──────────────┘
+                    HTTPS (Port 443)
                           │
-                          ├──────▶ OpenAI API (optional)
+                    ┌─────▼─────┐
+                    │   Nginx   │  (SSL Termination)
+                    │  (Alpine) │
+                    └─────┬─────┘
                           │
-                          └──────▶ DeepSeek API (optional)
+         ┌────────────────┴────────────────┐
+         │                                 │
+    ┌────▼─────┐                    ┌─────▼──────┐
+    │ Frontend │                    │  Backend   │───┐
+    │  React   │                    │  FastAPI   │   │
+    │  (Vite)  │                    │ (port 8000)│   │
+    └──────────┘                    └─────┬──────┘   │
+                                          │          │
+                                    ┌─────▼──────┐   │
+                                    │ PostgreSQL │   │
+                                    │  Database  │   │
+                                    │ (port 5432)│   │
+                                    └────────────┘   │
+                                                     │
+                    ┌────────────────────────────────┘
+                    │
+         ┌──────────┴───────────┐
+         │                      │
+    ┌────▼─────┐         ┌─────▼───────┐
+    │  OpenAI  │         │  DeepSeek   │
+    │   API    │         │     API     │
+    │(optional)│         │  (optional) │
+    └──────────┘         └─────────────┘
 ```
 
-- **Frontend** — React 18, React Router, Axios, Vite, i18n, served via Nginx in production
+- **Nginx** — SSL termination, reverse proxy, serves frontend (Alpine Linux)
+- **Frontend** — React 18, React Router, Axios, Vite, i18n, MediaPipe Pose (client-side)
 - **Backend** — Python 3.12, FastAPI, SQLAlchemy, LangChain, LangChain-OpenAI, LangChain-DeepSeek
 - **Database** — PostgreSQL 16
+
+### STS Video Assessment Feature
+
+The system includes real-time posture validation for the 30-second Sit-to-Stand test using MediaPipe Pose:
+- **Client-side pose detection** — Runs in browser using MediaPipe Pose Lite (GPU-accelerated)
+- **Real-time feedback** — Validates stance width, foot rotation, and body placement
+- **Visual guidance** — Skeleton overlay and validation panel guide users to correct positioning
+- **HTTPS required** — Camera access requires secure connection (handled by Nginx SSL)
 
 ## Quick Start with Docker
 
@@ -62,24 +92,52 @@ docker compose up --build
 ```
 
 This will:
-1. Start a **PostgreSQL** database
-2. Start the **FastAPI backend** (auto-creates tables and seeds exercise data)
-3. Build and start the **React frontend**
+1. Start a **PostgreSQL** database (port 5432)
+2. Start the **FastAPI backend** (port 8000, auto-creates tables and seeds exercise data)
+3. Build and start the **React frontend** (internal port 80)
+4. Start **Nginx reverse proxy** with SSL termination (ports 80→443, 443)
 
 ### 3. Access the application
 
+#### Local Development (Desktop Browser)
+
 | Service | URL |
 |---|---|
-| Frontend | [http://localhost:3000](http://localhost:3000) |
+| **Frontend (HTTPS)** | [https://localhost](https://localhost) |
+| Frontend (HTTP) | [http://localhost](http://localhost) (auto-redirects to HTTPS) |
 | Backend API | [http://localhost:8000](http://localhost:8000) |
 | API Docs (Swagger) | [http://localhost:8000/docs](http://localhost:8000/docs) |
 
+#### Mobile Testing (Camera Features)
+
+For testing camera features on mobile devices:
+
+1. Find your local IP address:
+   ```bash
+   # Windows
+   ipconfig
+   # Look for "IPv4 Address" under your network adapter (e.g., 192.168.1.118)
+
+   # macOS/Linux
+   ifconfig | grep "inet "
+   ```
+
+2. Access from mobile device: **`https://YOUR_LOCAL_IP`** (e.g., `https://192.168.1.118`)
+
+3. Accept the security warning:
+   - Chrome: "Your connection is not private" → Advanced → Proceed
+   - Safari: "This Connection Is Not Private" → Show Details → Visit Website
+   - The self-signed certificate is safe for local development
+
 **First-time usage:**
-1. Navigate to [http://localhost:3000](http://localhost:3000)
-2. Enter the passcode (default: `physio2024` from `.env`)
-3. Enter a username to create/login
-4. Complete the assessment flow: Demographics → Questionnaire → STS Assessment → Results
-5. On the Results Dashboard, optionally click "Get AI Recommendations" to generate LLM-enhanced exercise plans
+1. Navigate to `https://localhost` (or `https://YOUR_LOCAL_IP` on mobile)
+2. Accept the browser security warning for the self-signed certificate
+3. Enter the passcode (default: `physio2024` from `.env`)
+4. Enter a username to create/login
+5. Complete the assessment flow: Demographics → Questionnaire → **STS Assessment** → Results
+   - **Manual mode**: Enter results manually (traditional form)
+   - **Video mode**: Use camera for real-time posture validation (requires HTTPS)
+6. On the Results Dashboard, optionally click "Get AI Recommendations" to generate LLM-enhanced exercise plans
 
 ### 4. Stop
 
@@ -135,8 +193,15 @@ The Vite dev server runs on `http://localhost:5173` and proxies `/api/*` request
 ## Project Structure
 
 ```
-├── docker-compose.yml          # Docker orchestration
+├── docker-compose.yml          # Docker orchestration with Nginx
 ├── .env.example                # Environment variable template
+├── .gitignore                  # Git ignore rules (protects .env and SSL keys)
+│
+├── nginx/                      # SSL termination and reverse proxy
+│   ├── nginx.conf              # Nginx configuration
+│   └── ssl/
+│       ├── fullchain.pem       # Public SSL certificate (safe to commit)
+│       └── privkey.pem         # Private SSL key (GIT-IGNORED)
 │
 ├── backend/
 │   ├── Dockerfile
@@ -168,9 +233,12 @@ The Vite dev server runs on `http://localhost:5173` and proxies `/api/*` request
 │
 ├── frontend/
 │   ├── Dockerfile
-│   ├── nginx.conf              # Nginx config with API proxy
+│   ├── nginx.conf              # Production Nginx config (in container)
 │   ├── package.json
 │   ├── vite.config.js
+│   ├── public/
+│   │   └── models/
+│   │       └── pose_landmarker_lite.task  # MediaPipe Pose model (5.8 MB)
 │   └── src/
 │       ├── main.jsx
 │       ├── App.jsx
@@ -179,13 +247,31 @@ The Vite dev server runs on `http://localhost:5173` and proxies `/api/*` request
 │       │   ├── AuthContext.jsx
 │       │   └── LanguageContext.jsx
 │       ├── i18n/translations.js
+│       ├── lib/                # MediaPipe utilities
+│       │   ├── mediapipeAdapter.js   # Landmark to body keypoints converter
+│       │   └── validators.js         # Posture validation logic
+│       ├── hooks/              # React hooks for video features
+│       │   ├── useCamera.js          # Camera stream management
+│       │   ├── usePoseLandmarker.js  # MediaPipe pose detection
+│       │   └── useRecordingFlow.js   # Video recording state machine
 │       ├── pages/
 │       │   ├── HomePage.jsx
 │       │   ├── DemographicsPage.jsx
 │       │   ├── QuestionnairePage.jsx
-│       │   ├── STSAssessmentPage.jsx
+│       │   ├── STSAssessmentPage.jsx  # Mode selector (manual/video)
 │       │   └── ResultsPage.jsx
-│       ├── components/Header.jsx
+│       ├── components/
+│       │   ├── Header.jsx
+│       │   └── sts-video/      # Video assessment UI components
+│       │       ├── VideoSTSAssessment.jsx  # Main video component
+│       │       ├── CameraView.jsx
+│       │       ├── LoadingScreen.jsx
+│       │       ├── CountdownOverlay.jsx
+│       │       ├── RecordingBar.jsx
+│       │       ├── PreviewModal.jsx
+│       │       ├── UploadingScreen.jsx
+│       │       ├── ResultsScreen.jsx
+│       │       └── ErrorScreen.jsx
 │       └── styles/shared.css
 │
 └── database/
@@ -319,3 +405,128 @@ The Results page displays a comprehensive assessment dashboard with four main se
 - Loading indicator with estimated wait time (1-2 minutes for DeepSeek)
 
 All dashboard cards use **dynamic color coding** to provide immediate visual feedback on health status.
+
+## Production Deployment on VM
+
+For production deployment on a Virtual Machine with a domain name:
+
+### 1. SSL Certificate Setup
+
+Replace the self-signed certificate with a real SSL certificate from Let's Encrypt:
+
+```bash
+# On your VM, install certbot
+sudo apt update
+sudo apt install certbot
+
+# Stop the application
+docker compose down
+
+# Generate SSL certificate (replace yourdomain.com)
+sudo certbot certonly --standalone -d yourdomain.com -d www.yourdomain.com
+
+# Copy certificates to nginx/ssl/
+sudo cp /etc/letsencrypt/live/yourdomain.com/fullchain.pem nginx/ssl/
+sudo cp /etc/letsencrypt/live/yourdomain.com/privkey.pem nginx/ssl/
+
+# Set proper permissions
+sudo chown $USER:$USER nginx/ssl/*.pem
+```
+
+### 2. Update Configuration
+
+**Update `nginx/nginx.conf`** (if needed):
+- Change `server_name _;` to `server_name yourdomain.com www.yourdomain.com;`
+
+**Update `docker-compose.yml`**:
+```yaml
+backend:
+  environment:
+    CORS_ORIGINS: https://yourdomain.com,https://www.yourdomain.com
+```
+
+**Update `.env`**:
+```bash
+# Production values
+PHYSIO_PASSCODE=your_secure_passcode_here
+POSTGRES_PASSWORD=secure_production_password
+```
+
+### 3. Deploy
+
+```bash
+docker compose up -d --build
+```
+
+### 4. SSL Certificate Auto-Renewal
+
+Set up automatic certificate renewal:
+
+```bash
+# Create renewal script
+cat > ~/renew-ssl.sh << 'EOF'
+#!/bin/bash
+docker compose -f /path/to/docker-compose.yml down
+certbot renew --quiet
+cp /etc/letsencrypt/live/yourdomain.com/fullchain.pem /path/to/nginx/ssl/
+cp /etc/letsencrypt/live/yourdomain.com/privkey.pem /path/to/nginx/ssl/
+docker compose -f /path/to/docker-compose.yml up -d
+EOF
+
+chmod +x ~/renew-ssl.sh
+
+# Add to crontab (runs at 2 AM on the 1st of each month)
+(crontab -l 2>/dev/null; echo "0 2 1 * * ~/renew-ssl.sh") | crontab -
+```
+
+### 5. Firewall Configuration
+
+```bash
+# Allow HTTPS and HTTP
+sudo ufw allow 443/tcp
+sudo ufw allow 80/tcp
+sudo ufw enable
+```
+
+### Production Security Checklist
+
+- ✅ Use real SSL certificates (Let's Encrypt)
+- ✅ Change default passwords in `.env` and `docker-compose.yml`
+- ✅ Set strong `PHYSIO_PASSCODE`
+- ✅ Configure firewall (allow only 80, 443, and SSH)
+- ✅ Enable automatic SSL renewal
+- ✅ Regular database backups (`docker compose exec db pg_dump`)
+- ✅ Monitor logs: `docker compose logs -f`
+- ✅ Keep Docker images updated: `docker compose pull && docker compose up -d`
+
+## SSL Certificate Management
+
+### Development (Self-Signed Certificate)
+
+The repository includes a self-signed certificate valid for local development:
+- **Location**: `nginx/ssl/fullchain.pem` (public) and `nginx/ssl/privkey.pem` (private, git-ignored)
+- **Valid for**: Local IP addresses (e.g., 192.168.1.118)
+- **Browser warning**: Accept once per device
+- **Security**: Safe for local development, NOT for production
+
+### Production (Let's Encrypt Certificate)
+
+For production with a domain name, use Let's Encrypt for free, trusted SSL certificates:
+- **Validity**: 90 days (auto-renewable)
+- **Cost**: Free
+- **Browser trust**: All browsers trust Let's Encrypt
+- **Setup time**: ~5 minutes
+
+### Regenerating Development Certificate
+
+If you need to regenerate the development certificate (e.g., for a different IP):
+
+```bash
+cd nginx/ssl
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout privkey.pem -out fullchain.pem \
+  -subj "//C=US\ST=State\L=City\O=PhysioAIign\CN=YOUR_LOCAL_IP"
+
+# Example for IP 192.168.1.118:
+# ... -subj "//C=US\ST=State\L=City\O=PhysioAIign\CN=192.168.1.118"
+```

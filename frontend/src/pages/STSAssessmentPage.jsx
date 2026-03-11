@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { getSTSAssessment, upsertSTSAssessment } from '../services/api';
+import { VideoSTSAssessment } from '../components/sts-video/VideoSTSAssessment';
 
 export default function STSAssessmentPage() {
   const { currentUser } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
 
+  const [assessmentMode, setAssessmentMode] = useState(null); // null | 'manual' | 'video'
   const [form, setForm] = useState({
     repetitions: '',
     knee_alignment: 'normal',
@@ -62,10 +64,61 @@ export default function STSAssessmentPage() {
     }
   };
 
+  // Mode selection screen
+  if (assessmentMode === null) {
+    return (
+      <div className="page-container">
+        <div className="card">
+          <h1 className="page-title">{t('sts.title')}</h1>
+          <p className="page-subtitle">{t('sts.subtitle')}</p>
+
+          <div className="info-box">
+            <p>{t('sts.modeSelectionPrompt')}</p>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '2rem' }}>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => setAssessmentMode('video')}
+              style={{ padding: '1.5rem', fontSize: '1.1rem' }}
+            >
+              📹 {t('sts.videoModeButton')}
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setAssessmentMode('manual')}
+              style={{ padding: '1.5rem', fontSize: '1.1rem' }}
+            >
+              ✏️ {t('sts.manualModeButton')}
+            </button>
+          </div>
+
+          <div className="form-actions" style={{ marginTop: '2rem' }}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => navigate('/questionnaire')}
+            >
+              {t('sts.backButton')}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Video mode - Real-time validation component
+  if (assessmentMode === 'video') {
+    return <VideoSTSAssessment onBack={() => setAssessmentMode(null)} />;
+  }
+
+  // Manual mode (existing form)
   return (
     <div className="page-container">
       <div className="card">
-        <h1 className="page-title">{t('sts.title')}</h1>
+        <h1 className="page-title">{t('sts.title')} - {t('sts.manualMode')}</h1>
         <p className="page-subtitle">{t('sts.subtitle')}</p>
 
         <div className="info-box">
@@ -136,9 +189,9 @@ export default function STSAssessmentPage() {
             <button
               type="button"
               className="btn btn-secondary"
-              onClick={() => navigate('/questionnaire')}
+              onClick={() => setAssessmentMode(null)}
             >
-              {t('sts.backButton')}
+              {t('common.back')}
             </button>
             <button type="submit" className="btn btn-primary" disabled={loading}>
               {loading ? t('common.loading') : t('sts.submitButton')}

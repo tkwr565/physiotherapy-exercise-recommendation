@@ -31,3 +31,7 @@ dist-ssr
 # Custom folders
 .claude/
 ammend/
+
+# SSL Certificates (private keys should never be committed)
+nginx/ssl/privkey.pem
+nginx/ssl/*.key
