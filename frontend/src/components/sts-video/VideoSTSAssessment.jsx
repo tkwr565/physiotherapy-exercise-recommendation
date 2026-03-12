@@ -1,35 +1,57 @@
 import { useEffect, useRef } from 'react';
 import { useCamera }         from '../../hooks/useCamera';
 import { usePoseLandmarker } from '../../hooks/usePoseLandmarker';
+import { useRecordingFlow }  from '../../hooks/useRecordingFlow';
+import { uploadVideo }       from '../../services/api';
+import { useLanguage }       from '../../context/LanguageContext';
 
 import { CameraView }       from './CameraView';
 import { LoadingScreen }    from './LoadingScreen';
+import { CountdownOverlay } from './CountdownOverlay';
+import { RecordingBar }     from './RecordingBar';
+import { PreviewModal }     from './PreviewModal';
+import { UploadingScreen }  from './UploadingScreen';
+import { ResultsScreen }    from './ResultsScreen';
+import { ErrorScreen }      from './ErrorScreen';
 
 /**
- * VideoSTSAssessment - Real-time posture validation for STS test setup
+ * VideoSTSAssessment - Complete video-based STS assessment with recording and analysis
  *
- * This component provides real-time guidance to help users position themselves
- * correctly before performing the STS assessment. It validates:
- * - Stance width (feet shoulder-width apart)
- * - Foot rotation (feet pointing forward)
- * - Body placement (entire body visible in frame)
- *
- * Future: Will integrate video recording and backend analysis
+ * State Flow: VALIDATING → COUNTDOWN → RECORDING → PREVIEW → UPLOADING → RESULTS/ERROR
  *
  * @param {function} onBack - Callback to return to mode selection
+ * @param {function} onComplete - Callback with analysis results for saving to database
  */
-export function VideoSTSAssessment({ onBack }) {
+export function VideoSTSAssessment({ onBack, onComplete }) {
+  const { t } = useLanguage();
   const canvasRef = useRef(null);
 
+  // Camera setup
   const { videoRef, streamRef, isReady, error: cameraError } = useCamera();
 
+  // Recording flow state machine
+  const {
+    phase,
+    countdown,
+    secondsLeft,
+    recordedBlob,
+    analysisResult,
+    errorMessage,
+    uploadProgress,
+    onReportChange,
+    handleConfirm,
+    handleRetake,
+  } = useRecordingFlow(streamRef, uploadVideo);
+
+  // Pose detection and validation
   const { isModelLoaded } = usePoseLandmarker(
     videoRef, canvasRef,
     isReady,
-    'VALIDATING',  // phase - currently always in validation mode
-    null,          // countdown
-    null,          // secondsLeft
-    () => {}       // onReportChange - placeholder for now
+    phase,
+    countdown,
+    secondsLeft,
+    onReportChange,
+    t
   );
 
   // Add CSS animation for spinner
@@ -52,12 +74,49 @@ export function VideoSTSAssessment({ onBack }) {
       {/* Camera + canvas always mounted so stream starts immediately */}
       <CameraView videoRef={videoRef} canvasRef={canvasRef} />
 
+      {/* Loading screen */}
       {showLoading && (
         <LoadingScreen cameraError={cameraError} isModelLoaded={isModelLoaded} />
       )}
 
-      {/* Back button overlay */}
-      {!showLoading && (
+      {/* Countdown overlay (3, 2, 1) */}
+      {phase === 'COUNTDOWN' && <CountdownOverlay countdown={countdown} />}
+
+      {/* Recording progress bar */}
+      {phase === 'RECORDING' && <RecordingBar secondsLeft={secondsLeft} />}
+
+      {/* Preview modal */}
+      {phase === 'PREVIEW' && (
+        <PreviewModal
+          videoBlob={recordedBlob}
+          onConfirm={handleConfirm}
+          onRetake={handleRetake}
+        />
+      )}
+
+      {/* Uploading screen */}
+      {phase === 'UPLOADING' && <UploadingScreen progress={uploadProgress} />}
+
+      {/* Results screen */}
+      {phase === 'RESULTS' && (
+        <ResultsScreen
+          results={analysisResult}
+          onNewRecording={handleRetake}
+          onSaveAndExit={() => onComplete && onComplete(analysisResult)}
+        />
+      )}
+
+      {/* Error screen */}
+      {phase === 'ERROR' && (
+        <ErrorScreen
+          errorMessage={errorMessage}
+          onRetry={handleConfirm}
+          onRetake={handleRetake}
+        />
+      )}
+
+      {/* Back button (only show during VALIDATING phase) */}
+      {!showLoading && phase === 'VALIDATING' && (
         <button
           onClick={onBack}
           style={{
@@ -79,8 +138,6 @@ export function VideoSTSAssessment({ onBack }) {
           ← Back
         </button>
       )}
-
-      {/* Future: Add UI for starting recording, countdown, etc. */}
     </div>
   );
 }

@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routers import users, demographics, questionnaire, sts_assessment, exercises, recommendations
+from app.routers import users, demographics, questionnaire, sts_assessment, exercises, recommendations, video_analysis
 
 app = FastAPI(
     title="Physiotherapy Exercise Recommendation API",
@@ -24,6 +24,7 @@ app.include_router(questionnaire.router, prefix="/api/questionnaire", tags=["Que
 app.include_router(sts_assessment.router, prefix="/api/sts-assessment", tags=["STS Assessment"])
 app.include_router(exercises.router, prefix="/api/exercises", tags=["Exercises"])
 app.include_router(recommendations.router, prefix="/api/recommendations", tags=["Recommendations"])
+app.include_router(video_analysis.router, prefix="/api/video-analysis", tags=["Video Analysis"])
 
 
 @app.get("/api/health")

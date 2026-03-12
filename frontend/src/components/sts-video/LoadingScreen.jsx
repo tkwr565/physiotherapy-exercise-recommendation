@@ -1,7 +1,11 @@
+import { useLanguage } from '../../context/LanguageContext';
+
 /**
  * Shown while MediaPipe model is loading or camera is starting.
  */
 export function LoadingScreen({ cameraError, isModelLoaded, onShowDiagnostics }) {
+  const { t } = useLanguage();
+
   return (
     <div style={{
       position: 'absolute', inset: 0,
@@ -16,13 +20,13 @@ export function LoadingScreen({ cameraError, isModelLoaded, onShowDiagnostics })
             {cameraError}
           </p>
           <p style={{ color: '#94a3b8', textAlign: 'center', fontSize: 14, maxWidth: '400px' }}>
-            Common fixes:
+            {t('sts.cameraErrorFixes')}
           </p>
           <ul style={{ color: '#94a3b8', fontSize: 14, textAlign: 'left', maxWidth: '400px' }}>
-            <li>Make sure you're using <code style={{ background: '#1e293b', padding: '2px 6px', borderRadius: '4px' }}>http://localhost:3000</code></li>
-            <li>Try using a different browser (Firefox, Chrome, Edge)</li>
-            <li>Check if another app is using your camera</li>
-            <li>Grant camera permissions in browser settings</li>
+            <li>{t('sts.cameraErrorLocalhost')} <code style={{ background: '#1e293b', padding: '2px 6px', borderRadius: '4px' }}>http://localhost:3000</code></li>
+            <li>{t('sts.cameraErrorBrowser')}</li>
+            <li>{t('sts.cameraErrorOtherApp')}</li>
+            <li>{t('sts.cameraErrorPermissions')}</li>
           </ul>
           {onShowDiagnostics && (
             <button
@@ -38,7 +42,7 @@ export function LoadingScreen({ cameraError, isModelLoaded, onShowDiagnostics })
                 fontSize: '14px',
               }}
             >
-              Show Diagnostics
+              {t('sts.showDiagnostics')}
             </button>
           )}
         </>
@@ -46,7 +50,7 @@ export function LoadingScreen({ cameraError, isModelLoaded, onShowDiagnostics })
         <>
           <Spinner />
           <p style={{ color: '#94a3b8', fontSize: 15 }}>
-            {!isModelLoaded ? 'Loading pose model…' : 'Starting camera…'}
+            {!isModelLoaded ? t('sts.loadingModel') : t('sts.startingCamera')}
           </p>
         </>
       )}

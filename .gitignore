@@ -35,3 +35,7 @@ ammend/
 # SSL Certificates (private keys should never be committed)
 nginx/ssl/privkey.pem
 nginx/ssl/*.key
+
+# Video Analysis
+backend/temp/
+backend/app/video_analysis/models/*.task

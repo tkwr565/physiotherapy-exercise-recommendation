@@ -58,4 +58,52 @@ export const getDeepSeekRecommendations = (username, language = 'en') => {
   return api.post('/recommendations/deepseek', { username, language });
 };
 
+// ── Video Analysis ──────────────────────────────────────────────────────────
+
+export function uploadVideo(videoBlob, onProgress) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+
+    // Progress tracking
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && onProgress) {
+        onProgress(e.loaded / e.total);  // Fraction 0.0-1.0
+      }
+    };
+
+    // Success handler
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          resolve(JSON.parse(xhr.responseText));
+        } catch {
+          reject(new Error('Invalid response from server'));
+        }
+      } else {
+        let detail = `HTTP ${xhr.status}`;
+        try {
+          detail = JSON.parse(xhr.responseText).detail || detail;
+        } catch { /* ignore */ }
+        reject(new Error(detail));
+      }
+    };
+
+    // Error handler
+    xhr.onerror = () => reject(new Error('Network error'));
+    xhr.ontimeout = () => reject(new Error('Upload timeout'));
+
+    // Timeout
+    xhr.timeout = 300000; // 5 minutes
+
+    // FormData construction
+    const ext = videoBlob.type.includes('mp4') ? '.mp4' : '.webm';
+    const fd = new FormData();
+    fd.append('file', videoBlob, `recording${ext}`);
+
+    // POST to /video-analysis/analyze-sts-video endpoint
+    xhr.open('POST', '/api/video-analysis/analyze-sts-video');
+    xhr.send(fd);
+  });
+}
+
 export default api;

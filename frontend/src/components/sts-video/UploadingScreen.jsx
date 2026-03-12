@@ -1,8 +1,11 @@
+import { useLanguage } from '../../context/LanguageContext';
+
 /**
  * Shown during UPLOADING phase.
  * progress: 0.0–1.0 (upload phase), then indeterminate spinner for server analysis.
  */
 export function UploadingScreen({ progress }) {
+  const { t } = useLanguage();
   const isUploading  = progress < 1;
   const pct          = Math.round(progress * 100);
 
@@ -16,12 +19,10 @@ export function UploadingScreen({ progress }) {
       <Spinner />
 
       <p style={{ fontSize: 18, fontWeight: 700, color: '#f1f5f9', textAlign: 'center' }}>
-        {isUploading ? `Uploading… ${pct}%` : 'Analysing your movement…'}
+        {isUploading ? `${t('sts.uploading')} ${pct}%` : t('sts.analyzing')}
       </p>
       <p style={{ fontSize: 13, color: '#64748b', textAlign: 'center' }}>
-        {isUploading
-          ? 'Please keep this screen open.'
-          : 'This may take a minute. Please wait.'}
+        {isUploading ? t('sts.uploadKeepOpen') : t('sts.analyzingWait')}
       </p>
 
       {isUploading && (

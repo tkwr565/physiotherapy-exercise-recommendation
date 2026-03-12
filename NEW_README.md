@@ -53,11 +53,28 @@ A full-stack application that provides personalized knee exercise recommendation
 
 ### STS Video Assessment Feature
 
-The system includes real-time posture validation for the 30-second Sit-to-Stand test using MediaPipe Pose:
+The system includes a complete video-based assessment workflow for the 30-second Sit-to-Stand test with dual analysis pipeline:
+
+**Frontend - Real-time Posture Validation (MediaPipe Pose Lite)**
 - **Client-side pose detection** — Runs in browser using MediaPipe Pose Lite (GPU-accelerated)
-- **Real-time feedback** — Validates stance width, foot rotation, and body placement
+- **Real-time validation** — Validates stance width, foot rotation, and body placement before recording
 - **Visual guidance** — Skeleton overlay and validation panel guide users to correct positioning
+- **Auto-start countdown** — Recording begins automatically when posture is valid (3-2-1 countdown)
+- **30-second recording** — Records video with real-time countdown display
+- **Preview & upload** — Users can review their recording before uploading for analysis
 - **HTTPS required** — Camera access requires secure connection (handled by Nginx SSL)
+- **Fully bilingual** — All on-screen annotations and messages in English and Traditional Chinese
+
+**Backend - Video Analysis (MediaPipe Pose Heavy)**
+- **Server-side biomechanical analysis** — Uses MediaPipe Pose Landmarker Heavy model
+- **Complete STS analysis pipeline** — Preprocessing → Global calibration → Repetition segmentation → Biomechanical metrics
+- **Clinical metrics extraction**:
+  - FPPA (Frontal Plane Projection Angle) for knee valgus/varus detection
+  - Trunk sway standard deviation (lateral trunk angle variability)
+  - Hip sway standard deviation (lateral hip displacement variability)
+  - Repetition count (total and clinically valid reps)
+- **Automatic result mapping** — Maps video analysis to database format and saves to STS assessment table
+- **One Euro Filter** — Adaptive low-pass filtering for smooth keypoint tracking
 
 ## Quick Start with Docker
 
@@ -221,15 +238,22 @@ The Vite dev server runs on `http://localhost:5173` and proxies `/api/*` request
 │       │   ├── questionnaire.py
 │       │   ├── sts_assessment.py
 │       │   ├── exercises.py
-│       │   └── recommendations.py
-│       └── services/
-│           ├── algorithm.py           # Rule-based recommendation engine
-│           ├── llm_recommendation.py  # OpenAI GPT-4o-mini integration
-│           └── llm_deepseek/          # DeepSeek two-LLM system
-│               ├── deepseek_recommendation_service.py  # Main orchestrator
-│               ├── data_transformer.py                  # Patient profile structuring
-│               ├── llm1_recommendation.py               # Exercise recommendation agent
-│               └── llm2_safety_verification.py         # Safety verification agent
+│       │   ├── recommendations.py
+│       │   └── video_analysis.py      # Video upload and analysis endpoint
+│       ├── services/
+│       │   ├── algorithm.py           # Rule-based recommendation engine
+│       │   ├── llm_recommendation.py  # OpenAI GPT-4o-mini integration
+│       │   └── llm_deepseek/          # DeepSeek two-LLM system
+│       │       ├── deepseek_recommendation_service.py  # Main orchestrator
+│       │       ├── data_transformer.py                  # Patient profile structuring
+│       │       ├── llm1_recommendation.py               # Exercise recommendation agent
+│       │       └── llm2_safety_verification.py         # Safety verification agent
+│       └── video_analysis/            # Video analysis pipeline
+│           ├── pose_engine.py         # MediaPipe adapter and body keypoint conversion
+│           ├── video_processor.py     # Frame processing and model initialization
+│           ├── repetition_segmentation.py  # STS repetition detection
+│           ├── biomechanics_analyzer.py    # FPPA, sway, and clinical metrics
+│           └── one_euro_filter.py     # Keypoint smoothing filter
 │
 ├── frontend/
 │   ├── Dockerfile
@@ -299,6 +323,7 @@ The Vite dev server runs on `http://localhost:5173` and proxies `/api/*` request
 | GET | `/api/questionnaire/{username}` | Get questionnaire |
 | POST | `/api/sts-assessment/` | Upsert STS assessment |
 | GET | `/api/sts-assessment/{username}` | Get STS assessment |
+| POST | `/api/video-analysis/analyze-sts-video` | Analyze STS video and return biomechanical metrics |
 | GET | `/api/exercises/` | List all exercises |
 | POST | `/api/recommendations/algorithm` | Get algorithm-based recommendations |
 | POST | `/api/recommendations/llm` | Get OpenAI GPT-4o-mini enhanced recommendations |

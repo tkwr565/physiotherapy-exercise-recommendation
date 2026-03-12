@@ -125,7 +125,7 @@ function drawSkeleton(ctx, body) {
   }
 }
 
-function drawValidationBox(ctx, vw, vh, isValid) {
+function drawValidationBox(ctx, vw, vh, isValid, t) {
   const boxW = vw * 0.80;
   const boxH = vh * 0.72;           // shorter box — more top breathing room
   const x1   = (vw - boxW) / 2;
@@ -174,14 +174,14 @@ function drawValidationBox(ctx, vw, vh, isValid) {
   ctx.shadowColor  = 'rgba(0,0,0,0.8)';
   ctx.shadowBlur   = 10;
   ctx.fillStyle    = color;
-  ctx.fillText('PLACE BODY IN BOX', vw / 2, y1 + boxH * 0.12);
+  ctx.fillText(t('sts.placeBodyInBox'), vw / 2, y1 + boxH * 0.12);
   ctx.shadowBlur   = 0;
 
   ctx.textAlign    = 'left';
   ctx.textBaseline = 'alphabetic';
 }
 
-function drawValidationPanel(ctx, report, vw) {
+function drawValidationPanel(ctx, report, vw, t) {
   // Scale relative to canvas width so it looks right on any phone
   const scale = vw / 390;          // 390 = reference portrait width
 
@@ -193,12 +193,12 @@ function drawValidationPanel(ctx, report, vw) {
 
   const rows = report
     ? [
-        { label: 'Stance Width', ok: report.stanceWidth.isValid },
-        { label: 'Left Foot',    ok: report.footRotationLeft.isValid },
-        { label: 'Right Foot',   ok: report.footRotationRight.isValid },
-        { label: 'Position',     ok: report.bodyPlacement.isValid },
+        { label: t('sts.stanceWidth'), ok: report.stanceWidth.isValid },
+        { label: t('sts.leftFoot'),    ok: report.footRotationLeft.isValid },
+        { label: t('sts.rightFoot'),   ok: report.footRotationRight.isValid },
+        { label: t('sts.position'),    ok: report.bodyPlacement.isValid },
       ]
-    : [{ label: 'No person detected', ok: false }];
+    : [{ label: t('sts.noPersonDetected'), ok: false }];
 
   const badgeH = Math.round(46 * scale);
   const panelW = Math.round(265 * scale);
@@ -292,7 +292,7 @@ function drawValidationPanel(ctx, report, vw) {
     ctx.shadowColor  = badgeColor;
     ctx.shadowBlur   = 10;
     ctx.fillText(
-      badgeOk ? '✓  READY TO RECORD' : '✗  NOT READY',
+      badgeOk ? `✓  ${t('sts.readyToRecord')}` : `✗  ${t('sts.notReady')}`,
       px + panelW / 2,
       badgeY + (badgeH - badgePad) / 2
     );
@@ -342,14 +342,35 @@ function drawRecordingBar(ctx, vw, vh, secondsLeft) {
   ctx.textAlign = 'left';
 }
 
+function drawRecordingStartOverlay(ctx, vw, vh, t) {
+  // Semi-transparent background
+  ctx.fillStyle = 'rgba(0,0,0,0.45)';
+  ctx.fillRect(0, 0, vw, vh);
+
+  // Large "Recording Start!" text
+  const fontSize = Math.round(vh * 0.12);
+  ctx.fillStyle    = '#ffffff';
+  ctx.font         = `bold ${fontSize}px sans-serif`;
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor  = '#4ade80';
+  ctx.shadowBlur   = 20;
+  ctx.fillText(t('sts.recordingStart'), vw / 2, vh / 2);
+  ctx.shadowBlur   = 0;
+
+  ctx.textAlign    = 'left';
+  ctx.textBaseline = 'alphabetic';
+}
+
 // ─── Hook ────────────────────────────────────────────────────────────────────
 
 export function usePoseLandmarker(
   videoRef, canvasRef,
   cameraReady, phase, countdown, secondsLeft,
-  onReportChange
+  onReportChange, t
 ) {
   const [isModelLoaded, setIsModelLoaded] = useState(false);
+  const [showRecordingStart, setShowRecordingStart] = useState(false);
 
   const landmarkerRef     = useRef(null);
   const latestBodyRef     = useRef(null);
@@ -359,11 +380,22 @@ export function usePoseLandmarker(
   const phaseRef          = useRef(phase);
   const countdownRef      = useRef(countdown);
   const secondsLeftRef    = useRef(secondsLeft);
+  const tRef              = useRef(t);
 
   useEffect(() => { onReportChangeRef.current = onReportChange; }, [onReportChange]);
   useEffect(() => { phaseRef.current = phase; },         [phase]);
   useEffect(() => { countdownRef.current = countdown; }, [countdown]);
   useEffect(() => { secondsLeftRef.current = secondsLeft; }, [secondsLeft]);
+  useEffect(() => { tRef.current = t; }, [t]);
+
+  // Show "Recording Start!" message when recording begins
+  useEffect(() => {
+    if (phase === 'RECORDING' && secondsLeft === 30) {
+      setShowRecordingStart(true);
+      const timer = setTimeout(() => setShowRecordingStart(false), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [phase, secondsLeft]);
 
   useEffect(() => {
     let cancelled = false;
@@ -441,10 +473,12 @@ export function usePoseLandmarker(
       const body         = latestBodyRef.current;
       const report       = latestReportRef.current;
 
+      const translate = tRef.current;
+
       if (currentPhase === 'VALIDATING' || currentPhase === 'COUNTDOWN') {
-        drawValidationBox(ctx, cw, ch, report?.bodyPlacement?.isValid ?? false);
+        drawValidationBox(ctx, cw, ch, report?.bodyPlacement?.isValid ?? false, translate);
         drawSkeleton(ctx, body);
-        drawValidationPanel(ctx, report, cw);
+        drawValidationPanel(ctx, report, cw, translate);
         if (currentPhase === 'COUNTDOWN' && countdownRef.current != null) {
           drawCountdownOverlay(ctx, cw, ch, countdownRef.current);
         }
@@ -453,6 +487,10 @@ export function usePoseLandmarker(
         if (secondsLeftRef.current != null) {
           drawRecordingBar(ctx, cw, ch, secondsLeftRef.current);
         }
+        // Show "Recording Start!" overlay for first 1.5 seconds
+        if (showRecordingStart) {
+          drawRecordingStartOverlay(ctx, cw, ch, translate);
+        }
       }
 
       rafId = requestAnimationFrame(loop);
@@ -460,7 +498,7 @@ export function usePoseLandmarker(
 
     rafId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(rafId);
-  }, [cameraReady, isModelLoaded, videoRef, canvasRef]);
+  }, [cameraReady, isModelLoaded, videoRef, canvasRef, showRecordingStart]);
 
   return { isModelLoaded };
 }

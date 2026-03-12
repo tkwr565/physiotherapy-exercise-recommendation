@@ -64,6 +64,44 @@ export default function STSAssessmentPage() {
     }
   };
 
+  // Handle video analysis results
+  const handleVideoComplete = async (analysisResult) => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const agg = analysisResult?.aggregate_metrics;
+
+      if (!agg) {
+        throw new Error('Invalid analysis results');
+      }
+
+      // Map video analysis results to STS assessment format
+      // FPPA: negative = valgus (knock-knee), mean_fppa < -12 indicates significant valgus
+      const hasValgus = agg.mean_fppa < -12;
+      const kneeAlignment = hasValgus ? 'valgus' : 'normal';
+
+      // Trunk/hip sway: SD > 2.5° indicates instability
+      const hasTrunkSway = agg.mean_trunk_sway_sd > 2.5;
+      const hasHipSway = agg.mean_hip_sway_sd > 2.5;
+
+      await upsertSTSAssessment({
+        username: currentUser,
+        repetition_count: agg.valid_reps || agg.total_reps,
+        knee_alignment: kneeAlignment,
+        trunk_sway: hasTrunkSway ? 'present' : 'absent',
+        hip_sway: hasHipSway ? 'present' : 'absent',
+      });
+
+      navigate('/results');
+    } catch (err) {
+      setError(err.response?.data?.detail || err.message || 'Failed to save video assessment');
+      setAssessmentMode(null); // Return to mode selection on error
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Mode selection screen
   if (assessmentMode === null) {
     return (
@@ -109,9 +147,14 @@ export default function STSAssessmentPage() {
     );
   }
 
-  // Video mode - Real-time validation component
+  // Video mode - Complete video recording and analysis workflow
   if (assessmentMode === 'video') {
-    return <VideoSTSAssessment onBack={() => setAssessmentMode(null)} />;
+    return (
+      <VideoSTSAssessment
+        onBack={() => setAssessmentMode(null)}
+        onComplete={handleVideoComplete}
+      />
+    );
   }
 
   // Manual mode (existing form)

@@ -1,9 +1,13 @@
+import { useLanguage } from '../../context/LanguageContext';
+
 /**
  * Full-screen countdown overlay (3 → 2 → 1).
  * key={countdown} on the animated span causes the CSS animation to replay
  * each time the number changes.
  */
 export function CountdownOverlay({ countdown }) {
+  const { t } = useLanguage();
+
   return (
     <div style={{
       position: 'absolute', inset: 0,
@@ -32,7 +36,7 @@ export function CountdownOverlay({ countdown }) {
         letterSpacing: 2,
         animation: 'countdownPop 1s ease-out forwards',
       }}>
-        HOLD POSITION
+        {t('sts.holdPosition')}
       </span>
     </div>
   );

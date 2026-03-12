@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { uploadVideo } from '../lib/api';
+import { uploadVideo } from '../services/api';
 
 const RECORDING_DURATION_S = 30;
 
